@@ -661,35 +661,36 @@ export default function LevelsScreen() {
         )}
       </View>
 
-      {/* Modos de práctica */}
-      <View style={styles.practiceSection}>
-        <Text style={styles.practiceSectionTitle}>Modos de práctica</Text>
-        <View style={styles.practiceGrid}>
-          {[
-            { emoji: '⚡', title: 'Repaso Rápido', sub: '10 palabras · 5 min', colors: ['#1D4ED8', '#60A5FA'] as [string,string], route: '/practice/quick-review' },
-            { emoji: '🎧', title: 'Solo Escucha', sub: '10 ejercicios', colors: ['#065F46', '#34D399'] as [string,string], route: '/practice/listen-mode' },
-            { emoji: '📝', title: 'Solo Ordenar', sub: '10 ejercicios', colors: ['#78350F', '#FBBF24'] as [string,string], route: '/practice/order-mode' },
-            { emoji: '🔥', title: 'Palabras Difíciles', sub: 'Repaso de errores', colors: ['#7F1D1D', '#F87171'] as [string,string], route: '/practice/hard-words' },
-          ].map((mode) => (
-            <TouchableOpacity
-              key={mode.title}
-              style={styles.practiceTileWrapper}
-              onPress={() => router.push(mode.route as any)}
-              activeOpacity={0.85}
+      {/* Modos de práctica — fila horizontal compacta */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.practiceRow}
+        contentContainerStyle={styles.practiceRowContent}
+      >
+        {[
+          { emoji: '⚡', title: 'Repaso Rápido', colors: ['#1D4ED8', '#60A5FA'] as [string,string], route: '/practice/quick-review' },
+          { emoji: '🎧', title: 'Solo Escucha', colors: ['#065F46', '#34D399'] as [string,string], route: '/practice/listen-mode' },
+          { emoji: '📝', title: 'Solo Ordenar', colors: ['#78350F', '#FBBF24'] as [string,string], route: '/practice/order-mode' },
+          { emoji: '🔥', title: 'Palabras Difíciles', colors: ['#7F1D1D', '#F87171'] as [string,string], route: '/practice/hard-words' },
+        ].map((mode) => (
+          <TouchableOpacity
+            key={mode.title}
+            onPress={() => router.push(mode.route as any)}
+            activeOpacity={0.8}
+            style={styles.practiceChipWrapper}
+          >
+            <LinearGradient
+              colors={mode.colors}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={styles.practiceChip}
             >
-              <LinearGradient
-                colors={mode.colors}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                style={styles.practiceTileGradient}
-              >
-                <Text style={styles.practiceTileEmojiLg}>{mode.emoji}</Text>
-                <Text style={styles.practiceTileTitle}>{mode.title}</Text>
-                <Text style={styles.practiceTileSub}>{mode.sub}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+              <Text style={styles.practiceChipEmoji}>{mode.emoji}</Text>
+              <Text style={styles.practiceChipTitle}>{mode.title}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       {/* Barra de progreso global */}
       <View style={styles.globalProgress}>
@@ -748,31 +749,31 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 14,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   headerLeft: { flex: 1 },
-  greetingTime: { fontSize: 13, fontWeight: '500', color: '#A78BFA', letterSpacing: 0.3 },
-  greetingName: { fontSize: 24, fontWeight: '900', color: '#FFFFFF', marginTop: 1, letterSpacing: -0.5 },
-  xpRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-  xpStar: { fontSize: 14 },
-  xpAmount: { fontSize: 16, fontWeight: '800', color: '#FCD34D', marginLeft: 4 },
-  xpLabel: { fontSize: 13, fontWeight: '600', color: '#FCD34D80' },
-  headerRight: { flexDirection: 'row', gap: 8, alignItems: 'center', marginTop: 4 },
+  greetingTime: { fontSize: 11, fontWeight: '500', color: '#A78BFA', letterSpacing: 0.3 },
+  greetingName: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginTop: 0, letterSpacing: -0.3 },
+  xpRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
+  xpStar: { fontSize: 12 },
+  xpAmount: { fontSize: 13, fontWeight: '800', color: '#FCD34D', marginLeft: 3 },
+  xpLabel: { fontSize: 11, fontWeight: '600', color: '#FCD34D80' },
+  headerRight: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   statPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    gap: 5,
-    minWidth: 60,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 4,
+    minWidth: 50,
     justifyContent: 'center',
   },
-  statPillEmoji: { fontSize: 15 },
-  statPillValue: { fontSize: 16, fontWeight: '900', color: '#FFFFFF' },
+  statPillEmoji: { fontSize: 13 },
+  statPillValue: { fontSize: 14, fontWeight: '900', color: '#FFFFFF' },
   // Legacy aliases (keep for backward compat)
   greeting: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
   progressRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
@@ -912,50 +913,44 @@ const styles = StyleSheet.create({
   offlineBadgeNoConn: { backgroundColor: '#FF960015' },
   offlineDot: { fontSize: 9 },
   offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
-  // Sección de modos de práctica (grid 2x2)
-  practiceSection: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
+  // Fila horizontal de chips de práctica
+  practiceRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#2D3148',
   },
-  practiceSectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#6B7280',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  practiceGrid: {
+  practiceRowContent: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 8,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    alignItems: 'center',
   },
-  practiceTile: {
-    width: '47.5%',
-    backgroundColor: '#1A1D2E',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#2D3148',
-    alignItems: 'flex-start',
-  },
-  practiceTileWrapper: {
-    width: '47.5%',
-    borderRadius: 18,
+  practiceChipWrapper: {
+    borderRadius: 20,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  practiceTileGradient: {
-    padding: 18,
-    alignItems: 'flex-start',
-    minHeight: 110,
-    justifyContent: 'space-between',
+  practiceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 6,
+    borderRadius: 20,
   },
+  practiceChipEmoji: { fontSize: 16 },
+  practiceChipTitle: { fontSize: 13, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.1 },
+  // Legacy grid styles (kept for compat)
+  practiceSection: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
+  practiceSectionTitle: { fontSize: 12, fontWeight: '700', color: '#6B7280', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
+  practiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  practiceTile: { width: '47.5%', backgroundColor: '#1A1D2E', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2D3148', alignItems: 'flex-start' },
+  practiceTileWrapper: { width: '47.5%', borderRadius: 18, overflow: 'hidden' },
+  practiceTileGradient: { padding: 18, alignItems: 'flex-start', minHeight: 110, justifyContent: 'space-between' },
   practiceTileEmojiLg: { fontSize: 32, marginBottom: 8 },
   practiceTileEmoji: { fontSize: 26, marginBottom: 8 },
   practiceTileTitle: { fontSize: 14, fontWeight: '900', color: '#FFFFFF', marginBottom: 3, letterSpacing: -0.2 },
@@ -1006,13 +1001,6 @@ const styles = StyleSheet.create({
   },
   searchClear: { padding: 4 },
   searchClearText: { color: '#9CA3AF', fontSize: 14 },
-  practiceRow: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    flexWrap: 'wrap',
-  },
   // ─── Modal de vista previa ─────────────────────────────────────────
   modalOverlay: {
     flex: 1,

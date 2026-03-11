@@ -308,3 +308,7 @@
 - [x] Tarjeta del Desafío del día con gradiente morado-violeta y layout vertical
 - [x] Modos de práctica con gradientes únicos (azul, verde, ámbar, rojo) e iconos 32px
 - [x] Tarjetas de nivel más grandes con sombras de color y botón play con glow
+
+## v1.35 — Compactación pantalla principal
+- [x] Modos de práctica: convertir grid 2×2 en fila horizontal de chips compactos con scroll
+- [x] Reducir padding del header, desafío del día y sección de práctica para mostrar más niveles
