@@ -1,8 +1,9 @@
 'use client';
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  StatusBar, Animated, ScrollView, TextInput,
+  StatusBar, Animated, ScrollView, TextInput, Modal,
 } from 'react-native';
 import Reanimated, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence,
@@ -167,14 +168,85 @@ function StatsHeader({ username, gems, xp, streak }: {
   );
 }
 
+// ─── Modal de vista previa de nivel bloqueado ───────────────────────────────
+function LevelPreviewModal({
+  levelNum, visible, onClose,
+}: { levelNum: number; visible: boolean; onClose: () => void }) {
+  const levelData = useMemo(() => getLevelData(levelNum), [levelNum]);
+  const icon = useMemo(() => getLevelIcon(levelNum), [levelNum]);
+  const words = levelData.words.slice(0, 10);
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={[styles.modalCard, { borderColor: levelData.color }]}
+          onPress={() => {}}
+        >
+          {/* Header del modal */}
+          <View style={[styles.modalHeader, { borderBottomColor: levelData.color + '40' }]}>
+            <View style={[styles.modalIconBg, { backgroundColor: levelData.color + '22' }]}>
+              <Text style={styles.modalIcon}>{icon}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.modalTitle}>Nivel {levelNum}</Text>
+              <Text style={[styles.modalSubtitle, { color: levelData.color }]}>{levelData.name}</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} style={styles.modalClose}>
+              <Text style={styles.modalCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Descripción */}
+          <Text style={styles.modalDesc}>
+            🔒 Completa el nivel anterior para desbloquear este nivel y aprender:
+          </Text>
+
+          {/* Lista de palabras */}
+          <View style={styles.modalWordGrid}>
+            {words.map((w, i) => (
+              <View key={i} style={[styles.modalWordChip, { borderColor: levelData.color + '60' }]}>
+                <Text style={[styles.modalWordEn, { color: levelData.color }]}>{w.word}</Text>
+                <Text style={styles.modalWordEs}>{w.translation}</Text>
+              </View>
+            ))}
+            {levelData.words.length > 10 && (
+              <View style={[styles.modalWordChip, { borderColor: '#4B5563' }]}>
+                <Text style={[styles.modalWordEn, { color: '#9CA3AF' }]}>+{levelData.words.length - 10} más</Text>
+              </View>
+            )}
+          </View>
+
+          {/* XP disponible */}
+          <View style={styles.modalFooter}>
+            <Text style={styles.modalXp}>⭐ {levelData.xp} XP al completar</Text>
+            <Text style={styles.modalExercises}>📝 20 ejercicios</Text>
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
+  );
+}
+
 interface LevelCardProps {
   levelNum: number;
   isCompleted: boolean;
   isUnlocked: boolean;
   onPress: () => void;
+  onPressLocked?: () => void;
 }
 
-function LevelCard({ levelNum, isCompleted, isUnlocked, onPress }: LevelCardProps) {
+function LevelCard({ levelNum, isCompleted, isUnlocked, onPress, onPressLocked }: LevelCardProps) {
   const levelData = useMemo(() => getLevelData(levelNum), [levelNum]);
   const icon = useMemo(() => getLevelIcon(levelNum), [levelNum]);
 
@@ -185,8 +257,7 @@ function LevelCard({ levelNum, isCompleted, isUnlocked, onPress }: LevelCardProp
   return (
     <TouchableOpacity
       style={[styles.levelCard, { backgroundColor: bgColor, borderColor }]}
-      onPress={onPress}
-      disabled={!isUnlocked}
+      onPress={isUnlocked ? onPress : onPressLocked}
       activeOpacity={0.75}
     >
       <View style={styles.levelLeft}>
@@ -220,6 +291,40 @@ export default function LevelsScreen() {
   const { xp, gems, streak, maxUnlockedLevel, levelProgress } = game;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [previewLevel, setPreviewLevel] = useState<number | null>(null);
+  const [unlockAnim, setUnlockAnim] = useState<{ levelNum: number; levelData: ReturnType<typeof getLevelData> } | null>(null);
+  const unlockScale = useSharedValue(0);
+  const unlockOpacity = useSharedValue(0);
+
+  const showUnlockAnimation = useCallback((levelNum: number) => {
+    const levelData = getLevelData(levelNum);
+    setUnlockAnim({ levelNum, levelData });
+    unlockScale.value = 0;
+    unlockOpacity.value = 0;
+    unlockScale.value = withSpring(1, { damping: 12, stiffness: 180 });
+    unlockOpacity.value = withTiming(1, { duration: 200 });
+    setTimeout(() => {
+      unlockOpacity.value = withTiming(0, { duration: 400 });
+      setTimeout(() => setUnlockAnim(null), 450);
+    }, 2200);
+  }, [unlockScale, unlockOpacity]);
+
+  // Detectar nuevo nivel desbloqueado al volver al mapa
+  const prevMaxUnlockedRef = useRef(maxUnlockedLevel);
+  useFocusEffect(
+    useCallback(() => {
+      const prev = prevMaxUnlockedRef.current;
+      if (maxUnlockedLevel > prev && maxUnlockedLevel > 1) {
+        showUnlockAnimation(maxUnlockedLevel);
+      }
+      prevMaxUnlockedRef.current = maxUnlockedLevel;
+    }, [maxUnlockedLevel, showUnlockAnimation])
+  );
+
+  const unlockAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: unlockScale.value }],
+    opacity: unlockOpacity.value,
+  }));
 
   const allLevels = useMemo(() =>
     Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1),
@@ -270,6 +375,7 @@ export default function LevelsScreen() {
         isCompleted={isCompleted}
         isUnlocked={isUnlocked}
         onPress={() => handleLevelPress(levelNum)}
+        onPressLocked={() => setPreviewLevel(levelNum)}
       />
     );
   }, [levelProgress, maxUnlockedLevel, handleLevelPress]);
@@ -401,6 +507,29 @@ export default function LevelsScreen() {
         windowSize={10}
         getItemLayout={(_, index) => ({ length: 76, offset: 76 * index, index })}
       />
+
+      {/* Modal de vista previa de nivel bloqueado */}
+      {previewLevel !== null && (
+        <LevelPreviewModal
+          levelNum={previewLevel}
+          visible={previewLevel !== null}
+          onClose={() => setPreviewLevel(null)}
+        />
+      )}
+
+      {/* Overlay de animación de desbloqueo */}
+      {unlockAnim && (
+        <Reanimated.View style={[styles.unlockOverlay, unlockAnimStyle]} pointerEvents="none">
+          <View style={[styles.unlockCard, { borderColor: unlockAnim.levelData.color }]}>
+            <Text style={styles.unlockEmoji}>🔓</Text>
+            <Text style={[styles.unlockTitle, { color: unlockAnim.levelData.color }]}>
+              ¡Nivel {unlockAnim.levelNum} desbloqueado!
+            </Text>
+            <Text style={styles.unlockSubtitle}>{unlockAnim.levelData.name}</Text>
+            <Text style={styles.unlockDesc}>Sigue así — ¡estás progresando! 🚀</Text>
+          </View>
+        </Reanimated.View>
+      )}
     </View>
   );
 }
@@ -571,4 +700,99 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     flexWrap: 'wrap',
   },
+  // ─── Modal de vista previa ─────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: '#1A1D27',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    width: '100%',
+    maxWidth: 400,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    gap: 12,
+  },
+  modalIconBg: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalIcon: { fontSize: 26 },
+  modalTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  modalSubtitle: { fontSize: 13, fontWeight: '600', marginTop: 2 },
+  modalClose: { padding: 6 },
+  modalCloseText: { fontSize: 16, color: '#9CA3AF', fontWeight: '700' },
+  modalDesc: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+    lineHeight: 18,
+  },
+  modalWordGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 12,
+    gap: 8,
+    paddingBottom: 14,
+  },
+  modalWordChip: {
+    backgroundColor: '#252836',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  modalWordEn: { fontSize: 13, fontWeight: '700' },
+  modalWordEs: { fontSize: 11, color: '#9CA3AF', marginTop: 2 },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#2D3148',
+  },
+  modalXp: { fontSize: 13, fontWeight: '700', color: '#FFD700' },
+  modalExercises: { fontSize: 13, fontWeight: '600', color: '#9CA3AF' },
+  // ─── Animación de desbloqueo ──────────────────────────────────────────
+  unlockOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  unlockCard: {
+    backgroundColor: '#1A1D27',
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: '#58CC02',
+    padding: 32,
+    alignItems: 'center',
+    width: 280,
+  },
+  unlockEmoji: { fontSize: 56, marginBottom: 12 },
+  unlockTitle: { fontSize: 22, fontWeight: '900', color: '#58CC02', marginBottom: 6 },
+  unlockSubtitle: { fontSize: 15, color: '#FFFFFF', fontWeight: '600', marginBottom: 4 },
+  unlockDesc: { fontSize: 13, color: '#9CA3AF', textAlign: 'center' },
 });
+

@@ -232,3 +232,7 @@
 - [x] F1: Tarea diaria con mini quiz de 5 preguntas antes de completar
 - [x] F2: Repaso espaciado inteligente con algoritmo SM-2
 - [x] F3: Audio TTS en cada tarjeta de palabra de la tarea diaria (ya existía)
+
+## v1.25 — Mejoras aprobadas
+- [x] Modal de vista previa de nivel bloqueado (palabras que se aprenderán)
+- [x] Animación de desbloqueo al completar nivel (candado abriéndose + confeti)
