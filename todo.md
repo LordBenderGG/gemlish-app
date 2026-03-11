@@ -165,3 +165,8 @@
 ## v1.19 — Mejoras aprobadas
 - [x] Animación de pulso (onda expansiva) en el botón de grabar durante la pronunciación
 - [x] Ícono del tipo de ejercicio actual en el sub-header junto al contador de progreso
+
+## v1.20 — Mejoras aprobadas
+- [x] Barra de progreso con color dinámico según el tipo de ejercicio actual
+- [x] Transición animada entre ejercicios (fade + translateX sutil)
+- [x] Contador de racha interna del nivel (🔥 N seguidas cuando N >= 3)

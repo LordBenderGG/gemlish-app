@@ -931,8 +931,56 @@ export default function ExerciseScreen() {
   const [exerciseKey, setExerciseKey] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [errorWords, setErrorWords] = useState<string[]>([]);
+  const [internalStreak, setInternalStreak] = useState(0);
+
+  // Animación de transición entre ejercicios
+  const slideAnim = useSharedValue(0);
+  const fadeAnim = useSharedValue(1);
+
+  const transitionToNext = useCallback(() => {
+    // Salida: deslizar a la izquierda y desvanecer
+    slideAnim.value = withTiming(-30, { duration: 180, easing: Easing.in(Easing.ease) });
+    fadeAnim.value = withTiming(0, { duration: 180 }, () => {
+      // Reposicionar a la derecha (sin animar)
+      slideAnim.value = 30;
+      fadeAnim.value = 0;
+      // Entrada: deslizar desde la derecha y aparecer
+      slideAnim.value = withTiming(0, { duration: 220, easing: Easing.out(Easing.ease) });
+      fadeAnim.value = withTiming(1, { duration: 220 });
+    });
+  }, [slideAnim, fadeAnim]);
+
+  const exerciseAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideAnim.value }],
+    opacity: fadeAnim.value,
+  }));
 
   const progressAnim = useRef(new Animated.Value(0)).current;
+
+  // Color de la barra de progreso según tipo de ejercicio
+  const exerciseTypeColor = useMemo(() => {
+    if (!level) return '#58CC02';
+    const type = level.exercises[currentIdx]?.type;
+    switch (type) {
+      case 'pronunciation': return '#FF4B4B';
+      case 'listen-write': return '#1CB0F6';
+      case 'fill-blank': return '#58CC02';
+      case 'sentence-order': return '#FF9500';
+      case 'match-pairs': return '#CE82FF';
+      case 'translate': return '#FF9500';
+      default: return level.color;
+    }
+  }, [level, currentIdx]);
+
+  // Animar color de la barra de progreso
+  const barColorAnim = useSharedValue(0);
+  const prevColorRef = useRef(exerciseTypeColor);
+  const [barDisplayColor, setBarDisplayColor] = useState(exerciseTypeColor);
+
+  useEffect(() => {
+    setBarDisplayColor(exerciseTypeColor);
+    prevColorRef.current = exerciseTypeColor;
+  }, [exerciseTypeColor]);
 
   const animateProgress = useCallback((to: number) => {
     Animated.timing(progressAnim, {
@@ -945,8 +993,10 @@ export default function ExerciseScreen() {
   const handleAnswer = useCallback(async (correct: boolean, wordEn?: string) => {
     if (correct) {
       playCorrect();
+      setInternalStreak(s => s + 1);
     } else {
       playWrong();
+      setInternalStreak(0);
     }
     if (!correct) {
       setWrongCount(w => w + 1);
@@ -993,12 +1043,13 @@ export default function ExerciseScreen() {
         await saveLevelErrors(levelNum, finalErrors);
       }
     } else {
+      transitionToNext();
       animateProgress(next / TOTAL_EXERCISES);
       setCurrentIdx(next);
       setHintUsed(false);
       setExerciseKey(k => k + 1);
     }
-  }, [currentIdx, hearts, wrongCount, errorWords, level, levelNum, completeLevel, saveLevelErrors, loseHeart, animateProgress, playCorrect, playWrong, playLevelComplete]);
+  }, [currentIdx, hearts, wrongCount, errorWords, level, levelNum, completeLevel, saveLevelErrors, loseHeart, animateProgress, transitionToNext, playCorrect, playWrong, playLevelComplete]);
 
   const handleHint = useCallback(async () => {
     if (hintUsed) return;
@@ -1091,7 +1142,7 @@ export default function ExerciseScreen() {
           <Text style={styles.backBtnText}>✕</Text>
         </TouchableOpacity>
         <View style={styles.progressBarBg}>
-          <Animated.View style={[styles.progressBarFill, { width: progressWidth, backgroundColor: level.color }]} />
+          <Animated.View style={[styles.progressBarFill, { width: progressWidth, backgroundColor: barDisplayColor }]} />
         </View>
         <View style={styles.heartsRow}>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -1127,64 +1178,73 @@ export default function ExerciseScreen() {
             · {currentIdx + 1}/{TOTAL_EXERCISES}
           </Text>
         </View>
-        <TouchableOpacity style={styles.hintBtn} onPress={handleHint}>
-          <Text style={styles.hintBtnText}>💡 Pista ({game.gems} 💎)</Text>
-        </TouchableOpacity>
+        <View style={styles.subHeaderRight}>
+          {internalStreak >= 3 && (
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakBadgeText}>🔥 {internalStreak}</Text>
+            </View>
+          )}
+          <TouchableOpacity style={styles.hintBtn} onPress={handleHint}>
+            <Text style={styles.hintBtnText}>💡 ({game.gems} 💎)</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-        {exercise.type === 'multiple-choice' && (
-          <MultipleChoiceView
-            key={exerciseKey}
-            exercise={exercise as MultipleChoiceExercise}
-            onAnswer={handleAnswer}
-          />
-        )}
-        {exercise.type === 'translate' && (
-          <TranslateView
-            key={exerciseKey}
-            exercise={exercise as TranslateExercise}
-            onAnswer={handleAnswer}
-            hintUsed={hintUsed}
-          />
-        )}
-        {exercise.type === 'match-pairs' && (
-          <MatchPairsView
-            key={exerciseKey}
-            exercise={exercise as MatchPairsExercise}
-            onAnswer={handleAnswer}
-          />
-        )}
-        {exercise.type === 'listen-write' && (
-          <ListenWriteView
-            key={exerciseKey}
-            exercise={exercise as ListenWriteExercise}
-            onAnswer={handleAnswer}
-            hintUsed={hintUsed}
-          />
-        )}
-        {exercise.type === 'pronunciation' && (
-          <PronunciationView
-            key={exerciseKey}
-            exercise={exercise as PronunciationExercise}
-            onAnswer={handleAnswer}
-          />
-        )}
-        {exercise.type === 'sentence-order' && (
-          <SentenceOrderView
-            key={exerciseKey}
-            exercise={exercise as SentenceOrderExercise}
-            onAnswer={handleAnswer}
-          />
-        )}
-        {exercise.type === 'fill-blank' && (
-          <FillBlankView
-            key={exerciseKey}
-            exercise={exercise as FillBlankExercise}
-            onAnswer={handleAnswer}
-          />
-        )}
-      </ScrollView>
+      <Reanimated.View style={[{ flex: 1 }, exerciseAnimStyle]}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          {exercise.type === 'multiple-choice' && (
+            <MultipleChoiceView
+              key={exerciseKey}
+              exercise={exercise as MultipleChoiceExercise}
+              onAnswer={handleAnswer}
+            />
+          )}
+          {exercise.type === 'translate' && (
+            <TranslateView
+              key={exerciseKey}
+              exercise={exercise as TranslateExercise}
+              onAnswer={handleAnswer}
+              hintUsed={hintUsed}
+            />
+          )}
+          {exercise.type === 'match-pairs' && (
+            <MatchPairsView
+              key={exerciseKey}
+              exercise={exercise as MatchPairsExercise}
+              onAnswer={handleAnswer}
+            />
+          )}
+          {exercise.type === 'listen-write' && (
+            <ListenWriteView
+              key={exerciseKey}
+              exercise={exercise as ListenWriteExercise}
+              onAnswer={handleAnswer}
+              hintUsed={hintUsed}
+            />
+          )}
+          {exercise.type === 'pronunciation' && (
+            <PronunciationView
+              key={exerciseKey}
+              exercise={exercise as PronunciationExercise}
+              onAnswer={handleAnswer}
+            />
+          )}
+          {exercise.type === 'sentence-order' && (
+            <SentenceOrderView
+              key={exerciseKey}
+              exercise={exercise as SentenceOrderExercise}
+              onAnswer={handleAnswer}
+            />
+          )}
+          {exercise.type === 'fill-blank' && (
+            <FillBlankView
+              key={exerciseKey}
+              exercise={exercise as FillBlankExercise}
+              onAnswer={handleAnswer}
+            />
+          )}
+        </ScrollView>
+      </Reanimated.View>
     </View>
   );
 }
@@ -1431,4 +1491,13 @@ const styles = StyleSheet.create({
   },
   exerciseTypeEmoji: { fontSize: 14 },
   exerciseTypeName: { fontSize: 11, color: '#6B7280', fontWeight: '600' },
+  subHeaderRight: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+  },
+  streakBadge: {
+    backgroundColor: '#FF4B4B20', borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderWidth: 1, borderColor: '#FF4B4B60',
+  },
+  streakBadgeText: { fontSize: 12, color: '#FF6B6B', fontWeight: '700' },
 });
