@@ -919,7 +919,7 @@ export default function ExerciseScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
   const { username, game, completeLevel, saveLevelErrors, loseHeart, spendGems } = useGame();
   const { checkAchievements } = useAchievements();
-  const { playCorrect, playWrong, playLevelComplete } = useFeedbackSounds();
+  const { playCorrect, playWrong, playLevelComplete, playStreak } = useFeedbackSounds();
   const levelNum = parseInt(levelId || '1', 10);
 
   const level = useMemo(() => generateLevel(levelNum), [levelNum]);
@@ -932,6 +932,28 @@ export default function ExerciseScreen() {
   const [wrongCount, setWrongCount] = useState(0);
   const [errorWords, setErrorWords] = useState<string[]>([]);
   const [internalStreak, setInternalStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
+
+  // Animación de pulso del badge de racha
+  const streakPulse = useSharedValue(1);
+  useEffect(() => {
+    if (internalStreak >= 3) {
+      streakPulse.value = withRepeat(
+        withSequence(
+          withTiming(1.12, { duration: 500, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1.0, { duration: 500, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1,
+        false,
+      );
+    } else {
+      streakPulse.value = withTiming(1.0, { duration: 200 });
+    }
+  }, [internalStreak >= 3]);
+
+  const streakBadgeAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: streakPulse.value }],
+  }));
 
   // Animación de transición entre ejercicios
   const slideAnim = useSharedValue(0);
@@ -992,8 +1014,15 @@ export default function ExerciseScreen() {
 
   const handleAnswer = useCallback(async (correct: boolean, wordEn?: string) => {
     if (correct) {
-      playCorrect();
-      setInternalStreak(s => s + 1);
+      const newStreak = internalStreak + 1;
+      setInternalStreak(newStreak);
+      setMaxStreak(prev => Math.max(prev, newStreak));
+      // Sonido especial al llegar exactamente a 5 seguidas
+      if (newStreak === 5) {
+        playStreak();
+      } else {
+        playCorrect();
+      }
     } else {
       playWrong();
       setInternalStreak(0);
@@ -1049,7 +1078,7 @@ export default function ExerciseScreen() {
       setHintUsed(false);
       setExerciseKey(k => k + 1);
     }
-  }, [currentIdx, hearts, wrongCount, errorWords, level, levelNum, completeLevel, saveLevelErrors, loseHeart, animateProgress, transitionToNext, playCorrect, playWrong, playLevelComplete]);
+  }, [currentIdx, hearts, wrongCount, errorWords, level, levelNum, internalStreak, completeLevel, saveLevelErrors, loseHeart, animateProgress, transitionToNext, playCorrect, playWrong, playLevelComplete, playStreak]);
 
   const handleHint = useCallback(async () => {
     if (hintUsed) return;
@@ -1109,6 +1138,12 @@ export default function ExerciseScreen() {
             <View style={styles.rewardBadge}>
               <Text style={styles.rewardEmoji}>🎯</Text>
               <Text style={styles.rewardValue}>¡Sin errores!</Text>
+            </View>
+          )}
+          {maxStreak >= 3 && (
+            <View style={[styles.rewardBadge, { borderColor: '#FF6B6B40' }]}>
+              <Text style={styles.rewardEmoji}>🔥</Text>
+              <Text style={styles.rewardValue}>Racha: {maxStreak}</Text>
             </View>
           )}
         </View>
@@ -1180,9 +1215,9 @@ export default function ExerciseScreen() {
         </View>
         <View style={styles.subHeaderRight}>
           {internalStreak >= 3 && (
-            <View style={styles.streakBadge}>
+            <Reanimated.View style={[styles.streakBadge, streakBadgeAnimStyle]}>
               <Text style={styles.streakBadgeText}>🔥 {internalStreak}</Text>
-            </View>
+            </Reanimated.View>
           )}
           <TouchableOpacity style={styles.hintBtn} onPress={handleHint}>
             <Text style={styles.hintBtnText}>💡 ({game.gems} 💎)</Text>

@@ -24,6 +24,7 @@ export function useFeedbackSounds() {
   const correctPlayer = useAudioPlayer(require('@/assets/sounds/correct.mp3'));
   const wrongPlayer = useAudioPlayer(require('@/assets/sounds/wrong.mp3'));
   const levelCompletePlayer = useAudioPlayer(require('@/assets/sounds/level_complete.mp3'));
+  const streakPlayer = useAudioPlayer(require('@/assets/sounds/streak.mp3'));
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -61,5 +62,15 @@ export function useFeedbackSounds() {
     }
   }, [levelCompletePlayer]);
 
-  return { playCorrect, playWrong, playLevelComplete };
+  const playStreak = useCallback(() => {
+    if (!isSoundEnabled()) return;
+    try {
+      streakPlayer.seekTo(0);
+      streakPlayer.play();
+    } catch {
+      // Ignorar errores de reproducción
+    }
+  }, [streakPlayer]);
+
+  return { playCorrect, playWrong, playLevelComplete, playStreak };
 }

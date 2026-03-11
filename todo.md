@@ -170,3 +170,8 @@
 - [x] Barra de progreso con color dinámico según el tipo de ejercicio actual
 - [x] Transición animada entre ejercicios (fade + translateX sutil)
 - [x] Contador de racha interna del nivel (🔥 N seguidas cuando N >= 3)
+
+## v1.21 — Mejoras aprobadas
+- [x] Sonido especial de fanfarria al llegar a racha de 5 seguidas
+- [x] Racha máxima del nivel mostrada en la pantalla de resultado
+- [x] Animación de pulso suave en el badge de racha (escala 1.0 → 1.1 → 1.0 en bucle)
