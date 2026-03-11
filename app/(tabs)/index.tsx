@@ -146,49 +146,34 @@ function StatsHeader({ username, gems, xp, streak }: {
   username: string; gems: number; xp: number; streak: number;
 }) {
   const hour = new Date().getHours();
-  const timeGreeting = hour < 12 ? '¡Buenos días' : hour < 18 ? '¡Buenas tardes' : '¡Buenas noches';
+  const timeGreeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
 
   return (
-    <LinearGradient
-      colors={['#13002B', '#1A0040', '#0D0020']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+    <View style={styles.headerWrapper}>
       <View style={styles.header}>
-        {/* Izquierda: saludo + nombre */}
+        {/* Izquierda: saludo + nombre + XP */}
         <View style={styles.headerLeft}>
-          <Text style={styles.greetingTime}>{timeGreeting},</Text>
-          <Text style={styles.greetingName}>{username}! 👋</Text>
+          <Text style={styles.greetingTime}>{timeGreeting} 👋</Text>
+          <Text style={styles.greetingName}>{username}</Text>
           <View style={styles.xpRow}>
             <Text style={styles.xpStar}>⭐</Text>
-            <Text style={styles.xpAmount}>{xp.toLocaleString()}</Text>
-            <Text style={styles.xpLabel}> XP</Text>
+            <Text style={styles.xpAmount}>{xp.toLocaleString()} XP</Text>
           </View>
         </View>
         {/* Derecha: gemas y racha */}
         <View style={styles.headerRight}>
-          <LinearGradient
-            colors={['#0369A1', '#38BDF8']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.statPill}
-          >
+          <View style={styles.statPill}>
             <Text style={styles.statPillEmoji}>💎</Text>
             <Text style={styles.statPillValue}>{gems}</Text>
-          </LinearGradient>
-          <LinearGradient
-            colors={streak >= 3 ? ['#B91C1C', '#EF4444', '#F97316'] : ['#3B1F6E', '#5B2D9E']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.statPill}
-          >
+          </View>
+          <View style={[styles.statPill, streak >= 3 && styles.statPillFire]}>
             <FireAnimation streak={streak} />
             <Text style={styles.statPillValue}>{streak}</Text>
-          </LinearGradient>
+          </View>
         </View>
       </View>
       <OfflineBadge />
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -566,8 +551,8 @@ export default function LevelsScreen() {
           >
             <LinearGradient
               colors={isCompleted
-                ? ['#064E3B', '#059669', '#10B981']
-                : ['#4C1D95', '#7C3AED', '#A855F7']}
+                ? ['#052E16', '#166534', '#15803D']
+                : ['#0C1A2E', '#0F3460', '#1565C0']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.challengeGradient}
@@ -661,36 +646,29 @@ export default function LevelsScreen() {
         )}
       </View>
 
-      {/* Modos de práctica — fila horizontal compacta */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.practiceRow}
-        contentContainerStyle={styles.practiceRowContent}
-      >
-        {[
-          { emoji: '⚡', title: 'Repaso Rápido', colors: ['#1D4ED8', '#60A5FA'] as [string,string], route: '/practice/quick-review' },
-          { emoji: '🎧', title: 'Solo Escucha', colors: ['#065F46', '#34D399'] as [string,string], route: '/practice/listen-mode' },
-          { emoji: '📝', title: 'Solo Ordenar', colors: ['#78350F', '#FBBF24'] as [string,string], route: '/practice/order-mode' },
-          { emoji: '🔥', title: 'Palabras Difíciles', colors: ['#7F1D1D', '#F87171'] as [string,string], route: '/practice/hard-words' },
-        ].map((mode) => (
-          <TouchableOpacity
-            key={mode.title}
-            onPress={() => router.push(mode.route as any)}
-            activeOpacity={0.8}
-            style={styles.practiceChipWrapper}
-          >
-            <LinearGradient
-              colors={mode.colors}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={styles.practiceChip}
+      {/* Modos de práctica — 2 filas de 2 tarjetas compactas */}
+      <View style={styles.practiceSection}>
+        <Text style={styles.practiceSectionLabel}>MODOS DE PRÁCTICA</Text>
+        <View style={styles.practiceRow}>
+          {[
+            { emoji: '⚡', title: 'Repaso Rápido', sub: '10 palabras', bg: '#0F2A4A', accent: '#38BDF8', route: '/practice/quick-review' },
+            { emoji: '🎧', title: 'Solo Escucha', sub: '10 ejercicios', bg: '#0A2A1A', accent: '#4ADE80', route: '/practice/listen-mode' },
+            { emoji: '📝', title: 'Solo Ordenar', sub: '10 ejercicios', bg: '#2A1F0A', accent: '#FBBF24', route: '/practice/order-mode' },
+            { emoji: '🔥', title: 'Palabras Difíciles', sub: 'Repaso errores', bg: '#2A0A0A', accent: '#F87171', route: '/practice/hard-words' },
+          ].map((mode) => (
+            <TouchableOpacity
+              key={mode.title}
+              onPress={() => router.push(mode.route as any)}
+              activeOpacity={0.75}
+              style={[styles.practiceTileNew, { backgroundColor: mode.bg, borderColor: mode.accent + '40' }]}
             >
-              <Text style={styles.practiceChipEmoji}>{mode.emoji}</Text>
-              <Text style={styles.practiceChipTitle}>{mode.title}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text style={styles.practiceTileEmojiNew}>{mode.emoji}</Text>
+              <Text style={[styles.practiceTileTitleNew, { color: mode.accent }]}>{mode.title}</Text>
+              <Text style={styles.practiceTileSubNew}>{mode.sub}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
       {/* Barra de progreso global */}
       <View style={styles.globalProgress}>
@@ -745,35 +723,45 @@ export default function LevelsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#0D0D18' },
+  headerWrapper: {
+    backgroundColor: '#111122',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1E1E3A',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 12,
     paddingBottom: 10,
   },
   headerLeft: { flex: 1 },
-  greetingTime: { fontSize: 11, fontWeight: '500', color: '#A78BFA', letterSpacing: 0.3 },
-  greetingName: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginTop: 0, letterSpacing: -0.3 },
-  xpRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
+  greetingTime: { fontSize: 12, fontWeight: '500', color: '#94A3B8', letterSpacing: 0.2 },
+  greetingName: { fontSize: 20, fontWeight: '900', color: '#F1F5F9', marginTop: 1, letterSpacing: -0.4 },
+  xpRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
   xpStar: { fontSize: 12 },
-  xpAmount: { fontSize: 13, fontWeight: '800', color: '#FCD34D', marginLeft: 3 },
-  xpLabel: { fontSize: 11, fontWeight: '600', color: '#FCD34D80' },
-  headerRight: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  xpAmount: { fontSize: 13, fontWeight: '700', color: '#A3E635', marginLeft: 4 },
+  xpLabel: { fontSize: 11, fontWeight: '600', color: '#A3E63580' },
+  headerRight: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   statPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    gap: 4,
-    minWidth: 50,
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    gap: 5,
+    backgroundColor: '#1E1E3A',
+    borderWidth: 1,
+    borderColor: '#2A2A4A',
   },
-  statPillEmoji: { fontSize: 13 },
-  statPillValue: { fontSize: 14, fontWeight: '900', color: '#FFFFFF' },
+  statPillFire: {
+    backgroundColor: '#2A1010',
+    borderColor: '#7F1D1D',
+  },
+  statPillEmoji: { fontSize: 14 },
+  statPillValue: { fontSize: 15, fontWeight: '900', color: '#F1F5F9' },
   // Legacy aliases (keep for backward compat)
   greeting: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
   progressRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
@@ -829,10 +817,10 @@ const styles = StyleSheet.create({
   levelCardUnlocked: {
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#7C3AED60',
+    borderColor: '#38BDF840',
     marginBottom: 8,
     overflow: 'hidden',
-    shadowColor: '#7C3AED',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -880,7 +868,7 @@ const styles = StyleSheet.create({
   playBtnGradient: {
     width: 42, height: 42, borderRadius: 21,
     justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#7C3AED',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 6,
@@ -913,11 +901,37 @@ const styles = StyleSheet.create({
   offlineBadgeNoConn: { backgroundColor: '#FF960015' },
   offlineDot: { fontSize: 9 },
   offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
-  // Fila horizontal de chips de práctica
-  practiceRow: {
+  // Sección de modos de práctica
+  practiceSection: {
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#2D3148',
+    borderBottomColor: '#1E1E3A',
   },
+  practiceSectionLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#475569',
+    letterSpacing: 1.2,
+    marginBottom: 8,
+  },
+  practiceRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  practiceTileNew: {
+    width: '47.5%',
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 12,
+    minHeight: 72,
+    justifyContent: 'center',
+  },
+  practiceTileEmojiNew: { fontSize: 22, marginBottom: 4 },
+  practiceTileTitleNew: { fontSize: 13, fontWeight: '800', letterSpacing: -0.2 },
+  practiceTileSubNew: { fontSize: 11, color: '#64748B', marginTop: 2, fontWeight: '500' },
   practiceRowContent: {
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -945,7 +959,6 @@ const styles = StyleSheet.create({
   practiceChipEmoji: { fontSize: 16 },
   practiceChipTitle: { fontSize: 13, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.1 },
   // Legacy grid styles (kept for compat)
-  practiceSection: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
   practiceSectionTitle: { fontSize: 12, fontWeight: '700', color: '#6B7280', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
   practiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   practiceTile: { width: '47.5%', backgroundColor: '#1A1D2E', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2D3148', alignItems: 'flex-start' },
@@ -1102,9 +1115,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     borderRadius: 20,
     overflow: 'hidden',
-    shadowColor: '#F59E0B',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 8,
   },

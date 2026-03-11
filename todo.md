@@ -312,3 +312,11 @@
 ## v1.35 — Compactación pantalla principal
 - [x] Modos de práctica: convertir grid 2×2 en fila horizontal de chips compactos con scroll
 - [x] Reducir padding del header, desafío del día y sección de práctica para mostrar más niveles
+
+## v1.36 — Rediseño visual radical
+- [ ] Bug: chips de modos de práctica no se renderizan en pantalla
+- [ ] Nueva paleta: fondo #0F0F1A, acento verde lima #A3E635, azul eléctrico #38BDF8
+- [ ] Header rediseñado con nueva paleta
+- [ ] Tarjeta del Desafío del día con nueva paleta
+- [ ] Modos de práctica visibles y bien diseñados
+- [ ] Tarjetas de nivel con nueva paleta y mejor contraste

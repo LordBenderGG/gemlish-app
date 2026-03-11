@@ -1,18 +1,25 @@
 /** @type {const} */
 const themeColors = {
-  primary:    { light: '#7C3AED', dark: '#A855F7' },   // morado vibrante
-  background: { light: '#F8F7FF', dark: '#0A0A14' },   // casi negro azulado
-  surface:    { light: '#FFFFFF', dark: '#12121F' },    // tarjetas
-  foreground: { light: '#1A1033', dark: '#F0EEFF' },   // texto principal
-  muted:      { light: '#7C6FA0', dark: '#8B7EC8' },   // texto secundario
-  border:     { light: '#E8E0FF', dark: '#1E1B3A' },   // bordes
-  success:    { light: '#10B981', dark: '#34D399' },   // verde esmeralda
-  warning:    { light: '#F59E0B', dark: '#FBBF24' },   // ámbar
-  error:      { light: '#EF4444', dark: '#F87171' },   // rojo
-  gem:        { light: '#06B6D4', dark: '#22D3EE' },   // cian brillante
-  purple:     { light: '#7C3AED', dark: '#A855F7' },   // morado
-  blue:       { light: '#3B82F6', dark: '#60A5FA' },   // azul
-  gold:       { light: '#D97706', dark: '#F59E0B' },   // dorado
-  pink:       { light: '#EC4899', dark: '#F472B6' },   // rosa
+  // Azul eléctrico como color primario (reemplaza el morado)
+  primary: { light: '#0284C7', dark: '#38BDF8' },
+  // Fondo oscuro profundo
+  background: { light: '#F8FAFC', dark: '#0D0D18' },
+  // Superficie de tarjetas
+  surface: { light: '#F1F5F9', dark: '#111122' },
+  // Texto principal
+  foreground: { light: '#0F172A', dark: '#F1F5F9' },
+  // Texto secundario
+  muted: { light: '#64748B', dark: '#64748B' },
+  // Bordes
+  border: { light: '#E2E8F0', dark: '#1E2A3A' },
+  // Verde lima para éxito/XP
+  success: { light: '#65A30D', dark: '#A3E635' },
+  // Ámbar para advertencias
+  warning: { light: '#D97706', dark: '#FBBF24' },
+  // Rojo para errores
+  error: { light: '#DC2626', dark: '#F87171' },
+  // Tint (color de acento para tabs)
+  tint: { light: '#0284C7', dark: '#38BDF8' },
 };
+
 module.exports = { themeColors };

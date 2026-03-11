@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
     backgroundColor: '#2A2D2E', borderWidth: 1, borderColor: '#3A3D3E',
   },
-  chipActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+  chipActive: { backgroundColor: '#38BDF8', borderColor: '#38BDF8' },
   chipText: { fontSize: 13, color: '#9BA1A6', fontWeight: '500' },
   chipTextActive: { color: '#FFFFFF', fontWeight: '700' },
 
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   emojiBox: {
     width: 52, height: 52, borderRadius: 26, backgroundColor: '#2A2D2E',
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: '#7C3AED',
+    borderWidth: 2, borderColor: '#38BDF8',
   },
   emojiBoxLocked: { borderColor: '#3A3D3E' },
   emoji: { fontSize: 26 },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   titleLocked: { color: '#687076' },
   desc: { fontSize: 12, color: '#9BA1A6', lineHeight: 16 },
   descLocked: { color: '#4A4D4E' },
-  date: { fontSize: 11, color: '#7C3AED', marginTop: 4, fontWeight: '600' },
+  date: { fontSize: 11, color: '#38BDF8', marginTop: 4, fontWeight: '600' },
   shareBtn: {
     width: 36, height: 36, borderRadius: 18, backgroundColor: '#2A2D2E',
     alignItems: 'center', justifyContent: 'center',

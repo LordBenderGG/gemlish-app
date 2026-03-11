@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
@@ -34,13 +33,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={['#1A0A3A', '#0A0A14']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.6 }}
-        style={styles.topGradient}
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#0D0D18" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
@@ -53,7 +46,7 @@ export default function LoginScreen() {
             <Text style={styles.logoSub}>Aprende Inglés Jugando</Text>
           </View>
 
-          {/* Formulario sin card */}
+          {/* Formulario */}
           <View style={styles.form}>
             <Text style={styles.formTitle}>Iniciar Sesión</Text>
 
@@ -68,7 +61,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Tu nombre de usuario"
-                placeholderTextColor="#4B5563"
+                placeholderTextColor="#3D4A5C"
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -83,7 +76,7 @@ export default function LoginScreen() {
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Tu contraseña"
-                  placeholderTextColor="#4B5563"
+                  placeholderTextColor="#3D4A5C"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -107,7 +100,7 @@ export default function LoginScreen() {
               activeOpacity={0.85}
             >
               {loading
-                ? <ActivityIndicator color="#fff" />
+                ? <ActivityIndicator color="#0D0D18" />
                 : <Text style={styles.btnPrimaryText}>Entrar</Text>
               }
             </TouchableOpacity>
@@ -136,96 +129,98 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A14' },
-  topGradient: {
-    position: 'absolute', top: 0, left: 0, right: 0, height: 320,
-  },
-  scroll: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 60, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#0D0D18' },
+  scroll: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 64, paddingBottom: 40 },
 
   logoContainer: { alignItems: 'center', marginBottom: 48 },
   logoCircle: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#7C3AED',
+    width: 88, height: 88, borderRadius: 24,
+    backgroundColor: '#0F2A4A',
     justifyContent: 'center', alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    elevation: 12,
+    marginBottom: 18,
+    borderWidth: 2,
+    borderColor: '#38BDF8',
+    shadowColor: '#38BDF8',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    elevation: 10,
   },
-  logoEmoji: { fontSize: 38 },
+  logoEmoji: { fontSize: 40 },
   logoText: {
-    fontSize: 36, fontWeight: '900', color: '#FFFFFF',
-    letterSpacing: 0.5,
+    fontSize: 38, fontWeight: '900', color: '#F1F5F9',
+    letterSpacing: -0.5,
   },
-  logoSub: { fontSize: 14, color: '#6B7280', marginTop: 4, fontWeight: '500' },
+  logoSub: { fontSize: 14, color: '#64748B', marginTop: 6, fontWeight: '500' },
 
   form: { width: '100%' },
   formTitle: {
-    fontSize: 22, fontWeight: '800', color: '#FFFFFF',
-    marginBottom: 28, textAlign: 'center',
+    fontSize: 20, fontWeight: '800', color: '#CBD5E1',
+    marginBottom: 24, textAlign: 'center', letterSpacing: -0.2,
   },
 
   errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.12)',
+    backgroundColor: 'rgba(239,68,68,0.1)',
     borderRadius: 12, padding: 12,
     marginBottom: 20,
     borderLeftWidth: 3, borderLeftColor: '#EF4444',
   },
   errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '600' },
 
-  inputGroup: { marginBottom: 20 },
-  label: { fontSize: 12, color: '#9CA3AF', marginBottom: 8, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
+  inputGroup: { marginBottom: 18 },
+  label: {
+    fontSize: 11, color: '#64748B', marginBottom: 8,
+    fontWeight: '700', letterSpacing: 1.0, textTransform: 'uppercase',
+  },
   input: {
-    backgroundColor: '#141420',
+    backgroundColor: '#111122',
     borderWidth: 1,
-    borderColor: '#2A2A40',
+    borderColor: '#1E2A3A',
     borderRadius: 14,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    color: '#FFFFFF',
+    color: '#F1F5F9',
     fontSize: 16,
   },
   passwordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#141420',
+    backgroundColor: '#111122',
     borderWidth: 1,
-    borderColor: '#2A2A40',
+    borderColor: '#1E2A3A',
     borderRadius: 14,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    color: '#FFFFFF',
+    color: '#F1F5F9',
     fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: 16, paddingVertical: 16 },
   eyeIcon: { fontSize: 18 },
 
   btnPrimary: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#A3E635',
     borderRadius: 14,
     paddingVertical: 18,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#7C3AED',
+    shadowColor: '#A3E635',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
+    shadowOpacity: 0.35,
     shadowRadius: 14,
     elevation: 8,
   },
-  btnPrimaryText: { color: '#FFFFFF', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
+  btnPrimaryText: { color: '#0D0D18', fontSize: 17, fontWeight: '900', letterSpacing: 0.3 },
 
   forgotBtn: { marginTop: 16, alignItems: 'center', paddingVertical: 4 },
-  forgotText: { color: '#6B7280', fontSize: 13 },
+  forgotText: { color: '#475569', fontSize: 13 },
 
   footer: {
     flexDirection: 'row', justifyContent: 'center',
     alignItems: 'center', marginTop: 40,
   },
-  footerText: { color: '#6B7280', fontSize: 14 },
-  footerLink: { color: '#A78BFA', fontSize: 14, fontWeight: '700' },
+  footerText: { color: '#475569', fontSize: 14 },
+  footerLink: { color: '#38BDF8', fontSize: 14, fontWeight: '700' },
 });

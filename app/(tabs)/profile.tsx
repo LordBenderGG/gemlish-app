@@ -606,7 +606,7 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#7C3AED', '#A855F7']}
+              colors={['#38BDF8', '#A855F7']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.avatarCircle}
@@ -1210,5 +1210,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 16, marginTop: 10, borderWidth: 1, borderColor: '#2A2D2E',
   },
   viewAllText: { fontSize: 14, fontWeight: '600', color: '#ECEDEE' },
-  viewAllArrow: { fontSize: 20, color: '#7C3AED', fontWeight: '700' },
+  viewAllArrow: { fontSize: 20, color: '#38BDF8', fontWeight: '700' },
 });

@@ -32,8 +32,8 @@ const SLIDES: Slide[] = [
     title: 'Bienvenido a Gemlish',
     subtitle: 'Aprende inglés de forma divertida',
     description: 'Un juego completo para aprender inglés desde cero. Sin internet, sin suscripciones, sin límites.',
-    color: '#8E5AF5',
-    bgColor: '#8E5AF515',
+    color: '#38BDF8',
+    bgColor: '#38BDF815',
     items: [
       { icon: '🏆', text: '500 niveles de ejercicios' },
       { icon: '📱', text: '100% offline, sin datos móviles' },
@@ -232,7 +232,7 @@ export default function OnboardingScreen() {
   if (showWelcomeBack) {
     return (
       <LinearGradient
-        colors={['#0A0A14', '#12082A', '#0A0A14']}
+        colors={['#0D0D18', '#0D1A2E', '#0D0D18']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
@@ -250,7 +250,7 @@ export default function OnboardingScreen() {
 
   return (
     <LinearGradient
-      colors={['#0A0A14', '#12082A', '#0A0A14']}
+      colors={['#0D0D18', '#0D1A2E', '#0D0D18']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#8E5AF530',
+    borderColor: '#38BDF830',
     gap: 12,
   },
   welcomeBackCardEmoji: {
@@ -515,12 +515,12 @@ const styles = StyleSheet.create({
   },
   welcomeBackBtn: {
     width: '100%',
-    backgroundColor: '#8E5AF5',
+    backgroundColor: '#38BDF8',
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#8E5AF5',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
