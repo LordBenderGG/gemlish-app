@@ -1,4 +1,5 @@
-import React, { useMemo, useCallback, useEffect, useRef } from 'react';
+'use client';
+import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   StatusBar, Animated,
@@ -9,6 +10,43 @@ import { useGame } from '@/context/GameContext';
 import { getLevelData, getLevelIcon } from '@/data/lessons';
 
 const TOTAL_LEVELS = 500;
+
+function OfflineBadge() {
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        await fetch('https://1.1.1.1', { signal: controller.signal, mode: 'no-cors' });
+        clearTimeout(timeout);
+        if (!cancelled) setIsOnline(true);
+      } catch {
+        if (!cancelled) setIsOnline(false);
+      }
+    };
+    check();
+    const interval = setInterval(check, 15000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+
+  return (
+    <View style={[
+      styles.offlineBadge,
+      isOnline ? styles.offlineBadgeOk : styles.offlineBadgeNoConn,
+    ]}>
+      <Text style={styles.offlineDot}>{isOnline ? '🟢' : '🔴'}</Text>
+      <Text style={[
+        styles.offlineText,
+        { color: isOnline ? '#58CC02' : '#FF9600' },
+      ]}>
+        {isOnline ? '100% Offline — Sin internet requerido' : 'Sin internet · Modo offline activo'}
+      </Text>
+    </View>
+  );
+}
 
 function StatsHeader({ username, gems, xp, streak }: {
   username: string; gems: number; xp: number; streak: number;
@@ -30,26 +68,29 @@ function StatsHeader({ username, gems, xp, streak }: {
   }, [streak, pulseAnim]);
 
   return (
-    <View style={styles.header}>
-      <View style={styles.headerLeft}>
-        <Text style={styles.greeting}>¡Hola, {username}! 👋</Text>
-        <View style={styles.progressRow}>
-          <Text style={styles.xpText}>⭐ {xp} XP</Text>
+    <View>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.greeting}>¡Hola, {username}! 👋</Text>
+          <View style={styles.progressRow}>
+            <Text style={styles.xpText}>⭐ {xp} XP</Text>
+          </View>
+        </View>
+        <View style={styles.headerRight}>
+          <View style={styles.statBadge}>
+            <Text style={styles.statEmoji}>💎</Text>
+            <Text style={styles.statValue}>{gems}</Text>
+          </View>
+          <View style={[styles.statBadge, streak >= 3 && styles.statBadgeStreak]}>
+            <Animated.Text style={[styles.statEmoji, streak > 0 && { transform: [{ scale: pulseAnim }] }]}>
+              🔥
+            </Animated.Text>
+            <Text style={[styles.statValue, streak >= 3 && styles.statValueStreak]}>{streak}</Text>
+            {streak >= 7 && <Text style={styles.streakLabel}>días</Text>}
+          </View>
         </View>
       </View>
-      <View style={styles.headerRight}>
-        <View style={styles.statBadge}>
-          <Text style={styles.statEmoji}>💎</Text>
-          <Text style={styles.statValue}>{gems}</Text>
-        </View>
-        <View style={[styles.statBadge, streak >= 3 && styles.statBadgeStreak]}>
-          <Animated.Text style={[styles.statEmoji, streak > 0 && { transform: [{ scale: pulseAnim }] }]}>
-            🔥
-          </Animated.Text>
-          <Text style={[styles.statValue, streak >= 3 && styles.statValueStreak]}>{streak}</Text>
-          {streak >= 7 && <Text style={styles.streakLabel}>días</Text>}
-        </View>
-      </View>
+      <OfflineBadge />
     </View>
   );
 }
@@ -257,4 +298,18 @@ const styles = StyleSheet.create({
   },
   statValueStreak: { color: '#FF9500' },
   streakLabel: { fontSize: 9, color: '#FF9500', fontWeight: '600', marginLeft: 2 },
+  offlineBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    gap: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2D3148',
+  },
+  offlineBadgeOk: { backgroundColor: '#58CC0210' },
+  offlineBadgeNoConn: { backgroundColor: '#FF960015' },
+  offlineDot: { fontSize: 9 },
+  offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
 });

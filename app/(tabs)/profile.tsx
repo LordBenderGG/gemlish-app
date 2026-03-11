@@ -1,11 +1,14 @@
-import React, { useMemo, useState, useCallback } from 'react';
+'use client';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   StatusBar, Alert, Switch, Modal, FlatList,
 } from 'react-native';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useNotifications } from '@/hooks/use-notifications';
+import { LESSONS } from '@/data/lessons';
 
 // ─── Definición de Logros ─────────────────────────────────────────────────────
 
@@ -257,6 +260,111 @@ function NotificationsSection() {
   );
 }
 
+// ─── Ranking de Palabras Difíciles ───────────────────────────────────────────
+
+interface HardWord {
+  word: string;
+  translation: string;
+  pronunciation: string;
+  failCount: number;
+}
+
+function findWordTranslation(wordEn: string): { translation: string; pronunciation: string } {
+  for (const lesson of LESSONS) {
+    const found = lesson.words.find(w => w.word.toLowerCase() === wordEn.toLowerCase());
+    if (found) return { translation: found.translation, pronunciation: found.pronunciation };
+  }
+  return { translation: '—', pronunciation: '' };
+}
+
+function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[]> }) {
+  const hardWords = useMemo((): HardWord[] => {
+    // Contar cuántas veces falla cada palabra en todos los niveles
+    const counts: Record<string, number> = {};
+    Object.values(levelErrors).forEach(words => {
+      words.forEach(word => {
+        const key = word.toLowerCase();
+        counts[key] = (counts[key] || 0) + 1;
+      });
+    });
+    // Ordenar por frecuencia y tomar top 5
+    return Object.entries(counts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([word, failCount]) => {
+        const { translation, pronunciation } = findWordTranslation(word);
+        return {
+          word: word.charAt(0).toUpperCase() + word.slice(1),
+          translation,
+          pronunciation,
+          failCount,
+        };
+      });
+  }, [levelErrors]);
+
+  const handlePractice = useCallback(() => {
+    // Navegar al primer nivel que tenga errores
+    const firstLevelWithErrors = Object.entries(levelErrors).find(([, words]) => words.length > 0);
+    if (firstLevelWithErrors) {
+      router.push(`/review/${firstLevelWithErrors[0]}` as any);
+    }
+  }, [levelErrors]);
+
+  if (hardWords.length === 0) {
+    return (
+      <View style={styles.hardWordsSection}>
+        <Text style={styles.sectionTitle}>🎯 Palabras Difíciles</Text>
+        <View style={styles.hardWordsEmpty}>
+          <Text style={styles.hardWordsEmptyEmoji}>🌟</Text>
+          <Text style={styles.hardWordsEmptyText}>¡Sin errores registrados!</Text>
+          <Text style={styles.hardWordsEmptySubtext}>Completa niveles para ver las palabras que más te cuestan.</Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.hardWordsSection}>
+      <View style={styles.hardWordsHeader}>
+        <Text style={styles.sectionTitle}>🎯 Palabras Difíciles</Text>
+        <Text style={styles.hardWordsSubtitle}>Top 5 más falladas</Text>
+      </View>
+
+      <View style={styles.hardWordsList}>
+        {hardWords.map((item, idx) => (
+          <View key={item.word} style={styles.hardWordRow}>
+            <View style={[
+              styles.hardWordRank,
+              idx === 0 && styles.hardWordRank1,
+              idx === 1 && styles.hardWordRank2,
+              idx === 2 && styles.hardWordRank3,
+            ]}>
+              <Text style={styles.hardWordRankText}>{idx + 1}</Text>
+            </View>
+            <View style={styles.hardWordInfo}>
+              <View style={styles.hardWordNameRow}>
+                <Text style={styles.hardWordEn}>{item.word}</Text>
+                {item.pronunciation ? (
+                  <Text style={styles.hardWordPhonetic}>{item.pronunciation}</Text>
+                ) : null}
+              </View>
+              <Text style={styles.hardWordEs}>{item.translation}</Text>
+            </View>
+            <View style={styles.hardWordFails}>
+              <Text style={styles.hardWordFailCount}>{item.failCount}</Text>
+              <Text style={styles.hardWordFailLabel}>{item.failCount === 1 ? 'error' : 'errores'}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      <TouchableOpacity style={styles.practiceBtn} onPress={handlePractice} activeOpacity={0.8}>
+        <Text style={styles.practiceBtnText}>📚 Practicar palabras difíciles</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 // ─── Pantalla de Perfil ───────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
@@ -361,6 +469,9 @@ export default function ProfileScreen() {
 
         {/* Notificaciones */}
         <NotificationsSection />
+
+        {/* Palabras Difíciles */}
+        <HardWordsSection levelErrors={game.levelErrors} />
 
         {/* Logros */}
         <View style={styles.achieveHeader}>
@@ -526,4 +637,43 @@ const styles = StyleSheet.create({
   achieveDesc: { fontSize: 12, color: '#9CA3AF', lineHeight: 16 },
   achieveDescLocked: { color: '#4B5563' },
   achieveCheck: { fontSize: 18 },
+  // Palabras Difíciles
+  hardWordsSection: { gap: 10 },
+  hardWordsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  hardWordsSubtitle: { fontSize: 12, color: '#FF4B4B', fontWeight: '700' },
+  hardWordsList: { gap: 8 },
+  hardWordRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#1A1D27', borderRadius: 14, padding: 12,
+    borderWidth: 1, borderColor: '#FF4B4B20',
+  },
+  hardWordRank: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: '#2D3148', justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1.5, borderColor: '#4B5563',
+  },
+  hardWordRank1: { backgroundColor: '#FFD70020', borderColor: '#FFD700' },
+  hardWordRank2: { backgroundColor: '#C0C0C020', borderColor: '#C0C0C0' },
+  hardWordRank3: { backgroundColor: '#CD7F3220', borderColor: '#CD7F32' },
+  hardWordRankText: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
+  hardWordInfo: { flex: 1 },
+  hardWordNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  hardWordEn: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  hardWordPhonetic: { fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' },
+  hardWordEs: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  hardWordFails: { alignItems: 'center' },
+  hardWordFailCount: { fontSize: 20, fontWeight: '800', color: '#FF4B4B' },
+  hardWordFailLabel: { fontSize: 10, color: '#9CA3AF', fontWeight: '600' },
+  hardWordsEmpty: {
+    backgroundColor: '#1A1D27', borderRadius: 14, padding: 20,
+    alignItems: 'center', borderWidth: 1, borderColor: '#2D3148',
+  },
+  hardWordsEmptyEmoji: { fontSize: 36, marginBottom: 8 },
+  hardWordsEmptyText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', marginBottom: 4 },
+  hardWordsEmptySubtext: { fontSize: 12, color: '#9CA3AF', textAlign: 'center', lineHeight: 18 },
+  practiceBtn: {
+    backgroundColor: '#FF4B4B20', borderRadius: 14, paddingVertical: 14,
+    alignItems: 'center', borderWidth: 1.5, borderColor: '#FF4B4B60',
+  },
+  practiceBtnText: { color: '#FF4B4B', fontSize: 14, fontWeight: '800' },
 });

@@ -4,6 +4,7 @@ import { Stack, useSegments, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameProvider, useGame } from '@/context/GameContext';
+import { hasSeenOnboarding } from '@/lib/onboarding';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { Platform } from "react-native";
@@ -34,9 +35,18 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
     const inAuthGroup = (segments[0] as string) === 'auth';
-    if (!username && !inAuthGroup) {
-      router.replace('/auth/login' as any);
-    } else if (username && inAuthGroup) {
+    const inOnboarding = (segments[0] as string) === 'onboarding';
+
+    if (!username && !inAuthGroup && !inOnboarding) {
+      // Verificar si ya vio el onboarding
+      hasSeenOnboarding().then((seen) => {
+        if (!seen) {
+          router.replace('/onboarding' as any);
+        } else {
+          router.replace('/auth/login' as any);
+        }
+      });
+    } else if (username && (inAuthGroup || inOnboarding)) {
       router.replace('/(tabs)');
     }
   }, [username, isLoading, segments]);
@@ -108,6 +118,7 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="auth" />
+            <Stack.Screen name="onboarding" />
             <Stack.Screen name="exercise" />
             <Stack.Screen name="oauth/callback" />
           </Stack>

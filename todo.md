@@ -87,3 +87,9 @@
 - [x] Modo repaso de errores: guardar palabras fallidas al terminar nivel
 - [x] Pantalla de repaso de errores con tarjetas de palabras fallidas
 - [x] Racha con animación de fuego 🔥 pulsante en el header del mapa de niveles
+
+## v1.7 — Mejoras aprobadas
+- [x] Pantalla de onboarding (4 slides) que se muestra solo la primera vez
+- [x] Indicador offline en el header del mapa de niveles
+- [x] Ranking de palabras difíciles en Perfil (top 5 más falladas)
+- [x] Botón para practicar palabras difíciles directamente desde Perfil
