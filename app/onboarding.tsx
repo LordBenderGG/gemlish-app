@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   Dimensions, Animated, StatusBar, FlatList,
@@ -7,6 +7,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { markOnboardingDone } from '@/lib/onboarding';
+import { hasExistingUsers } from '@/lib/storage';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
@@ -82,26 +83,93 @@ const SLIDES: Slide[] = [
   },
 ];
 
-// ─── Componente de Slide ─────────────────────────────────────────────────────
+// ─── Pantalla de Bienvenida de Vuelta ────────────────────────────────────────
 
-function SlideView({ slide }: { slide: Slide }) {
+function WelcomeBackScreen({ onContinue }: { onContinue: () => void }) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.85)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 7, tension: 50, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={[styles.welcomeBackContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
+      <Text style={styles.welcomeBackEmoji}>👋</Text>
+      <Text style={styles.welcomeBackTitle}>¡Bienvenido de vuelta!</Text>
+      <Text style={styles.welcomeBackSubtitle}>
+        Vemos que ya tienes datos guardados en este dispositivo.{'\n'}
+        ¡Tu progreso te espera!
+      </Text>
+
+      <View style={styles.welcomeBackCards}>
+        <View style={styles.welcomeBackCard}>
+          <Text style={styles.welcomeBackCardEmoji}>💎</Text>
+          <Text style={styles.welcomeBackCardText}>Tus gemas y XP están guardados</Text>
+        </View>
+        <View style={styles.welcomeBackCard}>
+          <Text style={styles.welcomeBackCardEmoji}>🏆</Text>
+          <Text style={styles.welcomeBackCardText}>Tus niveles completados te esperan</Text>
+        </View>
+        <View style={styles.welcomeBackCard}>
+          <Text style={styles.welcomeBackCardEmoji}>🔥</Text>
+          <Text style={styles.welcomeBackCardText}>Recupera tu racha de estudio</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.welcomeBackBtn} onPress={onContinue} activeOpacity={0.85}>
+        <Text style={styles.welcomeBackBtnText}>Iniciar sesión →</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+// ─── Componente de Slide con Fade-in ─────────────────────────────────────────
+
+function SlideView({ slide, isActive }: { slide: Slide; isActive: boolean }) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    if (isActive) {
+      fadeAnim.setValue(0);
+      slideAnim.setValue(30);
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [isActive]);
+
   return (
     <View style={[styles.slide, { width: SCREEN_W }]}>
-      <View style={[styles.emojiContainer, { backgroundColor: slide.bgColor }]}>
+      <Animated.View style={[styles.emojiContainer, { backgroundColor: slide.bgColor, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <Text style={styles.slideEmoji}>{slide.emoji}</Text>
-      </View>
-      <Text style={[styles.slideTitle, { color: slide.color }]}>{slide.title}</Text>
-      <Text style={styles.slideSubtitle}>{slide.subtitle}</Text>
-      <Text style={styles.slideDescription}>{slide.description}</Text>
+      </Animated.View>
 
-      <View style={styles.itemsContainer}>
+      <Animated.Text style={[styles.slideTitle, { color: slide.color, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+        {slide.title}
+      </Animated.Text>
+
+      <Animated.Text style={[styles.slideSubtitle, { opacity: fadeAnim }]}>
+        {slide.subtitle}
+      </Animated.Text>
+
+      <Animated.Text style={[styles.slideDescription, { opacity: fadeAnim }]}>
+        {slide.description}
+      </Animated.Text>
+
+      <Animated.View style={[styles.itemsContainer, { opacity: fadeAnim }]}>
         {slide.items.map((item, idx) => (
           <View key={idx} style={[styles.itemRow, { borderColor: slide.color + '30' }]}>
             <Text style={styles.itemIcon}>{item.icon}</Text>
             <Text style={styles.itemText}>{item.text}</Text>
           </View>
         ))}
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -111,8 +179,21 @@ function SlideView({ slide }: { slide: Slide }) {
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showWelcomeBack, setShowWelcomeBack] = useState<boolean | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+
+  // Verificar si hay usuarios existentes al montar
+  useEffect(() => {
+    hasExistingUsers().then(hasUsers => {
+      setShowWelcomeBack(hasUsers);
+    });
+  }, []);
+
+  const handleWelcomeBackContinue = useCallback(async () => {
+    await markOnboardingDone();
+    router.replace('/auth/login' as any);
+  }, []);
 
   const handleNext = useCallback(async () => {
     if (currentIndex < SLIDES.length - 1) {
@@ -141,6 +222,23 @@ export default function OnboardingScreen() {
     }
   );
 
+  // Mientras se verifica, no renderizar nada (evita flash)
+  if (showWelcomeBack === null) {
+    return <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} />;
+  }
+
+  // Si hay usuarios existentes, mostrar pantalla de bienvenida de vuelta
+  if (showWelcomeBack) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <StatusBar barStyle="light-content" backgroundColor="#0F1117" />
+        <View style={styles.welcomeBackWrapper}>
+          <WelcomeBackScreen onContinue={handleWelcomeBackContinue} />
+        </View>
+      </View>
+    );
+  }
+
   const currentSlide = SLIDES[currentIndex];
   const isLast = currentIndex === SLIDES.length - 1;
 
@@ -160,7 +258,9 @@ export default function OnboardingScreen() {
         ref={flatListRef}
         data={SLIDES}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SlideView slide={item} />}
+        renderItem={({ item, index }) => (
+          <SlideView slide={item} isActive={index === currentIndex} />
+        )}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -211,7 +311,6 @@ export default function OnboardingScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Contador de slide */}
         <Text style={styles.slideCounter}>
           {currentIndex + 1} / {SLIDES.length}
         </Text>
@@ -348,5 +447,79 @@ const styles = StyleSheet.create({
     color: '#4B5563',
     fontSize: 13,
     fontWeight: '600',
+  },
+  // Pantalla de bienvenida de vuelta
+  welcomeBackWrapper: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  welcomeBackContainer: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  welcomeBackEmoji: {
+    fontSize: 72,
+  },
+  welcomeBackTitle: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  welcomeBackSubtitle: {
+    fontSize: 15,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  welcomeBackCards: {
+    width: '100%',
+    gap: 10,
+    marginTop: 4,
+  },
+  welcomeBackCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1A1D27',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#8E5AF530',
+    gap: 12,
+  },
+  welcomeBackCardEmoji: {
+    fontSize: 24,
+    width: 32,
+    textAlign: 'center',
+  },
+  welcomeBackCardText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  welcomeBackBtn: {
+    width: '100%',
+    backgroundColor: '#8E5AF5',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#8E5AF5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  welcomeBackBtnText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });

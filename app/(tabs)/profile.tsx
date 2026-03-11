@@ -303,12 +303,8 @@ function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[
   }, [levelErrors]);
 
   const handlePractice = useCallback(() => {
-    // Navegar al primer nivel que tenga errores
-    const firstLevelWithErrors = Object.entries(levelErrors).find(([, words]) => words.length > 0);
-    if (firstLevelWithErrors) {
-      router.push(`/review/${firstLevelWithErrors[0]}` as any);
-    }
-  }, [levelErrors]);
+    router.push('/practice/hard-words' as any);
+  }, []);
 
   if (hardWords.length === 0) {
     return (

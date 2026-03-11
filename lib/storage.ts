@@ -101,6 +101,12 @@ export async function logoutUser(): Promise<void> {
   await AsyncStorage.removeItem(KEYS.CURRENT_USER);
 }
 
+// Detecta si hay usuarios registrados (para el onboarding de bienvenida de vuelta)
+export async function hasExistingUsers(): Promise<boolean> {
+  const users = await getUsers();
+  return Object.keys(users).length > 0;
+}
+
 // ─── Estado del Juego ────────────────────────────────────────────────────────
 
 const DEFAULT_GAME_STATE: GameState = {

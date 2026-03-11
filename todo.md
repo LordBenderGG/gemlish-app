@@ -93,3 +93,8 @@
 - [x] Indicador offline en el header del mapa de niveles
 - [x] Ranking de palabras difíciles en Perfil (top 5 más falladas)
 - [x] Botón para practicar palabras difíciles directamente desde Perfil
+
+## v1.8 — Mejoras aprobadas
+- [x] Modo práctica con repetición espaciada de palabras difíciles (pantalla /practice/hard-words)
+- [x] Animación fade-in en cada slide del onboarding al cambiar de slide
+- [x] Pantalla de bienvenida de vuelta para usuarios que reinstalaron la app (detecta datos guardados)
