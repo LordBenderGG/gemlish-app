@@ -6,6 +6,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
+import { useAchievements } from '@/context/AchievementsContext';
 import { useSpeech } from '@/hooks/use-speech';
 import {
   generateLevel,
@@ -399,7 +400,8 @@ function ListenWriteView({
 export default function ExerciseScreen() {
   const insets = useSafeAreaInsets();
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
-  const { game, completeLevel, saveLevelErrors, loseHeart, spendGems } = useGame();
+  const { username, game, completeLevel, saveLevelErrors, loseHeart, spendGems } = useGame();
+  const { checkAchievements } = useAchievements();
   const levelNum = parseInt(levelId || '1', 10);
 
   const level = useMemo(() => generateLevel(levelNum), [levelNum]);
@@ -448,6 +450,19 @@ export default function ExerciseScreen() {
       const xpEarned = level?.xp || 10;
       const gemsEarned = wrongCount === 0 ? 5 : 2;
       await completeLevel(levelNum, xpEarned, gemsEarned);
+      // Verificar logros desbloqueados
+      if (username) {
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length + 1;
+        await checkAchievements(username, {
+          levelsCompleted,
+          streak: game.streak,
+          totalWordsLearned: 0,
+          gems: game.gems + (wrongCount === 0 ? 5 : 2),
+          xp: game.xp + (level?.xp || 10),
+          totalDaysCompleted: 0,
+          practiceSessionsCompleted: 0,
+        });
+      }
       // Guardar errores del nivel
       const finalErrors = errorWords;
       if (wordEn && !correct && !finalErrors.includes(wordEn)) {

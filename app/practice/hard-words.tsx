@@ -7,6 +7,8 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
+import { useAchievements } from '@/context/AchievementsContext';
+import { savePracticeSession } from '@/lib/practice-history';
 import { useSpeech } from '@/hooks/use-speech';
 import { LESSONS } from '@/data/lessons';
 import type { Word } from '@/data/lessons';
@@ -268,7 +270,9 @@ function RoundResult({
 
 export default function HardWordsPracticeScreen() {
   const insets = useSafeAreaInsets();
-  const { game, saveLevelErrors } = useGame();
+  const { username, game } = useGame();
+  const { checkAchievements } = useAchievements();
+  const sessionStartRef = useRef(Date.now());
 
   // Construir lista de palabras difíciles con sus conteos
   const practiceWords = useMemo((): PracticeWord[] => {
@@ -346,9 +350,32 @@ export default function HardWordsPracticeScreen() {
     progressAnim.setValue(0);
   }, [practiceWords, queue, progressAnim]);
 
-  const handleFinish = useCallback(() => {
+  const handleFinish = useCallback(async () => {
+    // Guardar historial de sesión
+    if (username) {
+      const totalAnswers = queue.reduce((acc, pw) => acc + pw.sessionCorrect + pw.sessionFails, 0);
+      const correctAnswers = queue.reduce((acc, pw) => acc + pw.sessionCorrect, 0);
+      const uniqueWords = new Set(queue.map(pw => pw.word.word)).size;
+      await savePracticeSession(username, {
+        wordsCount: uniqueWords,
+        correct: correctAnswers,
+        total: Math.max(totalAnswers, 1),
+        durationMs: Date.now() - sessionStartRef.current,
+      });
+      // Verificar logros de práctica
+      const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+      await checkAchievements(username, {
+        levelsCompleted,
+        streak: game.streak,
+        totalWordsLearned: 0,
+        gems: game.gems,
+        xp: game.xp,
+        totalDaysCompleted: 0,
+        practiceSessionsCompleted: 1, // Al menos 1 sesión completada
+      });
+    }
     router.back();
-  }, []);
+  }, [username, game, queue, checkAchievements]);
 
   if (practiceWords.length === 0) {
     return (

@@ -4,6 +4,7 @@ import { Stack, useSegments, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameProvider, useGame } from '@/context/GameContext';
+import { AchievementsProvider } from '@/context/AchievementsContext';
 import { hasSeenOnboarding } from '@/lib/onboarding';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -109,6 +110,7 @@ export default function RootLayout() {
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GameProvider>
+      <AchievementsProvider>
       <AuthGuard>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
@@ -127,6 +129,7 @@ export default function RootLayout() {
         </QueryClientProvider>
       </trpc.Provider>
       </AuthGuard>
+      </AchievementsProvider>
       </GameProvider>
     </GestureHandlerRootView>
   );

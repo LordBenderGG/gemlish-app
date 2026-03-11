@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   StatusBar, Alert, Switch, Modal, FlatList,
@@ -9,54 +9,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useNotifications } from '@/hooks/use-notifications';
 import { LESSONS } from '@/data/lessons';
+import { ACHIEVEMENTS } from '@/lib/achievements';
+import type { Achievement, AchievementStats } from '@/lib/achievements';
+import {
+  getPracticeHistory, formatDuration, formatSessionDate,
+  type PracticeSession,
+} from '@/lib/practice-history';
 
-// ─── Definición de Logros ─────────────────────────────────────────────────────
+// ─── Tipos locales ────────────────────────────────────────────────────────────
 
-interface Achievement {
-  id: string;
-  emoji: string;
-  title: string;
-  description: string;
-  check: (stats: UserStats) => boolean;
-  category: 'levels' | 'streak' | 'words' | 'gems' | 'game';
-}
-
-interface UserStats {
-  levelsCompleted: number;
-  streak: number;
-  totalWordsLearned: number;
-  gems: number;
-  xp: number;
-  totalDaysCompleted: number;
-}
-
-const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_level', emoji: '🎯', title: 'Primer Paso', description: 'Completa tu primer nivel', check: s => s.levelsCompleted >= 1, category: 'levels' },
-  { id: 'levels_10', emoji: '🔟', title: 'Diez Niveles', description: 'Completa 10 niveles', check: s => s.levelsCompleted >= 10, category: 'levels' },
-  { id: 'levels_25', emoji: '🌟', title: 'Cuarto de Siglo', description: 'Completa 25 niveles', check: s => s.levelsCompleted >= 25, category: 'levels' },
-  { id: 'levels_50', emoji: '🏅', title: 'Medio Camino', description: 'Completa 50 niveles', check: s => s.levelsCompleted >= 50, category: 'levels' },
-  { id: 'levels_100', emoji: '💯', title: 'Centurión', description: 'Completa 100 niveles', check: s => s.levelsCompleted >= 100, category: 'levels' },
-  { id: 'levels_250', emoji: '🥇', title: 'Experto', description: 'Completa 250 niveles', check: s => s.levelsCompleted >= 250, category: 'levels' },
-  { id: 'levels_500', emoji: '👑', title: 'Maestro del Inglés', description: '¡Completa los 500 niveles!', check: s => s.levelsCompleted >= 500, category: 'levels' },
-  { id: 'streak_3', emoji: '🔥', title: 'En Racha', description: '3 días seguidos estudiando', check: s => s.streak >= 3, category: 'streak' },
-  { id: 'streak_7', emoji: '🔥🔥', title: 'Semana Perfecta', description: '7 días de racha', check: s => s.streak >= 7, category: 'streak' },
-  { id: 'streak_30', emoji: '🌙', title: 'Mes de Estudio', description: '30 días de racha', check: s => s.streak >= 30, category: 'streak' },
-  { id: 'streak_100', emoji: '⚡', title: 'Imparable', description: '100 días de racha', check: s => s.streak >= 100, category: 'streak' },
-  { id: 'words_10', emoji: '📖', title: 'Primeras Palabras', description: 'Aprende 10 palabras en tarea diaria', check: s => s.totalWordsLearned >= 10, category: 'words' },
-  { id: 'words_50', emoji: '📚', title: 'Vocabulario Básico', description: 'Aprende 50 palabras', check: s => s.totalWordsLearned >= 50, category: 'words' },
-  { id: 'words_100', emoji: '🧠', title: 'Mente Brillante', description: 'Aprende 100 palabras', check: s => s.totalWordsLearned >= 100, category: 'words' },
-  { id: 'words_300', emoji: '📜', title: 'Políglota', description: 'Aprende 300 palabras', check: s => s.totalWordsLearned >= 300, category: 'words' },
-  { id: 'gems_50', emoji: '💎', title: 'Coleccionista', description: 'Acumula 50 💎', check: s => s.gems >= 50, category: 'gems' },
-  { id: 'gems_100', emoji: '💎💎', title: 'Tesoro', description: 'Acumula 100 💎', check: s => s.gems >= 100, category: 'gems' },
-  { id: 'gems_500', emoji: '💰', title: 'Rico en Conocimiento', description: 'Acumula 500 💎', check: s => s.gems >= 500, category: 'gems' },
-  { id: 'xp_100', emoji: '⭐', title: 'Primer XP', description: 'Gana 100 XP', check: s => s.xp >= 100, category: 'game' },
-  { id: 'xp_500', emoji: '🌠', title: 'Estrella en Ascenso', description: 'Gana 500 XP', check: s => s.xp >= 500, category: 'game' },
-  { id: 'xp_1000', emoji: '🚀', title: 'Despegue', description: 'Gana 1,000 XP', check: s => s.xp >= 1000, category: 'game' },
-  { id: 'xp_5000', emoji: '🌌', title: 'Leyenda', description: 'Gana 5,000 XP', check: s => s.xp >= 5000, category: 'game' },
-  { id: 'daily_1', emoji: '✅', title: 'Primer Día', description: 'Completa la tarea diaria 1 vez', check: s => s.totalDaysCompleted >= 1, category: 'words' },
-  { id: 'daily_7', emoji: '🗓️', title: 'Semana Completa', description: 'Completa la tarea diaria 7 veces', check: s => s.totalDaysCompleted >= 7, category: 'words' },
-  { id: 'daily_30', emoji: '📅', title: 'Mes de Palabras', description: 'Completa la tarea diaria 30 veces', check: s => s.totalDaysCompleted >= 30, category: 'words' },
-];
+// UserStats es un alias de AchievementStats para compatibilidad local
+type UserStats = AchievementStats;
 
 // ─── Componente de Logro ──────────────────────────────────────────────────────
 
@@ -366,6 +329,13 @@ function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { username, game, daily, logout } = useGame();
+  const [practiceHistory, setPracticeHistory] = useState<PracticeSession[]>([]);
+
+  useEffect(() => {
+    if (username) {
+      getPracticeHistory(username).then(setPracticeHistory);
+    }
+  }, [username]);
 
   const stats: UserStats = useMemo(() => {
     const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
@@ -377,6 +347,7 @@ export default function ProfileScreen() {
       gems: game.gems,
       xp: game.xp,
       totalDaysCompleted: daily.totalDaysCompleted,
+      practiceSessionsCompleted: 0,
     };
   }, [game, daily]);
 
@@ -468,6 +439,29 @@ export default function ProfileScreen() {
 
         {/* Palabras Difíciles */}
         <HardWordsSection levelErrors={game.levelErrors} />
+
+        {/* Historial de Sesiones de Práctica */}
+        {practiceHistory.length > 0 && (
+          <View style={styles.practiceHistorySection}>
+            <Text style={styles.sectionTitle}>📊 Últimas Sesiones de Práctica</Text>
+            {practiceHistory.slice(0, 5).map(session => {
+              const accuracy = Math.round((session.correct / session.total) * 100);
+              const accuracyColor = accuracy >= 80 ? '#58CC02' : accuracy >= 60 ? '#FF9600' : '#FF4B4B';
+              return (
+                <View key={session.id} style={styles.practiceHistoryCard}>
+                  <View style={styles.practiceHistoryLeft}>
+                    <Text style={styles.practiceHistoryDate}>{formatSessionDate(session.date)}</Text>
+                    <Text style={styles.practiceHistoryWords}>{session.wordsCount} palabras · {formatDuration(session.durationMs)}</Text>
+                  </View>
+                  <View style={[styles.practiceHistoryAccuracy, { borderColor: accuracyColor + '40' }]}>
+                    <Text style={[styles.practiceHistoryAccuracyNum, { color: accuracyColor }]}>{accuracy}%</Text>
+                    <Text style={styles.practiceHistoryAccuracyLabel}>acierto</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
 
         {/* Logros */}
         <View style={styles.achieveHeader}>
@@ -672,4 +666,21 @@ const styles = StyleSheet.create({
     alignItems: 'center', borderWidth: 1.5, borderColor: '#FF4B4B60',
   },
   practiceBtnText: { color: '#FF4B4B', fontSize: 14, fontWeight: '800' },
+  // Historial de sesiones de práctica
+  practiceHistorySection: { gap: 8 },
+  practiceHistoryCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
+    borderWidth: 1, borderColor: '#2D3148',
+  },
+  practiceHistoryLeft: { flex: 1, gap: 3 },
+  practiceHistoryDate: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+  practiceHistoryWords: { fontSize: 12, color: '#9CA3AF' },
+  practiceHistoryAccuracy: {
+    alignItems: 'center', backgroundColor: '#0F1117',
+    borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
+    borderWidth: 1.5, minWidth: 64,
+  },
+  practiceHistoryAccuracyNum: { fontSize: 18, fontWeight: '800' },
+  practiceHistoryAccuracyLabel: { fontSize: 10, color: '#9CA3AF', fontWeight: '600' },
 });

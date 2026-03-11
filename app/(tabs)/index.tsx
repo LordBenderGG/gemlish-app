@@ -186,6 +186,22 @@ export default function LevelsScreen() {
         streak={streak}
       />
 
+      {/* Botón de Repaso Rápido */}
+      <TouchableOpacity
+        style={styles.quickReviewBtn}
+        onPress={() => router.push('/practice/quick-review' as any)}
+        activeOpacity={0.85}
+      >
+        <View style={styles.quickReviewLeft}>
+          <Text style={styles.quickReviewEmoji}>⚡</Text>
+          <View>
+            <Text style={styles.quickReviewTitle}>Repaso Rápido</Text>
+            <Text style={styles.quickReviewSub}>10 palabras · 5 minutos</Text>
+          </View>
+        </View>
+        <Text style={styles.quickReviewArrow}>›</Text>
+      </TouchableOpacity>
+
       {/* Barra de progreso global */}
       <View style={styles.globalProgress}>
         <View style={styles.progressLabelRow}>
@@ -312,4 +328,16 @@ const styles = StyleSheet.create({
   offlineBadgeNoConn: { backgroundColor: '#FF960015' },
   offlineDot: { fontSize: 9 },
   offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
+  // Botón de repaso rápido
+  quickReviewBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#8E5AF520', borderRadius: 0,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderBottomWidth: 1, borderBottomColor: '#8E5AF540',
+  },
+  quickReviewLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  quickReviewEmoji: { fontSize: 20 },
+  quickReviewTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
+  quickReviewSub: { fontSize: 11, color: '#8E5AF5', fontWeight: '600', marginTop: 1 },
+  quickReviewArrow: { fontSize: 22, color: '#8E5AF5', fontWeight: '700' },
 });

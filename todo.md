@@ -98,3 +98,9 @@
 - [x] Modo práctica con repetición espaciada de palabras difíciles (pantalla /practice/hard-words)
 - [x] Animación fade-in en cada slide del onboarding al cambiar de slide
 - [x] Pantalla de bienvenida de vuelta para usuarios que reinstalaron la app (detecta datos guardados)
+
+## v1.9 — Mejoras aprobadas
+- [x] Sistema de logros: notificación emergente al desbloquear un logro nuevo
+- [x] Historial de sesiones de práctica: guardar fecha, palabras practicadas y tasa de acierto
+- [x] Mostrar historial de sesiones en el Perfil (sección "Últimas sesiones de práctica")
+- [x] Modo repaso rápido de 5 minutos: botón en pantalla principal con 10 palabras mixtas cronometradas
