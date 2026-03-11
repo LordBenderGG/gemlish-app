@@ -3,6 +3,14 @@ import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
   ScrollView, Alert, Animated, StatusBar, Platform,
 } from 'react-native';
+import Reanimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
+} from 'react-native-reanimated';
 import { ConfettiOverlay } from '@/components/confetti-overlay';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -404,6 +412,112 @@ function ListenWriteView({
 
 // ─── Pronunciación ───────────────────────────────────────────────────────────
 
+// ─── Animación de pulso para el botón de grabar ─────────────────────────────
+
+function RecordPulseButton({
+  recordingState,
+  onPress,
+  disabled,
+}: {
+  recordingState: 'idle' | 'recording' | 'recorded';
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  const pulse1 = useSharedValue(1);
+  const pulse2 = useSharedValue(1);
+  const opacity1 = useSharedValue(0.6);
+  const opacity2 = useSharedValue(0.4);
+
+  useEffect(() => {
+    if (recordingState === 'recording') {
+      // Onda 1: más rápida
+      pulse1.value = withRepeat(
+        withSequence(
+          withTiming(1.6, { duration: 700, easing: Easing.out(Easing.ease) }),
+          withTiming(1, { duration: 0 }),
+        ),
+        -1,
+        false,
+      );
+      opacity1.value = withRepeat(
+        withSequence(
+          withTiming(0, { duration: 700, easing: Easing.out(Easing.ease) }),
+          withTiming(0.6, { duration: 0 }),
+        ),
+        -1,
+        false,
+      );
+      // Onda 2: más lenta, desfasada
+      setTimeout(() => {
+        pulse2.value = withRepeat(
+          withSequence(
+            withTiming(2.2, { duration: 1000, easing: Easing.out(Easing.ease) }),
+            withTiming(1, { duration: 0 }),
+          ),
+          -1,
+          false,
+        );
+        opacity2.value = withRepeat(
+          withSequence(
+            withTiming(0, { duration: 1000, easing: Easing.out(Easing.ease) }),
+            withTiming(0.35, { duration: 0 }),
+          ),
+          -1,
+          false,
+        );
+      }, 350);
+    } else {
+      pulse1.value = withTiming(1, { duration: 200 });
+      pulse2.value = withTiming(1, { duration: 200 });
+      opacity1.value = withTiming(0, { duration: 200 });
+      opacity2.value = withTiming(0, { duration: 200 });
+    }
+  }, [recordingState]);
+
+  const ring1Style = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse1.value }],
+    opacity: opacity1.value,
+  }));
+  const ring2Style = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse2.value }],
+    opacity: opacity2.value,
+  }));
+
+  const isRecording = recordingState === 'recording';
+  const isDone = recordingState === 'recorded';
+
+  return (
+    <View style={styles.recordPulseWrapper}>
+      {/* Anillos de pulso */}
+      <Reanimated.View style={[styles.pulseRing, styles.pulseRing1, ring1Style]} />
+      <Reanimated.View style={[styles.pulseRing, styles.pulseRing2, ring2Style]} />
+
+      {/* Botón principal */}
+      <TouchableOpacity
+        style={[
+          styles.recordBtn,
+          isRecording && styles.recordBtnActive,
+          isDone && styles.recordBtnDone,
+        ]}
+        onPress={onPress}
+        activeOpacity={0.8}
+        disabled={disabled}
+      >
+        <Text style={styles.recordBtnEmoji}>
+          {isRecording ? '⏹' : isDone ? '✅' : '🎙'}
+        </Text>
+        <Text style={styles.recordBtnText}>
+          {isRecording
+            ? 'Grabando... (toca para parar)'
+            : isDone
+            ? 'Grabación guardada'
+            : 'Grabar mi pronunciación'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 function PronunciationView({
   exercise,
   onAnswer,
@@ -549,29 +663,13 @@ function PronunciationView({
         </Text>
       </TouchableOpacity>
 
-      {/* Botón grabar */}
+      {/* Botón grabar con animación de pulso */}
       {!completed && (
-        <TouchableOpacity
-          style={[
-            styles.recordBtn,
-            recordingState === 'recording' && styles.recordBtnActive,
-            recordingState === 'recorded' && styles.recordBtnDone,
-          ]}
+        <RecordPulseButton
+          recordingState={recordingState}
           onPress={recordingState === 'recording' ? handleStopRecording : handleStartRecording}
-          activeOpacity={0.8}
           disabled={permissionGranted === null}
-        >
-          <Text style={styles.recordBtnEmoji}>
-            {recordingState === 'recording' ? '⏹' : recordingState === 'recorded' ? '✅' : '🎙'}
-          </Text>
-          <Text style={styles.recordBtnText}>
-            {recordingState === 'recording'
-              ? 'Grabando... (toca para parar)'
-              : recordingState === 'recorded'
-              ? 'Grabación guardada'
-              : 'Grabar mi pronunciación'}
-          </Text>
-        </TouchableOpacity>
+        />
       )}
 
       {/* Botón reproducir grabación */}
@@ -1006,7 +1104,29 @@ export default function ExerciseScreen() {
 
       {/* Sub-header */}
       <View style={styles.exerciseSubHeader}>
-        <Text style={styles.exerciseCount}>{currentIdx + 1} / {TOTAL_EXERCISES}</Text>
+        <View style={styles.exerciseTypeTag}>
+          <Text style={styles.exerciseTypeEmoji}>
+            {exercise.type === 'multiple-choice' ? '📝'
+              : exercise.type === 'translate' ? '🔄'
+              : exercise.type === 'match-pairs' ? '🧩'
+              : exercise.type === 'listen-write' ? '🎧'
+              : exercise.type === 'pronunciation' ? '🎙'
+              : exercise.type === 'sentence-order' ? '📝'
+              : '✏️'}
+          </Text>
+          <Text style={styles.exerciseTypeName}>
+            {exercise.type === 'multiple-choice' ? 'Opción múltiple'
+              : exercise.type === 'translate' ? 'Traducción'
+              : exercise.type === 'match-pairs' ? 'Emparejar'
+              : exercise.type === 'listen-write' ? 'Escucha'
+              : exercise.type === 'pronunciation' ? 'Pronunciación'
+              : exercise.type === 'sentence-order' ? 'Ordenar'
+              : 'Completar'}
+          </Text>
+          <Text style={[styles.exerciseTypeName, { color: '#4B5563' }]}>
+            · {currentIdx + 1}/{TOTAL_EXERCISES}
+          </Text>
+        </View>
         <TouchableOpacity style={styles.hintBtn} onPress={handleHint}>
           <Text style={styles.hintBtnText}>💡 Pista ({game.gems} 💎)</Text>
         </TouchableOpacity>
@@ -1285,4 +1405,30 @@ const styles = StyleSheet.create({
   rewardValue: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   continueBtn: { backgroundColor: '#58CC02', borderRadius: 16, paddingHorizontal: 40, paddingVertical: 18 },
   continueBtnText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
+  // Pulso del botón de grabar
+  recordPulseWrapper: {
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 12,
+  },
+  pulseRing: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    borderWidth: 2,
+  },
+  pulseRing1: {
+    borderColor: '#FF4B4B',
+    backgroundColor: 'transparent',
+  },
+  pulseRing2: {
+    borderColor: '#FF4B4B',
+    backgroundColor: 'transparent',
+  },
+  // Ícono de tipo en sub-header
+  exerciseTypeTag: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+  },
+  exerciseTypeEmoji: { fontSize: 14 },
+  exerciseTypeName: { fontSize: 11, color: '#6B7280', fontWeight: '600' },
 });

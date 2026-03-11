@@ -161,3 +161,7 @@
 - [x] Nuevo tipo de ejercicio: Completar la oración (hueco con 4 opciones)
 - [x] Validación de respuestas escritas sin distinción de mayúsculas ni acentos
 - [x] Actualizar tests para reflejar 20 ejercicios y 7 tipos
+
+## v1.19 — Mejoras aprobadas
+- [x] Animación de pulso (onda expansiva) en el botón de grabar durante la pronunciación
+- [x] Ícono del tipo de ejercicio actual en el sub-header junto al contador de progreso
