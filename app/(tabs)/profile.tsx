@@ -4,6 +4,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   StatusBar, Alert, Switch, Modal, FlatList, Platform, Share,
 } from 'react-native';
+import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
@@ -366,6 +367,7 @@ function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const t = useThemeStyles();
   const { username, game, daily, logout } = useGame();
   const { colorScheme, setColorScheme, isManual, resetToSystem } = useThemeContext();
   const isDark = colorScheme === 'dark';
@@ -419,8 +421,8 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>👤 Perfil</Text>
@@ -548,7 +550,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F1117' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,

@@ -116,3 +116,8 @@
 - [x] Eliminar secciones de Apariencia y Notificaciones del Perfil principal
 - [x] Sonidos de feedback: correcto, incorrecto y nivel completado
 - [x] Toggle de sonidos en /settings
+
+## v1.12 — Bugs corregidos
+- [x] Bug: Agregar botón ojo 👁 para ver/ocultar contraseña en login y registro
+- [x] Bug: Modo oscuro/claro no funciona — siempre aparece oscuro (corregir ThemeProvider)
+- [x] Bug: Agregar botón "Abrir Configuración del sistema" cuando se deniegan permisos de notificaciones

@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
+import { useThemeStyles } from '@/hooks/use-theme-styles';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
   GAME_CATEGORIES, getGameWordsByCategory, getRandomGameWords, GameWord,
 } from '@/data/gameWords';
@@ -232,6 +234,8 @@ function GameBoard({ categoryKey, onWin, onTimeUp, remainingMs }: GameBoardProps
 
 export default function GameScreen() {
   const insets = useSafeAreaInsets();
+  const t = useThemeStyles();
+  const scheme = useColorScheme();
   const { game, miniGame, addMiniGameTime, winMiniGame } = useGame();
 
   const [activeGame, setActiveGame] = useState<string | null>(null);
@@ -283,8 +287,8 @@ export default function GameScreen() {
 
   if (activeGame && gameWon) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <StatusBar barStyle="light-content" />
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>🏆</Text>
           <Text style={styles.wonTitle}>¡Ganaste!</Text>
@@ -311,8 +315,8 @@ export default function GameScreen() {
 
   if (activeGame && timeUp) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <StatusBar barStyle="light-content" />
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>⏰</Text>
           <Text style={[styles.wonTitle, { color: '#FF4B4B' }]}>Tiempo Agotado</Text>
@@ -330,8 +334,8 @@ export default function GameScreen() {
 
   if (activeGame === 'memory') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <StatusBar barStyle="light-content" />
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.gameHeader}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.gameBackBtn}>
             <Text style={styles.gameBackBtnText}>← Salir</Text>
@@ -372,8 +376,8 @@ export default function GameScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
         <View>
@@ -432,7 +436,7 @@ export default function GameScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F1117' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,

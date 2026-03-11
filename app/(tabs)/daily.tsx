@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { getDailyWords, Word } from '@/data/lessons';
 import { useSpeech } from '@/hooks/use-speech';
+import { useThemeStyles } from '@/hooks/use-theme-styles';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface WordCardProps {
   word: Word;
@@ -61,6 +63,8 @@ function WordCard({ word, isLearned, onLearn }: WordCardProps) {
 
 export default function DailyScreen() {
   const insets = useSafeAreaInsets();
+  const t = useThemeStyles();
+  const scheme = useColorScheme();
   const { daily, markWordLearned, finishDaily, resetDailyIfNeeded } = useGame();
   const [words] = useState<Word[]>(() => getDailyWords());
 
@@ -98,8 +102,8 @@ export default function DailyScreen() {
   ), [daily.learnedWords, handleLearn]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
         <View>
@@ -152,7 +156,7 @@ export default function DailyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F1117' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,

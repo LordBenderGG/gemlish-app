@@ -2,13 +2,14 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Switch, Modal, FlatList, Alert, StatusBar,
+  Switch, Modal, FlatList, Alert, StatusBar, Linking, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '@/lib/theme-provider';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useSoundSettings } from '@/lib/sound-settings';
+import { useThemeStyles } from '@/hooks/use-theme-styles';
 
 // ─── Selector de Hora ─────────────────────────────────────────────────────────
 
@@ -106,10 +107,19 @@ function TimePickerModal({
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const t = useThemeStyles();
   const { colorScheme, setColorScheme, isManual, resetToSystem } = useThemeContext();
   const { settings, loading, enableNotifications, disableNotifications, updateTime } = useNotifications();
   const { soundEnabled, setSoundEnabled } = useSoundSettings();
   const isDark = colorScheme === 'dark';
+
+  const openSystemSettings = useCallback(() => {
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else {
+      Linking.openSettings();
+    }
+  }, []);
 
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -125,15 +135,18 @@ export default function SettingsScreen() {
       if (!ok) {
         Alert.alert(
           '🔔 Permisos necesarios',
-          'Para recibir recordatorios de racha, activa las notificaciones en Configuración del sistema.',
-          [{ text: 'Entendido' }]
+          'Para recibir recordatorios de racha, necesitas activar las notificaciones en la Configuración del sistema.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: '⚙️ Abrir Configuración', onPress: openSystemSettings },
+          ]
         );
       }
     } else {
       await disableNotifications();
     }
     setSaving(false);
-  }, [saving, settings, enableNotifications, disableNotifications]);
+  }, [saving, settings, enableNotifications, disableNotifications, openSystemSettings]);
 
   const handleTimeConfirm = useCallback(async (h: number, m: number) => {
     setShowPicker(false);
@@ -143,8 +156,8 @@ export default function SettingsScreen() {
   }, [updateTime]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -278,7 +291,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F1117' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,

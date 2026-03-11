@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { getLevelData, getLevelIcon } from '@/data/lessons';
+import { useThemeStyles } from '@/hooks/use-theme-styles';
 
 const TOTAL_LEVELS = 500;
 
@@ -143,6 +144,7 @@ function LevelCard({ levelNum, isCompleted, isUnlocked, onPress }: LevelCardProp
 
 export default function LevelsScreen() {
   const insets = useSafeAreaInsets();
+  const t = useThemeStyles();
   const { username, game } = useGame();
   const { xp, gems, streak, maxUnlockedLevel, levelProgress } = game;
 
@@ -177,8 +179,8 @@ export default function LevelsScreen() {
   const progressPct = Math.round((completedCount / TOTAL_LEVELS) * 100);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F1117" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={t.bg === '#FFFFFF' ? 'dark-content' : 'light-content'} backgroundColor={t.bg} />
       <StatsHeader
         username={username || 'Estudiante'}
         gems={gems}
@@ -229,7 +231,7 @@ export default function LevelsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F1117' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
