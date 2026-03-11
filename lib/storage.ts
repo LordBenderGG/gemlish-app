@@ -109,6 +109,47 @@ export async function hasExistingUsers(): Promise<boolean> {
   return Object.keys(users).length > 0;
 }
 
+// Renombra el usuario actual, migrando todos sus datos al nuevo nombre
+export async function renameUser(oldUsername: string, newUsername: string): Promise<{ ok: boolean; error?: string }> {
+  const trimmed = newUsername.trim();
+  if (!trimmed || trimmed.length < 3) return { ok: false, error: 'El nombre debe tener al menos 3 caracteres' };
+  if (trimmed.length > 20) return { ok: false, error: 'El nombre no puede superar 20 caracteres' };
+
+  const users = await getUsers();
+  const oldKey = oldUsername.toLowerCase();
+  const newKey = trimmed.toLowerCase();
+
+  if (newKey !== oldKey && users[newKey]) return { ok: false, error: 'Ese nombre ya está en uso' };
+  if (newKey === oldKey && users[oldKey]?.username === trimmed) return { ok: false, error: 'Es el mismo nombre' };
+
+  // Copiar datos al nuevo key si cambió el key
+  if (newKey !== oldKey) {
+    const [gameRaw, dailyRaw, miniRaw] = await Promise.all([
+      AsyncStorage.getItem(KEYS.GAME(oldKey)),
+      AsyncStorage.getItem(KEYS.DAILY(oldKey)),
+      AsyncStorage.getItem(KEYS.MINIGAME(oldKey)),
+    ]);
+    await Promise.all([
+      gameRaw ? AsyncStorage.setItem(KEYS.GAME(newKey), gameRaw) : Promise.resolve(),
+      dailyRaw ? AsyncStorage.setItem(KEYS.DAILY(newKey), dailyRaw) : Promise.resolve(),
+      miniRaw ? AsyncStorage.setItem(KEYS.MINIGAME(newKey), miniRaw) : Promise.resolve(),
+    ]);
+    // Eliminar datos del key anterior
+    await Promise.all([
+      AsyncStorage.removeItem(KEYS.GAME(oldKey)),
+      AsyncStorage.removeItem(KEYS.DAILY(oldKey)),
+      AsyncStorage.removeItem(KEYS.MINIGAME(oldKey)),
+    ]);
+    // Actualizar perfil
+    delete users[oldKey];
+  }
+
+  users[newKey] = { ...(users[newKey] || users[oldKey] || { passwordHash: '', createdAt: new Date().toISOString() }), username: trimmed };
+  await saveUsers(users);
+  await AsyncStorage.setItem(KEYS.CURRENT_USER, newKey);
+  return { ok: true };
+}
+
 // ─── Estado del Juego ────────────────────────────────────────────────────────
 
 const DEFAULT_GAME_STATE: GameState = {

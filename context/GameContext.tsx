@@ -4,7 +4,7 @@ import {
   getGameState, saveGameState,
   getDailyState, saveDailyState,
   getMiniGameState, saveMiniGameState,
-  getCurrentUser, loginUser, logoutUser, registerUser,
+  getCurrentUser, loginUser, logoutUser, registerUser, renameUser,
 } from '@/lib/storage';
 
 // ─── Tipos del contexto ──────────────────────────────────────────────────────
@@ -16,6 +16,7 @@ interface GameContextValue {
   login: (u: string, p: string) => Promise<{ ok: boolean; error?: string }>;
   register: (u: string, p: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
+  renameUsername: (newName: string) => Promise<{ ok: boolean; error?: string }>;
 
   // Juego
   game: GameState;
@@ -254,12 +255,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
     await saveGameState(username, nextGame);
   }, [username, game]);
 
-  // ─── Render ──────────────────────────────────────────────────────────────
+  const renameUsername = useCallback(async (newName: string): Promise<{ ok: boolean; error?: string }> => {
+    if (!username) return { ok: false, error: 'No hay sesión activa' };
+    const result = await renameUser(username, newName);
+    if (result.ok) setUsername(newName.trim());
+    return result;
+  }, [username]);
+
+  // ─── Render ────────────────────────────────────────────────────────────────────────────────────
 
   return (
     <GameContext.Provider value={{
       username, isLoading,
-      login, register, logout,
+      login, register, logout, renameUsername,
       game, updateGame, completeLevel, saveLevelErrors, loseHeart, spendGems,
       daily, markWordLearned, finishDaily, resetDailyIfNeeded,
       miniGame, addMiniGameTime, winMiniGame,

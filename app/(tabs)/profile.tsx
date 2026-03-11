@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  StatusBar, Alert, Switch, Modal, FlatList, Platform, Share,
+  StatusBar, Alert, Switch, Modal, FlatList, Platform, Share, TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
@@ -406,12 +406,16 @@ function AvatarPickerModal({
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const t = useThemeStyles();
-  const { username, game, daily, logout } = useGame();
+  const { username, game, daily, logout, renameUsername } = useGame();
   const { colorScheme, setColorScheme, isManual, resetToSystem } = useThemeContext();
   const isDark = colorScheme === 'dark';
   const [practiceHistory, setPracticeHistory] = useState<PracticeSession[]>([]);
   const [avatar, setAvatar] = useState('🦊');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [nameSaving, setNameSaving] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(AVATAR_KEY).then(v => { if (v) setAvatar(v); });
@@ -422,6 +426,25 @@ export default function ProfileScreen() {
     await AsyncStorage.setItem(AVATAR_KEY, emoji);
     setShowAvatarPicker(false);
   }, []);
+
+  const handleStartEditName = useCallback(() => {
+    setNewName(username || '');
+    setNameError('');
+    setEditingName(true);
+  }, [username]);
+
+  const handleSaveName = useCallback(async () => {
+    if (nameSaving) return;
+    setNameSaving(true);
+    setNameError('');
+    const result = await renameUsername(newName);
+    if (result.ok) {
+      setEditingName(false);
+    } else {
+      setNameError(result.error || 'Error al guardar');
+    }
+    setNameSaving(false);
+  }, [nameSaving, newName, renameUsername]);
 
   useEffect(() => {
     if (username) {
@@ -513,7 +536,35 @@ export default function ProfileScreen() {
               <Text style={styles.avatarEditIcon}>✏️</Text>
             </View>
           </TouchableOpacity>
-          <Text style={styles.userName}>{username}</Text>
+          {editingName ? (
+            <View style={styles.nameEditRow}>
+              <TextInput
+                style={styles.nameEditInput}
+                value={newName}
+                onChangeText={setNewName}
+                autoFocus
+                maxLength={20}
+                returnKeyType="done"
+                onSubmitEditing={handleSaveName}
+                placeholder="Nuevo nombre"
+                placeholderTextColor="#6B7280"
+              />
+              <TouchableOpacity style={styles.nameEditSave} onPress={handleSaveName} disabled={nameSaving} activeOpacity={0.8}>
+                <Text style={styles.nameEditSaveText}>{nameSaving ? '...' : '✓'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.nameEditCancel} onPress={() => setEditingName(false)} activeOpacity={0.8}>
+                <Text style={styles.nameEditCancelText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.nameRow}>
+              <Text style={styles.userName}>{username}</Text>
+              <TouchableOpacity style={styles.nameEditBtn} onPress={handleStartEditName} activeOpacity={0.7}>
+                <Text style={styles.nameEditBtnIcon}>✏️</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {nameError ? <Text style={styles.nameError}>{nameError}</Text> : null}
           <View style={[styles.levelBadge, { borderColor: levelTitle.color }]}>
             <Text style={[styles.levelBadgeText, { color: levelTitle.color }]}>{levelTitle.title}</Text>
           </View>
@@ -890,4 +941,33 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: '#1A1D27',
   },
   avatarEditIcon: { fontSize: 12 },
+  // Edición de nombre
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  nameEditBtn: {
+    backgroundColor: '#2D3148', borderRadius: 12,
+    width: 26, height: 26, justifyContent: 'center', alignItems: 'center',
+  },
+  nameEditBtnIcon: { fontSize: 12 },
+  nameEditRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4,
+    paddingHorizontal: 8,
+  },
+  nameEditInput: {
+    flex: 1, backgroundColor: '#0F1117', borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 8,
+    fontSize: 15, fontWeight: '700', color: '#FFFFFF',
+    borderWidth: 1.5, borderColor: '#8E5AF5',
+    textAlign: 'center',
+  },
+  nameEditSave: {
+    backgroundColor: '#8E5AF5', borderRadius: 10,
+    width: 34, height: 34, justifyContent: 'center', alignItems: 'center',
+  },
+  nameEditSaveText: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
+  nameEditCancel: {
+    backgroundColor: '#2D3148', borderRadius: 10,
+    width: 34, height: 34, justifyContent: 'center', alignItems: 'center',
+  },
+  nameEditCancelText: { color: '#9CA3AF', fontSize: 16, fontWeight: '700' },
+  nameError: { fontSize: 12, color: '#FF4B4B', marginTop: 4, textAlign: 'center' },
 });

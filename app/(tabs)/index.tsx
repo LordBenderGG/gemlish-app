@@ -2,7 +2,7 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  StatusBar, Animated,
+  StatusBar, Animated, ScrollView,
 } from 'react-native';
 import Reanimated, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence,
@@ -15,6 +15,34 @@ import { getLevelData, getLevelIcon } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 
 const TOTAL_LEVELS = 500;
+
+// Categorías de temas para el filtro
+const CATEGORIES = [
+  { id: 'all', label: '🌍 Todos', levels: null },
+  { id: 'saludos', label: '👋 Saludos', levels: [1] },
+  { id: 'numeros', label: '🔢 Números', levels: [2, 18] },
+  { id: 'colores', label: '🎨 Colores', levels: [3] },
+  { id: 'animales', label: '🐾 Animales', levels: [4] },
+  { id: 'familia', label: '👨‍👩‍👧 Familia', levels: [5] },
+  { id: 'cuerpo', label: '💪 Cuerpo', levels: [6, 23] },
+  { id: 'comida', label: '🍎 Comida', levels: [7, 21, 36] },
+  { id: 'casa', label: '🏠 Casa', levels: [8] },
+  { id: 'ropa', label: '👗 Ropa', levels: [9] },
+  { id: 'tiempo', label: '⛅ Tiempo', levels: [10] },
+  { id: 'transporte', label: '🚗 Transporte', levels: [11] },
+  { id: 'profesiones', label: '💼 Profesiones', levels: [12, 29] },
+  { id: 'deportes', label: '⚽ Deportes', levels: [13] },
+  { id: 'tecnologia', label: '💻 Tecnología', levels: [14, 35] },
+  { id: 'naturaleza', label: '🌿 Naturaleza', levels: [15] },
+  { id: 'emociones', label: '😊 Emociones', levels: [16] },
+  { id: 'verbos', label: '🏃 Verbos', levels: [17, 27] },
+  { id: 'tiempo2', label: '📅 Días/Meses', levels: [19] },
+  { id: 'adjetivos', label: '✨ Adjetivos', levels: [20] },
+  { id: 'viajes', label: '✈️ Viajes', levels: [28, 32, 33] },
+  { id: 'frases', label: '💬 Frases', levels: [26, 30, 34] },
+  { id: 'negocios', label: '🏢 Negocios', levels: [31, 38] },
+  { id: 'phrasal', label: '🔗 Phrasal Verbs', levels: [39, 40] },
+];
 
 function OfflineBadge() {
   const [isOnline, setIsOnline] = useState<boolean>(true);
@@ -190,11 +218,23 @@ export default function LevelsScreen() {
   const t = useThemeStyles();
   const { username, game } = useGame();
   const { xp, gems, streak, maxUnlockedLevel, levelProgress } = game;
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const levels = useMemo(() =>
+  const allLevels = useMemo(() =>
     Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1),
     []
   );
+
+  const levels = useMemo(() => {
+    if (selectedCategory === 'all') return allLevels;
+    const cat = CATEGORIES.find(c => c.id === selectedCategory);
+    if (!cat || !cat.levels) return allLevels;
+    // Filtrar niveles que corresponden a esas lecciones
+    return allLevels.filter(levelNum => {
+      const lessonId = ((levelNum - 1) % 40) + 1;
+      return cat.levels!.includes(lessonId);
+    });
+  }, [selectedCategory, allLevels]);
 
   const handleLevelPress = useCallback((levelNum: number) => {
     const isCompleted = !!game.levelProgress[levelNum]?.completed;
@@ -230,6 +270,33 @@ export default function LevelsScreen() {
         xp={xp}
         streak={streak}
       />
+
+      {/* Filtro de categorías */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryScroll}
+        contentContainerStyle={styles.categoryScrollContent}
+      >
+        {CATEGORIES.map(cat => (
+          <TouchableOpacity
+            key={cat.id}
+            style={[
+              styles.categoryChip,
+              selectedCategory === cat.id && styles.categoryChipActive,
+            ]}
+            onPress={() => setSelectedCategory(cat.id)}
+            activeOpacity={0.75}
+          >
+            <Text style={[
+              styles.categoryChipText,
+              selectedCategory === cat.id && styles.categoryChipTextActive,
+            ]}>
+              {cat.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       {/* Botón de Repaso Rápido */}
       <TouchableOpacity
@@ -386,4 +453,36 @@ const styles = StyleSheet.create({
   quickReviewTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
   quickReviewSub: { fontSize: 11, color: '#8E5AF5', fontWeight: '600', marginTop: 1 },
   quickReviewArrow: { fontSize: 22, color: '#8E5AF5', fontWeight: '700' },
+  // Filtro de categorías
+  categoryScroll: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#2D3148',
+  },
+  categoryScrollContent: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#1A1D27',
+    borderWidth: 1.5,
+    borderColor: '#2D3148',
+  },
+  categoryChipActive: {
+    backgroundColor: '#8E5AF520',
+    borderColor: '#8E5AF5',
+  },
+  categoryChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  categoryChipTextActive: {
+    color: '#8E5AF5',
+    fontWeight: '700',
+  },
 });

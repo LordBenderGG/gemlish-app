@@ -148,3 +148,8 @@
 - [x] Notificación de resumen semanal los lunes a las 9:00 AM (se activa junto al recordatorio diario)
 - [x] Selector de avatar/emoji en el Perfil (24 opciones, persiste en AsyncStorage)
 
+
+## v1.17 — Mejoras aprobadas
+- [x] Nombre de usuario editable en el Perfil (con migración de datos)
+- [x] Animación de confeti al completar un nivel con puntuación perfecta (componente ConfettiOverlay)
+- [x] Filtro de niveles por tema en el mapa (24 categorías con chips horizontales)

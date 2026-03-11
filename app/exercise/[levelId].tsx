@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
   ScrollView, Alert, Animated, StatusBar,
 } from 'react-native';
+import { ConfettiOverlay } from '@/components/confetti-overlay';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
@@ -529,8 +530,10 @@ export default function ExerciseScreen() {
   if (showResult) {
     const gemsEarned = wrongCount === 0 ? 5 : 2;
     const xpEarned = level.xp;
+    const isPerfect = wrongCount === 0;
     return (
       <View style={[styles.container, styles.resultContainer, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <ConfettiOverlay visible={isPerfect} />
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <Text style={styles.resultEmoji}>{wrongCount === 0 ? '🏆' : '⭐'}</Text>
         <Text style={styles.resultTitle}>{wrongCount === 0 ? '¡Perfecto!' : '¡Nivel Completado!'}</Text>
