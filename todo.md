@@ -104,3 +104,8 @@
 - [x] Historial de sesiones de práctica: guardar fecha, palabras practicadas y tasa de acierto
 - [x] Mostrar historial de sesiones en el Perfil (sección "Últimas sesiones de práctica")
 - [x] Modo repaso rápido de 5 minutos: botón en pantalla principal con 10 palabras mixtas cronometradas
+
+## v1.10 — Mejoras aprobadas
+- [x] Notificaciones push de racha con hora configurable por el usuario (mejorar UI del selector de hora)
+- [x] Botón "Compartir" en cada logro desbloqueado (texto enriquecido via expo-sharing)
+- [x] Toggle de modo oscuro/claro en el Perfil (persistido en AsyncStorage)

@@ -2,12 +2,13 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  StatusBar, Alert, Switch, Modal, FlatList,
+  StatusBar, Alert, Switch, Modal, FlatList, Platform, Share,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useThemeContext } from '@/lib/theme-provider';
 import { LESSONS } from '@/data/lessons';
 import { ACHIEVEMENTS } from '@/lib/achievements';
 import type { Achievement, AchievementStats } from '@/lib/achievements';
@@ -23,7 +24,16 @@ type UserStats = AchievementStats;
 
 // ─── Componente de Logro ──────────────────────────────────────────────────────
 
-function AchievementCard({ achievement, unlocked }: { achievement: Achievement; unlocked: boolean }) {
+function AchievementCard({ achievement, unlocked, username }: { achievement: Achievement; unlocked: boolean; username: string }) {
+  const handleShare = useCallback(async () => {
+    try {
+      const msg = `🏆 Desbloquee el logro "${achievement.title}" en Gemlish!\n${achievement.emoji} ${achievement.description}\n\n📱 Aprende inglés jugando con Gemlish`;
+      await Share.share({ message: msg, title: `Logro desbloqueado: ${achievement.title}` });
+    } catch {
+      // usuario canceló
+    }
+  }, [achievement]);
+
   return (
     <View style={[styles.achieveCard, !unlocked && styles.achieveCardLocked]}>
       <Text style={[styles.achieveEmoji, !unlocked && styles.achieveEmojiLocked]}>
@@ -37,7 +47,13 @@ function AchievementCard({ achievement, unlocked }: { achievement: Achievement; 
           {achievement.description}
         </Text>
       </View>
-      {unlocked && <Text style={styles.achieveCheck}>✅</Text>}
+      {unlocked ? (
+        <TouchableOpacity style={styles.achieveShareBtn} onPress={handleShare} activeOpacity={0.7}>
+          <Text style={styles.achieveShareIcon}>📤</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.achieveCheck}>🔒</Text>
+      )}
     </View>
   );
 }
@@ -155,7 +171,7 @@ function NotificationsSection() {
       if (!ok) {
         Alert.alert(
           '🔔 Permisos necesarios',
-          'Para recibir recordatorios, activa las notificaciones en Configuración del sistema.',
+          'Para recibir recordatorios de racha, activa las notificaciones en Configuración del sistema.',
           [{ text: 'Entendido' }]
         );
       }
@@ -176,40 +192,62 @@ function NotificationsSection() {
 
   return (
     <View style={styles.notifSection}>
-      <Text style={styles.sectionTitle}>🔔 Recordatorio Diario</Text>
+      <Text style={styles.sectionTitle}>🔔 Recordatorio de Racha</Text>
+
+      {/* Banner informativo */}
+      <View style={[styles.notifBanner, settings.enabled && styles.notifBannerActive]}>
+        <Text style={styles.notifBannerEmoji}>{settings.enabled ? '🔥' : '💤'}</Text>
+        <View style={styles.notifBannerText}>
+          <Text style={[styles.notifBannerTitle, settings.enabled && { color: '#FF9600' }]}>
+            {settings.enabled
+              ? `Recordatorio activo a las ${formatTime(settings.hour, settings.minute)}`
+              : 'Protégete de perder tu racha'}
+          </Text>
+          <Text style={styles.notifBannerSub}>
+            {settings.enabled
+              ? 'Te avisaremos si no has completado tu tarea diaria'
+              : 'Activa el recordatorio y elige a qué hora quieres que te avisemos'}
+          </Text>
+        </View>
+      </View>
+
       <View style={styles.notifCard}>
         {/* Toggle principal */}
         <View style={styles.notifRow}>
           <View style={styles.notifRowLeft}>
-            <Text style={styles.notifRowTitle}>Activar recordatorio</Text>
+            <Text style={styles.notifRowTitle}>Activar recordatorio diario</Text>
             <Text style={styles.notifRowSub}>
               {settings.enabled
-                ? `Recibirás un aviso a las ${formatTime(settings.hour, settings.minute)}`
+                ? `Aviso a las ${formatTime(settings.hour, settings.minute)}`
                 : 'Sin recordatorio configurado'}
             </Text>
           </View>
           <Switch
             value={settings.enabled}
             onValueChange={handleToggle}
-            trackColor={{ false: '#2D3148', true: '#8E5AF540' }}
-            thumbColor={settings.enabled ? '#8E5AF5' : '#6B7280'}
+            trackColor={{ false: '#2D3148', true: '#FF960040' }}
+            thumbColor={settings.enabled ? '#FF9600' : '#6B7280'}
             disabled={saving}
           />
         </View>
 
-        {/* Selector de hora (solo visible si está activado) */}
-        {settings.enabled && (
-          <TouchableOpacity style={styles.timeRow} onPress={() => setShowPicker(true)}>
-            <View style={styles.timeRowLeft}>
-              <Text style={styles.timeRowEmoji}>⏰</Text>
-              <View>
-                <Text style={styles.timeRowTitle}>Hora del recordatorio</Text>
-                <Text style={styles.timeRowValue}>{formatTime(settings.hour, settings.minute)}</Text>
-              </View>
+        {/* Selector de hora — siempre visible */}
+        <TouchableOpacity
+          style={[styles.timeRow, !settings.enabled && styles.timeRowDisabled]}
+          onPress={() => setShowPicker(true)}
+          activeOpacity={0.8}
+        >
+          <View style={styles.timeRowLeft}>
+            <Text style={styles.timeRowEmoji}>⏰</Text>
+            <View>
+              <Text style={styles.timeRowTitle}>Hora del recordatorio</Text>
+              <Text style={[styles.timeRowValue, settings.enabled && { color: '#FF9600' }]}>
+                {formatTime(settings.hour, settings.minute)}
+              </Text>
             </View>
-            <Text style={styles.timeRowArrow}>›</Text>
-          </TouchableOpacity>
-        )}
+          </View>
+          <Text style={styles.timeRowArrow}>›</Text>
+        </TouchableOpacity>
       </View>
 
       <TimePickerModal
@@ -329,6 +367,8 @@ function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { username, game, daily, logout } = useGame();
+  const { colorScheme, setColorScheme, isManual, resetToSystem } = useThemeContext();
+  const isDark = colorScheme === 'dark';
   const [practiceHistory, setPracticeHistory] = useState<PracticeSession[]>([]);
 
   useEffect(() => {
@@ -415,6 +455,31 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Apariencia */}
+        <Text style={styles.sectionTitle}>🎨 Apariencia</Text>
+        <View style={styles.appearanceCard}>
+          <View style={styles.themeRow}>
+            <Text style={styles.themeEmoji}>{isDark ? '🌙' : '☀️'}</Text>
+            <View style={styles.themeInfo}>
+              <Text style={styles.themeTitle}>{isDark ? 'Modo Oscuro' : 'Modo Claro'}</Text>
+              <Text style={styles.themeSub}>
+                {isManual ? 'Configurado manualmente' : 'Siguiendo el sistema'}
+              </Text>
+            </View>
+            <Switch
+              value={isDark}
+              onValueChange={val => setColorScheme(val ? 'dark' : 'light')}
+              trackColor={{ false: '#FFD70040', true: '#8E5AF540' }}
+              thumbColor={isDark ? '#8E5AF5' : '#FFD700'}
+            />
+          </View>
+          {isManual && (
+            <TouchableOpacity style={styles.resetThemeBtn} onPress={resetToSystem} activeOpacity={0.8}>
+              <Text style={styles.resetThemeBtnText}>↩ Usar tema del sistema</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* Estadísticas */}
         <Text style={styles.sectionTitle}>📊 Estadísticas</Text>
         <View style={styles.statsGrid}>
@@ -484,6 +549,7 @@ export default function ProfileScreen() {
               key={achievement.id}
               achievement={achievement}
               unlocked={achievement.check(stats)}
+              username={username ?? ''}
             />
           ))}
         </View>
@@ -544,6 +610,16 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 11, color: '#9CA3AF', fontWeight: '600', textAlign: 'center' },
   // Notificaciones
   notifSection: { gap: 10 },
+  notifBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
+    borderWidth: 1.5, borderColor: '#2D3148',
+  },
+  notifBannerActive: { borderColor: '#FF960040', backgroundColor: '#FF960010' },
+  notifBannerEmoji: { fontSize: 28 },
+  notifBannerText: { flex: 1 },
+  notifBannerTitle: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', marginBottom: 3 },
+  notifBannerSub: { fontSize: 12, color: '#9CA3AF', lineHeight: 17 },
   notifCard: {
     backgroundColor: '#1A1D27', borderRadius: 16,
     borderWidth: 1, borderColor: '#2D3148', overflow: 'hidden',
@@ -565,6 +641,7 @@ const styles = StyleSheet.create({
   timeRowTitle: { fontSize: 13, color: '#9CA3AF', fontWeight: '600', marginBottom: 2 },
   timeRowValue: { fontSize: 18, fontWeight: '800', color: '#8E5AF5' },
   timeRowArrow: { fontSize: 24, color: '#6B7280', fontWeight: '300' },
+  timeRowDisabled: { opacity: 0.5 },
   // Modal picker
   modalOverlay: {
     flex: 1, backgroundColor: '#00000088',
@@ -627,6 +704,29 @@ const styles = StyleSheet.create({
   achieveDesc: { fontSize: 12, color: '#9CA3AF', lineHeight: 16 },
   achieveDescLocked: { color: '#4B5563' },
   achieveCheck: { fontSize: 18 },
+  achieveShareBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: '#8E5AF520', justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: '#8E5AF540',
+  },
+  achieveShareIcon: { fontSize: 16 },
+  // Apariencia / Tema
+  appearanceCard: {
+    backgroundColor: '#1A1D27', borderRadius: 16,
+    borderWidth: 1, borderColor: '#2D3148', overflow: 'hidden',
+  },
+  themeRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16,
+  },
+  themeEmoji: { fontSize: 26, width: 32, textAlign: 'center' },
+  themeInfo: { flex: 1 },
+  themeTitle: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', marginBottom: 2 },
+  themeSub: { fontSize: 12, color: '#9CA3AF' },
+  resetThemeBtn: {
+    borderTopWidth: 1, borderTopColor: '#2D3148',
+    paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center',
+  },
+  resetThemeBtnText: { fontSize: 13, color: '#8E5AF5', fontWeight: '600' },
   // Palabras Difíciles
   hardWordsSection: { gap: 10 },
   hardWordsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
