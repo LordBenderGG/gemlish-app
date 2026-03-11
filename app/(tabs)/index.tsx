@@ -530,8 +530,8 @@ export default function LevelsScreen() {
   const progressPct = Math.round((completedCount / TOTAL_LEVELS) * 100);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
-      <StatusBar barStyle={t.bg === '#FFFFFF' ? 'dark-content' : 'light-content'} backgroundColor={t.bg} />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <StatusBar barStyle="light-content" backgroundColor="#0D0D18" />
       <StatsHeader
         username={username || 'Estudiante'}
         gems={gems}
@@ -988,8 +988,8 @@ const styles = StyleSheet.create({
     borderColor: '#4A5080',
   },
   categoryChipActive: {
-    backgroundColor: '#8E5AF5',
-    borderColor: '#8E5AF5',
+    backgroundColor: '#38BDF8',
+    borderColor: '#38BDF8',
   },
   categoryChipText: {
     fontSize: 13,

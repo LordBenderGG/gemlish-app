@@ -282,7 +282,7 @@ export default function QuickReviewScreen() {
     const elapsed = Date.now() - sessionStartRef.current;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.resultContainer}>
           <Text style={styles.resultEmoji}>
@@ -322,7 +322,7 @@ export default function QuickReviewScreen() {
 
   if (words.length === 0) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📚</Text>
@@ -337,7 +337,7 @@ export default function QuickReviewScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       {/* Header */}

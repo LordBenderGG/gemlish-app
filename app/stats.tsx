@@ -246,14 +246,14 @@ export default function StatsScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: t.bg, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: '#0D0D18', paddingTop: insets.top }]}>
         <ActivityIndicator color="#1CB0F6" size="large" style={{ marginTop: 80 }} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: t.bg, paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: '#0D0D18', paddingTop: insets.top }]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: borderColor }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>

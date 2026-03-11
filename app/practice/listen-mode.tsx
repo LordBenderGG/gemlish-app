@@ -87,7 +87,7 @@ export default function ListenModeScreen() {
   if (showResult) {
     const pct = Math.round((score / TOTAL) * 100);
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle="light-content" />
         <View style={styles.resultContainer}>
           <Text style={styles.resultEmoji}>{pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'}</Text>
@@ -103,7 +103,7 @@ export default function ListenModeScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle="light-content" />
 
       {/* Header */}

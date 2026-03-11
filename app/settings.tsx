@@ -185,7 +185,7 @@ export default function SettingsScreen() {
   }, [updateTime]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}

@@ -287,7 +287,7 @@ export default function GameScreen() {
 
   if (activeGame && gameWon) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>🏆</Text>
@@ -315,7 +315,7 @@ export default function GameScreen() {
 
   if (activeGame && timeUp) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>⏰</Text>
@@ -334,7 +334,7 @@ export default function GameScreen() {
 
   if (activeGame === 'memory') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.gameHeader}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.gameBackBtn}>
@@ -376,7 +376,7 @@ export default function GameScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>

@@ -393,7 +393,7 @@ export default function HardWordsPracticeScreen() {
 
   if (practiceWords.length === 0) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>🌟</Text>
@@ -408,7 +408,7 @@ export default function HardWordsPracticeScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       {/* Header */}

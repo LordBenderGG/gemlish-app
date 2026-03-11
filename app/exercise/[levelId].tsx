@@ -1180,7 +1180,7 @@ export default function ExerciseScreen() {
 
   if (!level) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <Text style={{ color: t.text, textAlign: 'center', marginTop: 40 }}>Nivel no encontrado</Text>
       </View>
     );
