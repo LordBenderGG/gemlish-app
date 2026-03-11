@@ -14,6 +14,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { getLevelData, getLevelIcon } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
+import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
+import { ConfettiOverlay } from '@/components/confetti-overlay';
 
 const TOTAL_LEVELS = 500;
 
@@ -293,21 +295,28 @@ export default function LevelsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [previewLevel, setPreviewLevel] = useState<number | null>(null);
   const [unlockAnim, setUnlockAnim] = useState<{ levelNum: number; levelData: ReturnType<typeof getLevelData> } | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const unlockScale = useSharedValue(0);
   const unlockOpacity = useSharedValue(0);
+  const { playUnlock } = useFeedbackSounds();
 
   const showUnlockAnimation = useCallback((levelNum: number) => {
     const levelData = getLevelData(levelNum);
     setUnlockAnim({ levelNum, levelData });
+    setShowConfetti(true);
+    playUnlock();
     unlockScale.value = 0;
     unlockOpacity.value = 0;
     unlockScale.value = withSpring(1, { damping: 12, stiffness: 180 });
     unlockOpacity.value = withTiming(1, { duration: 200 });
     setTimeout(() => {
       unlockOpacity.value = withTiming(0, { duration: 400 });
-      setTimeout(() => setUnlockAnim(null), 450);
+      setTimeout(() => {
+        setUnlockAnim(null);
+        setShowConfetti(false);
+      }, 450);
     }, 2200);
-  }, [unlockScale, unlockOpacity]);
+  }, [unlockScale, unlockOpacity, playUnlock]);
 
   // Detectar nuevo nivel desbloqueado al volver al mapa
   const prevMaxUnlockedRef = useRef(maxUnlockedLevel);
@@ -516,6 +525,9 @@ export default function LevelsScreen() {
           onClose={() => setPreviewLevel(null)}
         />
       )}
+
+      {/* Confeti de desbloqueo */}
+      <ConfettiOverlay visible={showConfetti} />
 
       {/* Overlay de animación de desbloqueo */}
       {unlockAnim && (

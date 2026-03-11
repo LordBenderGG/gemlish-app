@@ -236,3 +236,7 @@
 ## v1.25 — Mejoras aprobadas
 - [x] Modal de vista previa de nivel bloqueado (palabras que se aprenderán)
 - [x] Animación de desbloqueo al completar nivel (candado abriéndose + confeti)
+
+## v1.26 — Mejoras aprobadas
+- [x] Sonido de desbloqueo sincronizado con la animación del candado
+- [x] Confeti cayendo sobre el overlay de desbloqueo
