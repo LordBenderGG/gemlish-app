@@ -560,11 +560,11 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0A0A14' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle="light-content" />
 
       <LinearGradient
-        colors={['#1A0A2E', '#0D0D1F']}
+        colors={['#0C1A2E', '#0D0D18']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
@@ -595,7 +595,7 @@ export default function ProfileScreen() {
 
         {/* Tarjeta de usuario — Hero con gradiente */}
         <LinearGradient
-          colors={['#1A0A2E', '#12121F', '#0A0A14']}
+          colors={['#0C1A2E', '#0D0D18', '#0D0D18']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.userCard}
@@ -606,7 +606,7 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#38BDF8', '#A855F7']}
+              colors={['#38BDF8', '#38BDF8']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.avatarCircle}

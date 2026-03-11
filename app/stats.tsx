@@ -274,7 +274,7 @@ export default function StatsScreen() {
         </View>
         <View style={[styles.statsRow, { marginTop: 10 }]}>
           <StatCard emoji="🎯" label="Sesiones" value={String(totalSessions)} color="#58CC02" />
-          <StatCard emoji="📈" label="Acierto" value={`${avgAccuracy}%`} color="#A855F7" />
+          <StatCard emoji="📈" label="Acierto" value={`${avgAccuracy}%`} color="#38BDF8" />
           <StatCard emoji="⚡" label="XP total" value={String(game.xp)} color="#F59E0B" />
         </View>
 

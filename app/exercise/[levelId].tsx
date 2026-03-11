@@ -1230,10 +1230,10 @@ export default function ExerciseScreen() {
     }
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0A0A14' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
         <StatusBar barStyle="light-content" />
         <LinearGradient
-          colors={['#1A0A2E', '#0A0A14', '#0A0A14']}
+          colors={['#0C1A2E', '#0D0D18', '#0D0D18']}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 220 }}
@@ -1341,12 +1341,12 @@ export default function ExerciseScreen() {
   });
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0A0A14' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
       <StatusBar barStyle="light-content" />
 
       {/* Header con gradiente */}
       <LinearGradient
-        colors={['#1A0A2E', '#0D0D1F']}
+        colors={['#0C1A2E', '#0D0D18']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.exerciseHeader}

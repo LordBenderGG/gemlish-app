@@ -18,18 +18,19 @@ export function useThemeStyles() {
     warning: colors.warning,
     success: colors.success,
     gem: (colors as any).gem ?? '#22D3EE',
-    purple: (colors as any).purple ?? '#A855F7',
-    blue: (colors as any).blue ?? '#60A5FA',
-    gold: (colors as any).gold ?? '#F59E0B',
+    // Azul eléctrico reemplaza el morado
+    purple: '#38BDF8',
+    blue: '#38BDF8',
+    gold: (colors as any).gold ?? '#FBBF24',
     pink: (colors as any).pink ?? '#F472B6',
     surfaceAlt: colors.surface,
-    // Gradientes como arrays para LinearGradient
-    gradientPrimary: ['#7C3AED', '#A855F7'] as string[],
-    gradientGold: ['#B45309', '#F59E0B'] as string[],
-    gradientGem: ['#0891B2', '#22D3EE'] as string[],
-    gradientSuccess: ['#059669', '#34D399'] as string[],
-    gradientFire: ['#DC2626', '#F97316'] as string[],
-    gradientNight: ['#0A0A14', '#12121F'] as string[],
-    gradientCard: ['#1A1535', '#12121F'] as string[],
+    // Gradientes actualizados — sin morado
+    gradientPrimary: ['#0F3460', '#38BDF8'] as string[],
+    gradientGold: ['#92400E', '#FBBF24'] as string[],
+    gradientGem: ['#0369A1', '#38BDF8'] as string[],
+    gradientSuccess: ['#14532D', '#4ADE80'] as string[],
+    gradientFire: ['#7F1D1D', '#F97316'] as string[],
+    gradientNight: ['#0D0D18', '#111122'] as string[],
+    gradientCard: ['#111122', '#0D0D18'] as string[],
   }), [colors]);
 }
