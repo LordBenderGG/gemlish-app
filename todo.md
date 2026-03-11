@@ -56,3 +56,14 @@
 - [x] Generar ícono de Gemlish (ícono del usuario)
 - [x] Configurar splash screen
 - [x] Actualizar app.config.ts con nombre y colores
+
+## Bugs Reportados v1.0
+- [x] Bug: Validación de traducción no acepta minúsculas (ej. "wellcome" vs "Wellcome")
+- [x] Bug: Emparejamiento de pares en ejercicios falla al seleccionar
+- [x] Bug: TTS (parlante) en Tarea Diaria no reproduce audio
+- [x] Bug: Tablero de memoria de cartas se ve mal (solo 3 cartas visibles, mal layout)
+- [x] Mejora: Pantalla de Juegos con selector visual (imagen + descripción en inglés y español)
+
+## Mejoras v1.1
+- [x] Ampliar vocabulario del minijuego: colores, números, animales, saludos, casa, cocina, útiles escolares
+- [x] Pantalla de selección de juegos con imagen descriptiva y descripción en inglés/español
