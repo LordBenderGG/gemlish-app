@@ -148,16 +148,16 @@ export default function StatsScreen() {
 
   const last7Days = useMemo(() => getLast7Days(), []);
 
-  // Niveles completados por día (últimos 7 días)
+  // Niveles completados por día (últimos 7 días) — usa levelCompletedDates registrado en completeLevel
   const levelsByDay = useMemo(() => {
     const counts: Record<string, number> = {};
     last7Days.forEach(d => { counts[d] = 0; });
-    Object.entries(game.levelProgress).forEach(([, progress]) => {
-      // No tenemos fecha por nivel, así que mostramos el total distribuido
-      // En su lugar usamos las sesiones de práctica para los días con actividad
+    const dates = game.levelCompletedDates ?? {};
+    last7Days.forEach(d => {
+      if (dates[d] !== undefined) counts[d] = dates[d];
     });
     return counts;
-  }, [last7Days, game.levelProgress]);
+  }, [last7Days, game.levelCompletedDates]);
 
   // Sesiones de práctica por día (últimos 7 días)
   const sessionsByDay = useMemo(() => {
@@ -231,6 +231,13 @@ export default function StatsScreen() {
 
   const maxSessions = Math.max(...Object.values(sessionsByDay), 1);
   const maxWords = Math.max(...Object.values(wordsByDay), 1);
+  const maxLevels = Math.max(...Object.values(levelsByDay), 1);
+
+  const levelsBarData = last7Days.map(d => ({
+    label: getDayLabel(d),
+    value: levelsByDay[d],
+    color: '#FF9600',
+  }));
 
   const textPrimary = isDark ? '#ECEDEE' : '#11181C';
   const textMuted = isDark ? '#9BA1A6' : '#687076';
@@ -269,6 +276,19 @@ export default function StatsScreen() {
           <StatCard emoji="🎯" label="Sesiones" value={String(totalSessions)} color="#58CC02" />
           <StatCard emoji="📈" label="Acierto" value={`${avgAccuracy}%`} color="#A855F7" />
           <StatCard emoji="⚡" label="XP total" value={String(game.xp)} color="#F59E0B" />
+        </View>
+
+        {/* Gráfica: Niveles completados */}
+        <View style={[styles.chartCard, { backgroundColor: cardBg, borderColor }]}>
+          <Text style={[styles.chartTitle, { color: textPrimary }]}>Niveles completados</Text>
+          <Text style={[styles.chartSubtitle, { color: textMuted }]}>Últimos 7 días · Datos reales por día</Text>
+          <View style={styles.chartContainer}>
+            <BarChart
+              data={levelsBarData}
+              maxValue={maxLevels}
+              isDark={isDark}
+            />
+          </View>
         </View>
 
         {/* Gráfica: Sesiones de práctica */}

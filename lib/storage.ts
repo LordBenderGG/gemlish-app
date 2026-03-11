@@ -18,6 +18,8 @@ export interface GameState {
   lastHeartRefill: string;
   // Palabras fallidas por nivel: levelId -> array de palabras en inglés
   levelErrors: Record<number, string[]>;
+  // Fechas de niveles completados: fecha (YYYY-MM-DD) -> cantidad de niveles completados ese día
+  levelCompletedDates: Record<string, number>;
 }
 
 export interface DailyState {
@@ -118,6 +120,7 @@ const DEFAULT_GAME_STATE: GameState = {
   levelProgress: {},
   lastHeartRefill: new Date().toISOString(),
   levelErrors: {},
+  levelCompletedDates: {},
 };
 
 export async function getGameState(username: string): Promise<GameState> {

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameProvider, useGame } from '@/context/GameContext';
 import { AchievementsProvider } from '@/context/AchievementsContext';
 import { hasSeenOnboarding } from '@/lib/onboarding';
+import { usePendingAchievements } from '@/hooks/use-pending-achievements';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { Platform } from "react-native";
@@ -32,6 +33,8 @@ export const unstable_settings = {
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { username, isLoading } = useGame();
   const segments = useSegments();
+  // Verificar logros pendientes al abrir la app (logros desbloqueados mientras estaba cerrada)
+  usePendingAchievements();
 
   useEffect(() => {
     if (isLoading) return;

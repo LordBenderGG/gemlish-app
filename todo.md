@@ -137,3 +137,8 @@
 - [x] Integrar useFeedbackSounds en practice/quick-review.tsx
 - [x] Crear pantalla /stats con gráficas de progreso semanal
 - [x] Agregar botón 📊 en el header del Perfil para navegar a /stats
+
+## v1.15 — Mejoras aprobadas
+- [x] Registrar fecha de cada nivel completado en GameState (levelCompletedDates)
+- [x] Actualizar gráfica de /stats con niveles completados reales por día
+- [x] Mostrar toast de logros pendientes al abrir la app (logros desbloqueados mientras estaba cerrada)

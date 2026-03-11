@@ -55,7 +55,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [game, setGame] = useState<GameState>({
     xp: 0, gems: 0, streak: 0, hearts: 5,
     maxUnlockedLevel: 1, levelProgress: {}, lastHeartRefill: new Date().toISOString(),
-    levelErrors: {},
+    levelErrors: {}, levelCompletedDates: {},
   });
   const [daily, setDaily] = useState<DailyState>({
     lastDailyDate: '', learnedWords: {}, dailyCompleted: false, totalDaysCompleted: 0,
@@ -141,6 +141,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     let newStreak = game.streak;
     if (lastDate !== today) newStreak += 1;
 
+    // Registrar fecha de nivel completado para gráfica de actividad
+    const prevDates = game.levelCompletedDates ?? {};
+    const updatedDates = {
+      ...prevDates,
+      [today]: (prevDates[today] ?? 0) + 1,
+    };
+
     const next: GameState = {
       ...game,
       xp: game.xp + xpEarned,
@@ -152,6 +159,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ...game.levelProgress,
         [levelId]: { completed: true, score: 100 },
       },
+      levelCompletedDates: updatedDates,
     };
     setGame(next);
     await saveGameState(username, next);
