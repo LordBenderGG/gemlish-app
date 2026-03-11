@@ -286,12 +286,18 @@
 - [x] Resumen semanal de progreso los lunes a las 9:00 AM
 
 ## v1.32 — Rediseño visual completo (UX premium)
-- [ ] Nueva paleta de colores premium con gradientes morado-azul-verde
-- [ ] Header del mapa de niveles rediseñado con gradiente y stats visuales
-- [ ] Tarjetas de nivel con gradientes, sombras y animaciones de entrada
-- [ ] Tarjeta del Desafío del día con diseño hero destacado
-- [ ] Pantalla de Perfil con hero section y estadísticas visuales
-- [ ] Pantalla de ejercicios con UI inmersiva y feedback visual mejorado
-- [ ] Pantalla de onboarding rediseñada con ilustraciones y gradientes
-- [ ] Login y registro con diseño premium
-- [ ] Tarea diaria y minijuego con nuevo estilo visual
+- [x] Nueva paleta de colores premium con gradientes morado-azul-verde
+- [x] Header del mapa de niveles rediseñado con gradiente y stats visuales
+- [x] Tarjetas de nivel con gradientes, sombras y animaciones de entrada
+- [x] Tarjeta del Desafío del día con diseño hero destacado
+- [x] Pantalla de Perfil con hero section y estadísticas visuales
+- [x] Pantalla de ejercicios con UI inmersiva y feedback visual mejorado
+- [x] Pantalla de onboarding rediseñada con ilustraciones y gradientes
+- [x] Login y registro con diseño premium
+- [x] Tarea diaria y minijuego con nuevo estilo visual
+
+## v1.33 — Bugs reportados
+- [x] Login y registro rediseñados más limpios (sin bordes morados cargados)
+- [x] Toggle de recordatorio diario en Configuración no funciona
+- [x] Filtros de categoría (pastillas sin texto) eliminados de la pantalla principal
+- [x] Botones de modo (Repaso Rápido / Solo Escucha / Solo Ordena) amontonados — rediseñar

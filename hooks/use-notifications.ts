@@ -107,6 +107,7 @@ export function useNotifications() {
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     try {
+      // Android: crear canal SIEMPRE antes de verificar permisos
       if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('gemlish-daily', {
           name: 'Recordatorio Diario',
@@ -115,8 +116,15 @@ export function useNotifications() {
           lightColor: '#8E5AF5',
           sound: 'default',
         });
+        // En Android 12 y anteriores los permisos siempre son granted
+        // En Android 13+ se necesita POST_NOTIFICATIONS (ya en AndroidManifest)
+        const { status } = await Notifications.requestPermissionsAsync();
+        const granted = status === 'granted' || status === 'undetermined';
+        setPermissionGranted(granted);
+        return granted;
       }
 
+      // iOS: solicitar permiso explícito
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       if (existingStatus === 'granted') {
         setPermissionGranted(true);
@@ -129,7 +137,8 @@ export function useNotifications() {
       return granted;
     } catch (err) {
       console.warn('[useNotifications] Error requesting permission:', err);
-      return false;
+      // En caso de error, intentar continuar de todas formas en Android
+      return Platform.OS === 'android';
     }
   }, []);
 

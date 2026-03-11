@@ -655,49 +655,46 @@ export default function LevelsScreen() {
       </View>
 
       {/* Modos de práctica */}
-      <View style={styles.practiceRow}>
-        <TouchableOpacity
-          style={styles.quickReviewBtn}
-          onPress={() => router.push('/practice/quick-review' as any)}
-          activeOpacity={0.85}
-        >
-          <View style={styles.quickReviewLeft}>
-            <Text style={styles.quickReviewEmoji}>⚡</Text>
-            <View>
-              <Text style={styles.quickReviewTitle}>Repaso Rápido</Text>
-              <Text style={styles.quickReviewSub}>10 palabras · 5 min</Text>
-            </View>
-          </View>
-          <Text style={styles.quickReviewArrow}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.quickReviewBtn, { flex: 1 }]}
-          onPress={() => router.push('/practice/listen-mode' as any)}
-          activeOpacity={0.85}
-        >
-          <View style={styles.quickReviewLeft}>
-            <Text style={styles.quickReviewEmoji}>🎧</Text>
-            <View>
-              <Text style={styles.quickReviewTitle}>Solo Escucha</Text>
-              <Text style={styles.quickReviewSub}>10 ejercicios</Text>
-            </View>
-          </View>
-          <Text style={styles.quickReviewArrow}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.quickReviewBtn, { flex: 1 }]}
-          onPress={() => router.push('/practice/order-mode' as any)}
-          activeOpacity={0.85}
-        >
-          <View style={styles.quickReviewLeft}>
-            <Text style={styles.quickReviewEmoji}>📝</Text>
-            <View>
-              <Text style={styles.quickReviewTitle}>Solo Ordenar</Text>
-              <Text style={styles.quickReviewSub}>10 ejercicios</Text>
-            </View>
-          </View>
-          <Text style={styles.quickReviewArrow}>›</Text>
-        </TouchableOpacity>
+      <View style={styles.practiceSection}>
+        <Text style={styles.practiceSectionTitle}>Modos de práctica</Text>
+        <View style={styles.practiceGrid}>
+          <TouchableOpacity
+            style={styles.practiceTile}
+            onPress={() => router.push('/practice/quick-review' as any)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.practiceTileEmoji}>⚡</Text>
+            <Text style={styles.practiceTileTitle}>Repaso Rápido</Text>
+            <Text style={styles.practiceTileSub}>10 palabras · 5 min</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.practiceTile}
+            onPress={() => router.push('/practice/listen-mode' as any)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.practiceTileEmoji}>🎧</Text>
+            <Text style={styles.practiceTileTitle}>Solo Escucha</Text>
+            <Text style={styles.practiceTileSub}>10 ejercicios</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.practiceTile}
+            onPress={() => router.push('/practice/order-mode' as any)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.practiceTileEmoji}>📝</Text>
+            <Text style={styles.practiceTileTitle}>Solo Ordenar</Text>
+            <Text style={styles.practiceTileSub}>10 ejercicios</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.practiceTile}
+            onPress={() => router.push('/practice/hard-words' as any)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.practiceTileEmoji}>🔥</Text>
+            <Text style={styles.practiceTileTitle}>Palabras Difíciles</Text>
+            <Text style={styles.practiceTileSub}>Repaso de errores</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Barra de progreso global */}
@@ -902,18 +899,37 @@ const styles = StyleSheet.create({
   offlineBadgeNoConn: { backgroundColor: '#FF960015' },
   offlineDot: { fontSize: 9 },
   offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
-  // Botón de repaso rápido
-  quickReviewBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#8E5AF520', borderRadius: 0,
-    paddingHorizontal: 16, paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: '#8E5AF540',
+  // Sección de modos de práctica (grid 2x2)
+  practiceSection: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
-  quickReviewLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  quickReviewEmoji: { fontSize: 20 },
-  quickReviewTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
-  quickReviewSub: { fontSize: 11, color: '#8E5AF5', fontWeight: '600', marginTop: 1 },
-  quickReviewArrow: { fontSize: 22, color: '#8E5AF5', fontWeight: '700' },
+  practiceSectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#6B7280',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  practiceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  practiceTile: {
+    width: '47.5%',
+    backgroundColor: '#1A1D2E',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#2D3148',
+    alignItems: 'flex-start',
+  },
+  practiceTileEmoji: { fontSize: 26, marginBottom: 8 },
+  practiceTileTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF', marginBottom: 2 },
+  practiceTileSub: { fontSize: 11, color: '#8E5AF5', fontWeight: '600' },
   // Filtro de categorías
   categoryScroll: {
     borderBottomWidth: 1,
