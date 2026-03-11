@@ -38,7 +38,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   usePendingAchievements();
 
   // Programar notificaciones al abrir la app
-  const { scheduleStreakRiskReminder, scheduleDailyChallengeNotification } = useNotifications();
+  const { scheduleStreakRiskReminder, scheduleDailyChallengeNotification, scheduleWeeklySummary } = useNotifications();
   useEffect(() => {
     if (!username || isLoading) return;
     const today = new Date().toISOString().split('T')[0];
@@ -64,6 +64,23 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
           });
         }).catch(() => {});
       });
+    });
+
+    // Resumen semanal los lunes a las 9:00 AM
+    const levelsLastWeek = Object.entries(game.levelCompletedDates ?? {}).reduce((acc, [date, count]) => {
+      const d = new Date(date);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return d >= weekAgo ? acc + count : acc;
+    }, 0);
+    import('@/lib/storage').then(({ getDailyState }) => {
+      getDailyState(username!).then(d => {
+        scheduleWeeklySummary({
+          levelsLastWeek,
+          streak: game.streak,
+          wordsLearned: Object.values(d.learnedWords).filter(Boolean).length,
+        });
+      }).catch(() => {});
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, isLoading]);

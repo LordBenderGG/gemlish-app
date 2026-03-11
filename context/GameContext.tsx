@@ -7,6 +7,7 @@ import {
   getCurrentUser, loginUser, logoutUser, registerUser, renameUser,
 } from '@/lib/storage';
 import { getDailyChallenge, saveDailyChallenge } from '@/lib/daily-challenge';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── Tipos del contexto ──────────────────────────────────────────────────────
 
@@ -22,7 +23,7 @@ interface GameContextValue {
   // Juego
   game: GameState;
   updateGame: (patch: Partial<GameState>) => Promise<void>;
-  completeLevel: (levelId: number, xpEarned: number, gemsEarned: number) => Promise<void>;
+  completeLevel: (levelId: number, xpEarned: number, gemsEarned: number, elapsedMs?: number) => Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }>;
   saveLevelErrors: (levelId: number, errorWords: string[]) => Promise<void>;
   loseHeart: () => Promise<void>;
   spendGems: (amount: number) => Promise<boolean>;
@@ -58,6 +59,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     xp: 0, gems: 0, streak: 0, hearts: 5,
     maxUnlockedLevel: 1, levelProgress: {}, lastHeartRefill: new Date().toISOString(),
     levelErrors: {}, levelCompletedDates: {}, dailyChallengesCompleted: 0,
+    challengeStreak: 0, lastChallengeDate: '', challengeHistory: [], levelBestTimes: {},
   });
   const [daily, setDaily] = useState<DailyState>({
     lastDailyDate: '', learnedWords: {}, dailyCompleted: false, totalDaysCompleted: 0,
@@ -88,6 +90,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // ─── Auth ────────────────────────────────────────────────────────────────
 
+  const LEADERBOARD_KEY = '@gemlish_all_users';
+
+  const updateLeaderboard = async (key: string, g: GameState) => {
+    try {
+      const raw = await AsyncStorage.getItem(LEADERBOARD_KEY);
+      const all: Array<{ username: string; xp: number; streak: number; levelsCompleted: number }> = raw ? JSON.parse(raw) : [];
+      const levelsCompleted = Object.values(g.levelProgress).filter(p => p.completed).length;
+      const updated = all.filter(u => u.username !== key);
+      updated.push({ username: key, xp: g.xp, streak: g.streak, levelsCompleted });
+      await AsyncStorage.setItem(LEADERBOARD_KEY, JSON.stringify(updated));
+    } catch { /* silencioso */ }
+  };
+
   const login = useCallback(async (u: string, p: string) => {
     const result = await loginUser(u, p);
     if (result.ok) {
@@ -101,6 +116,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setGame(g);
       setDaily(d);
       setMiniGame(mg);
+      updateLeaderboard(key, g);
     }
     return result;
   }, []);
@@ -118,6 +134,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setGame(g);
       setDaily(d);
       setMiniGame(mg);
+      updateLeaderboard(key, g);
     }
     return result;
   }, []);
@@ -136,8 +153,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     await saveGameState(username, next);
   }, [username, game]);
 
-  const completeLevel = useCallback(async (levelId: number, xpEarned: number, gemsEarned: number) => {
-    if (!username) return;
+  const completeLevel = useCallback(async (
+    levelId: number,
+    xpEarned: number,
+    gemsEarned: number,
+    elapsedMs?: number,
+  ): Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }> => {
+    if (!username) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
     const today = new Date().toISOString().split('T')[0];
     const lastDate = game.lastHeartRefill?.split('T')[0];
     let newStreak = game.streak;
@@ -150,19 +172,52 @@ export function GameProvider({ children }: { children: ReactNode }) {
       [today]: (prevDates[today] ?? 0) + 1,
     };
 
+    // Actualizar mejor tiempo del nivel
+    const prevBestTimes = game.levelBestTimes ?? {};
+    const updatedBestTimes = { ...prevBestTimes };
+    if (elapsedMs !== undefined) {
+      const prev = prevBestTimes[levelId];
+      if (!prev || elapsedMs < prev) {
+        updatedBestTimes[levelId] = elapsedMs;
+      }
+    }
+
     // Verificar si este nivel es el desafío del día y no ha sido completado aún
     let bonusXp = 0;
     let bonusGems = 0;
+    let wasChallenge = false;
     let newDailyChallengesCompleted = game.dailyChallengesCompleted ?? 0;
+    let newChallengeStreak = game.challengeStreak ?? 0;
+    let newLastChallengeDate = game.lastChallengeDate ?? '';
+    let newChallengeHistory = [...(game.challengeHistory ?? [])];
+
     try {
       const challenge = await getDailyChallenge(username);
       if (challenge && challenge.date === today && !challenge.completed && challenge.levelId === levelId) {
         // Marcar el desafío como completado
         await saveDailyChallenge(username, { ...challenge, completed: true });
-        // El bonus es la recompensa base del desafío (ya incluye x2, así que el bonus es xpEarned adicional)
-        bonusXp = challenge.xpEarned - xpEarned; // diferencia entre recompensa x2 y recompensa normal
+        bonusXp = challenge.xpEarned - xpEarned;
         bonusGems = challenge.gemsEarned - gemsEarned;
         newDailyChallengesCompleted += 1;
+        wasChallenge = true;
+
+        // Actualizar racha de desafíos
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        if (newLastChallengeDate === yesterdayStr || newLastChallengeDate === today) {
+          newChallengeStreak += 1;
+        } else {
+          newChallengeStreak = 1; // Reiniciar si no fue ayer
+        }
+        newLastChallengeDate = today;
+
+        // Actualizar historial (máx 7 entradas)
+        const { getLevelData } = await import('@/data/lessons');
+        newChallengeHistory = [
+          { date: today, levelId: challenge.levelId, levelName: getLevelData(challenge.levelId).name, xpEarned: challenge.xpEarned, gemsEarned: challenge.gemsEarned },
+          ...newChallengeHistory,
+        ].slice(0, 7);
       }
     } catch {
       // No interrumpir el flujo si falla la lógica del desafío
@@ -180,10 +235,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
         [levelId]: { completed: true, score: 100 },
       },
       levelCompletedDates: updatedDates,
+      levelBestTimes: updatedBestTimes,
       dailyChallengesCompleted: newDailyChallengesCompleted,
+      challengeStreak: newChallengeStreak,
+      lastChallengeDate: newLastChallengeDate,
+      challengeHistory: newChallengeHistory,
     };
     setGame(next);
     await saveGameState(username, next);
+    return { wasChallenge, challengeBonus: { xp: bonusXp, gems: bonusGems } };
   }, [username, game]);
 
   const loseHeart = useCallback(async () => {

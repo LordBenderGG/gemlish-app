@@ -373,6 +373,71 @@ const AVATAR_EMOJIS = [
 ];
 const AVATAR_KEY = '@gemlish_avatar';
 
+// ─── Tabla de Clasificación Local ──────────────────────────────────────────────
+
+const LEADERBOARD_KEY = '@gemlish_all_users';
+
+function LeaderboardSection() {
+  const { game, username } = useGame();
+  const t = useThemeStyles();
+  const isDark = t.bg === '#151718';
+  const [entries, setEntries] = React.useState<Array<{ username: string; xp: number; streak: number; levelsCompleted: number }>>([]);
+
+  React.useEffect(() => {
+    AsyncStorage.getItem(LEADERBOARD_KEY).then(raw => {
+      if (!raw) {
+        // Si no hay datos, mostrar solo el usuario actual
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        setEntries([{ username: username ?? 'Tú', xp: game.xp, streak: game.streak, levelsCompleted }]);
+        return;
+      }
+      try {
+        const all = JSON.parse(raw) as Array<{ username: string; xp: number; streak: number; levelsCompleted: number }>;
+        // Actualizar el usuario actual
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        const updated = all.map(u => u.username === username ? { ...u, xp: game.xp, streak: game.streak, levelsCompleted } : u);
+        if (!updated.find(u => u.username === username)) {
+          updated.push({ username: username ?? 'Tú', xp: game.xp, streak: game.streak, levelsCompleted });
+        }
+        AsyncStorage.setItem(LEADERBOARD_KEY, JSON.stringify(updated));
+        setEntries(updated.sort((a, b) => b.xp - a.xp).slice(0, 10));
+      } catch {
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        setEntries([{ username: username ?? 'Tú', xp: game.xp, streak: game.streak, levelsCompleted }]);
+      }
+    });
+  }, [game, username]);
+
+  if (entries.length < 2) return null; // Solo mostrar si hay más de 1 usuario
+
+  const medals = ['🥇', '🥈', '🥉'];
+
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>🏅 Clasificación Local</Text>
+      {entries.map((entry, i) => {
+        const isMe = entry.username === username;
+        return (
+          <View key={entry.username} style={[
+            { flexDirection: 'row', alignItems: 'center', borderRadius: 12, padding: 12, marginBottom: 6, gap: 10 },
+            { backgroundColor: isMe ? (isDark ? '#1a2a1a' : '#e8f5e9') : (isDark ? '#1E2022' : '#F5F5F5') },
+            isMe && { borderWidth: 1.5, borderColor: '#58CC02' },
+          ]}>
+            <Text style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{medals[i] ?? `${i + 1}`}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: isMe ? '#58CC02' : (isDark ? '#ECEDEE' : '#11181C'), fontWeight: isMe ? '800' : '600', fontSize: 14 }}>
+                {isMe ? `${entry.username} (Tú)` : entry.username}
+              </Text>
+              <Text style={{ color: '#9BA1A6', fontSize: 11, marginTop: 2 }}>{entry.levelsCompleted} niveles · 🔥 {entry.streak} días</Text>
+            </View>
+            <Text style={{ color: '#8E5AF5', fontWeight: '800', fontSize: 14 }}>{entry.xp.toLocaleString()} XP</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 function AvatarPickerModal({
   visible, current, onSelect, onClose,
 }: { visible: boolean; current: string; onSelect: (e: string) => void; onClose: () => void }) {
@@ -713,6 +778,36 @@ export default function ProfileScreen() {
             })}
           </View>
         )}
+
+        {/* Historial de desafíos del día */}
+        {(game.challengeHistory ?? []).length > 0 && (
+          <View style={{ marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <Text style={styles.sectionTitle}>🏆 Últimos Desafíos</Text>
+              {(game.challengeStreak ?? 0) > 0 && (
+                <View style={{ backgroundColor: '#FFD70020', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: '#FFD700' }}>
+                  <Text style={{ color: '#FFD700', fontSize: 12, fontWeight: '700' }}>🔥 Racha: {game.challengeStreak}</Text>
+                </View>
+              )}
+            </View>
+            {(game.challengeHistory ?? []).map((entry, i) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? '#1E2022' : '#F5F5F5', borderRadius: 12, padding: 12, marginBottom: 6, gap: 10 }}>
+                <Text style={{ fontSize: 22 }}>🏆</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: isDark ? '#ECEDEE' : '#11181C', fontWeight: '700', fontSize: 13 }}>Nivel {entry.levelId}: {entry.levelName}</Text>
+                  <Text style={{ color: '#9BA1A6', fontSize: 11, marginTop: 2 }}>{entry.date}</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                  <Text style={{ color: '#FFD700', fontSize: 12, fontWeight: '700' }}>+{entry.xpEarned} XP</Text>
+                  <Text style={{ color: '#00D4FF', fontSize: 12 }}>+{entry.gemsEarned} 💎</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Tabla de clasificación local */}
+        <LeaderboardSection />
 
         {/* Logros */}
                <View style={styles.achieveHeader}>

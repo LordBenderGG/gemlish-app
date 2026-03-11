@@ -306,6 +306,24 @@ export default function LevelsScreen() {
   const [challengeReward, setChallengeReward] = useState<{ xp: number; gems: number } | null>(null);
   const challengeShineAnim = useSharedValue(0);
 
+  // Contador regresivo hasta medianoche
+  const [countdownText, setCountdownText] = useState('');
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      const diff = midnight.getTime() - now.getTime();
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdownText(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
+    };
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const loadDailyChallenge = useCallback(async () => {
     if (!username) return;
     const levelData = getLevelData(maxUnlockedLevel > 0 ? maxUnlockedLevel : 1);
@@ -491,6 +509,9 @@ export default function LevelsScreen() {
                 ) : (
                   <Text style={styles.challengeRewardText}>+{dailyChallenge.xpEarned} XP · +{dailyChallenge.gemsEarned} 💎 al completar</Text>
                 )}
+                {countdownText ? (
+                  <Text style={styles.challengeCountdown}>⏱ Caduca en {countdownText}</Text>
+                ) : null}
               </View>
             </View>
             <Text style={[styles.challengeArrow, { color: isCompleted ? '#58CC02' : challengeLevelData.color }]}>
@@ -988,6 +1009,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '700',
     marginLeft: 8,
+  },
+  challengeCountdown: {
+    fontSize: 10,
+    color: '#9CA3AF',
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
   },
 });
 

@@ -52,13 +52,27 @@ function normalizeAnswer(str: string): string {
 function MultipleChoiceView({
   exercise,
   onAnswer,
+  hideTranslation,
+  listenOnly,
 }: {
   exercise: MultipleChoiceExercise;
   onAnswer: (correct: boolean) => void;
+  hideTranslation?: boolean;
+  listenOnly?: boolean;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const optionLetters = ['A', 'B', 'C', 'D'];
+  const { speak } = useSpeech();
+
+  // En modo solo escucha, reproducir la palabra al montar
+  useEffect(() => {
+    if (listenOnly && exercise.questionEs) {
+      // Reproducir la respuesta correcta en inglés
+      const correctOption = exercise.options[exercise.correct];
+      if (correctOption) setTimeout(() => speak(correctOption), 400);
+    }
+  }, [listenOnly, exercise.correct, exercise.options, speak]);
 
   const handleSelect = (idx: number) => {
     if (answered) return;
@@ -69,8 +83,9 @@ function MultipleChoiceView({
 
   return (
     <View style={styles.exerciseContainer}>
-      <Text style={styles.questionLabel}>¿Cuál es la respuesta?</Text>
-      <Text style={styles.questionText}>{exercise.questionEs}</Text>
+      <Text style={styles.questionLabel}>{listenOnly ? '🎧 Escucha y elige:' : '¿Cuál es la respuesta?'}</Text>
+      {!hideTranslation && <Text style={styles.questionText}>{exercise.questionEs}</Text>}
+      {hideTranslation && <Text style={[styles.questionText, { opacity: 0.4 }]}>🔥 Modo difícil: sin traducción</Text>}
       <View style={styles.optionsGrid}>
         {exercise.options.map((opt, idx) => {
           let bg = '#1A1D27';
@@ -896,11 +911,13 @@ export default function ExerciseScreen() {
   const insets = useSafeAreaInsets();
   const t = useThemeStyles();
   const scheme = useColorScheme();
-  const { levelId } = useLocalSearchParams<{ levelId: string }>();
+  const { levelId, mode } = useLocalSearchParams<{ levelId: string; mode?: string }>();
   const { username, game, completeLevel, saveLevelErrors, loseHeart, spendGems } = useGame();
   const { checkAchievements } = useAchievements();
   const { playCorrect, playWrong, playLevelComplete, playStreak } = useFeedbackSounds();
   const levelNum = parseInt(levelId || '1', 10);
+  const isHardMode = mode === 'hard';
+  const isListenMode = mode === 'listen';
 
   const level = useMemo(() => generateLevel(levelNum), [levelNum]);
 
@@ -920,6 +937,8 @@ export default function ExerciseScreen() {
   const floatingXPCounter = useRef(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [wasChallengeLevel, setWasChallengeLevel] = useState(false);
+  const [challengeBonus, setChallengeBonus] = useState<{ xp: number; gems: number }>({ xp: 0, gems: 0 });
 
   // Cronómetro
   useEffect(() => {
@@ -1096,9 +1115,15 @@ export default function ExerciseScreen() {
       playLevelComplete();
       const xpEarned = level?.xp || 10;
       const gemsEarned = wrongCount === 0 ? 5 : 2;
-      await completeLevel(levelNum, xpEarned, gemsEarned);
+      const elapsedMs = elapsedSeconds * 1000;
+      const completionResult = await completeLevel(levelNum, xpEarned, gemsEarned, elapsedMs);
+      setWasChallengeLevel(completionResult.wasChallenge);
+      setChallengeBonus(completionResult.challengeBonus);
       if (username) {
         const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length + 1;
+        // Calcular el mejor tiempo global del usuario para logros de velocidad
+        const allBestTimes = { ...(game.levelBestTimes ?? {}), [levelNum]: elapsedMs };
+        const bestLevelTime = Math.min(...Object.values(allBestTimes));
         await checkAchievements(username, {
           levelsCompleted,
           streak: game.streak,
@@ -1107,6 +1132,11 @@ export default function ExerciseScreen() {
           xp: game.xp + (level?.xp || 10),
           totalDaysCompleted: 0,
           practiceSessionsCompleted: 0,
+          ...({
+            bestLevelTime,
+            dailyChallengesCompleted: (game.dailyChallengesCompleted ?? 0) + (completionResult.wasChallenge ? 1 : 0),
+            challengeStreak: (game.challengeStreak ?? 0) + (completionResult.wasChallenge ? 1 : 0),
+          } as any),
         });
       }
       const finalErrors = errorWords;
@@ -1228,6 +1258,26 @@ export default function ExerciseScreen() {
             )}
           </View>
 
+          {/* Badge Desafío del día completado */}
+          {wasChallengeLevel && (
+            <View style={styles.challengeBonusBanner}>
+              <Text style={styles.challengeBonusTitle}>🏆 ¡Desafío del día completado!</Text>
+              <Text style={styles.challengeBonusText}>Recompensa ×2 aplicada</Text>
+              <View style={styles.challengeBonusRow}>
+                {challengeBonus.xp > 0 && (
+                  <View style={styles.challengeBonusBadge}>
+                    <Text style={styles.challengeBonusBadgeText}>+{challengeBonus.xp} XP extra</Text>
+                  </View>
+                )}
+                {challengeBonus.gems > 0 && (
+                  <View style={[styles.challengeBonusBadge, { backgroundColor: '#00D4FF22', borderColor: '#00D4FF' }]}>
+                    <Text style={[styles.challengeBonusBadgeText, { color: '#00D4FF' }]}>+{challengeBonus.gems} 💎 extra</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
           {/* Desglose por tipo */}
           {Object.keys(typeBreakdown).length > 0 && (
             <View style={styles.breakdownContainer}>
@@ -1328,6 +1378,16 @@ export default function ExerciseScreen() {
           </Text>
         </View>
         <View style={styles.subHeaderRight}>
+          {isHardMode && (
+            <View style={{ backgroundColor: '#FF4B4B20', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: '#FF4B4B' }}>
+              <Text style={{ color: '#FF4B4B', fontSize: 11, fontWeight: '700' }}>🔥 Difícil</Text>
+            </View>
+          )}
+          {isListenMode && (
+            <View style={{ backgroundColor: '#1CB0F620', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: '#1CB0F6' }}>
+              <Text style={{ color: '#1CB0F6', fontSize: 11, fontWeight: '700' }}>🎧 Solo escucha</Text>
+            </View>
+          )}
           <Text style={styles.timerText}>⏱ {formatTime(elapsedSeconds)}</Text>
           {internalStreak >= 3 && (
             <Reanimated.View style={[styles.streakBadge, streakBadgeAnimStyle]}>
@@ -1361,6 +1421,8 @@ export default function ExerciseScreen() {
               key={exerciseKey}
               exercise={exercise as MultipleChoiceExercise}
               onAnswer={handleAnswer}
+              hideTranslation={isHardMode}
+              listenOnly={isListenMode}
             />
           )}
           {exercise.type === 'translate' && (
@@ -1725,4 +1787,18 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#FF4B4B60',
   },
   streakBadgeText: { fontSize: 12, color: '#FF6B6B', fontWeight: '700' },
+  challengeBonusBanner: {
+    backgroundColor: '#FFD70015', borderRadius: 16, padding: 16,
+    marginBottom: 16, borderWidth: 1.5, borderColor: '#FFD70060',
+    alignItems: 'center',
+  },
+  challengeBonusTitle: { fontSize: 16, fontWeight: '800', color: '#FFD700', marginBottom: 4 },
+  challengeBonusText: { fontSize: 13, color: '#FFD700AA', marginBottom: 10 },
+  challengeBonusRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
+  challengeBonusBadge: {
+    backgroundColor: '#FFD70022', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 5,
+    borderWidth: 1, borderColor: '#FFD700',
+  },
+  challengeBonusBadgeText: { fontSize: 13, color: '#FFD700', fontWeight: '700' },
 });

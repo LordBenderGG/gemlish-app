@@ -22,6 +22,14 @@ export interface GameState {
   levelCompletedDates: Record<string, number>;
   // Total de desafíos del día completados (acumulado)
   dailyChallengesCompleted: number;
+  // Racha consecutiva de desafíos del día
+  challengeStreak: number;
+  // Última fecha en que se completó el desafío del día
+  lastChallengeDate: string;
+  // Historial de últimos 7 desafíos completados
+  challengeHistory: Array<{ date: string; levelId: number; levelName: string; xpEarned: number; gemsEarned: number }>;
+  // Tiempos de completado por nivel (ms) para logros de velocidad
+  levelBestTimes: Record<number, number>;
 }
 
 export interface DailyState {
@@ -165,6 +173,10 @@ const DEFAULT_GAME_STATE: GameState = {
   levelErrors: {},
   levelCompletedDates: {},
   dailyChallengesCompleted: 0,
+  challengeStreak: 0,
+  lastChallengeDate: '',
+  challengeHistory: [],
+  levelBestTimes: {},
 };
 
 export async function getGameState(username: string): Promise<GameState> {

@@ -50,8 +50,9 @@ export default function LevelDetailScreen() {
   const icon = useMemo(() => getLevelIcon(levelNum), [levelNum]);
   const isCompleted = !!game.levelProgress[levelNum]?.completed;
 
-  const handleStartLevel = useCallback(() => {
-    router.replace(`/exercise/${levelNum}` as any);
+  const handleStartLevel = useCallback((mode?: 'hard' | 'listen') => {
+    const params = mode ? `?mode=${mode}` : '';
+    router.replace(`/exercise/${levelNum}${params}` as any);
   }, [levelNum]);
 
   const renderItem = useCallback(({ item }: { item: Word }) => (
@@ -109,13 +110,31 @@ export default function LevelDetailScreen() {
       <View style={[styles.footer, { paddingBottom: insets.bottom + 8, borderTopColor: t.border, backgroundColor: t.bg }]}>
         <TouchableOpacity
           style={[styles.startBtn, { backgroundColor: levelData.color }]}
-          onPress={handleStartLevel}
+          onPress={() => handleStartLevel()}
           activeOpacity={0.85}
         >
           <Text style={styles.startBtnText}>
             {isCompleted ? '🔄 Repetir nivel' : '▶ Empezar nivel'}
           </Text>
         </TouchableOpacity>
+        {isCompleted && (
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+            <TouchableOpacity
+              style={[styles.startBtn, { flex: 1, backgroundColor: '#1CB0F6' }]}
+              onPress={() => handleStartLevel('listen')}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.startBtnText}>🎧 Solo escucha</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.startBtn, { flex: 1, backgroundColor: '#FF4B4B' }]}
+              onPress={() => handleStartLevel('hard')}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.startBtnText}>🔥 Modo difícil</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );

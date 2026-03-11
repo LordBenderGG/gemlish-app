@@ -60,6 +60,14 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'practice_1', emoji: '🎯', title: 'Primera Práctica', description: 'Completa tu primera sesión de palabras difíciles', check: s => s.practiceSessionsCompleted >= 1, category: 'practice' },
   { id: 'practice_5', emoji: '💪', title: 'Perseverante', description: 'Completa 5 sesiones de práctica', check: s => s.practiceSessionsCompleted >= 5, category: 'practice' },
   { id: 'practice_20', emoji: '🏋️', title: 'Atleta del Vocabulario', description: 'Completa 20 sesiones de práctica', check: s => s.practiceSessionsCompleted >= 20, category: 'practice' },
+  // Velocidad
+  { id: 'speed_60', emoji: '⚡', title: 'Rayo', description: 'Completa un nivel en menos de 60 segundos', check: s => (s as any).bestLevelTime !== undefined && (s as any).bestLevelTime <= 60000, category: 'game' },
+  { id: 'speed_120', emoji: '💨', title: 'Veloz', description: 'Completa un nivel en menos de 2 minutos', check: s => (s as any).bestLevelTime !== undefined && (s as any).bestLevelTime <= 120000, category: 'game' },
+  // Desafíos
+  { id: 'challenge_1', emoji: '🏆', title: 'Primer Desafío', description: 'Completa tu primer desafío del día', check: s => (s as any).dailyChallengesCompleted >= 1, category: 'game' },
+  { id: 'challenge_7', emoji: '🔥🏆', title: 'Semana de Desafíos', description: '7 desafíos del día completados', check: s => (s as any).dailyChallengesCompleted >= 7, category: 'game' },
+  { id: 'challenge_streak_7', emoji: '🏆🔥', title: 'Racha de Campeón', description: '7 desafíos del día consecutivos', check: s => (s as any).challengeStreak >= 7, category: 'game' },
+  { id: 'challenge_streak_30', emoji: '🏆🌟', title: 'Leyenda del Desafío', description: '30 desafíos del día consecutivos', check: s => (s as any).challengeStreak >= 30, category: 'game' },
 ];
 
 // ─── Persistencia de logros desbloqueados ────────────────────────────────────

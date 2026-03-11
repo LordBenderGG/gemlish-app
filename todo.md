@@ -258,3 +258,29 @@
 - [x] Recompensa doble del desafío del día aplicada automáticamente al completar el nivel del desafío
 - [x] Contador de desafíos completados en el Perfil (junto al mapa de calor)
 - [x] Notificación diaria a las 8:00 AM con el nivel del desafío del día y su recompensa
+
+## v1.31 — Lista final completa
+
+### Gamificación
+- [x] Racha de desafíos consecutivos con logros a los 7 y 30 días
+- [x] Pantalla especial al completar el desafío del día con bonus ×2 destacado
+- [x] Historial de últimos 7 desafíos completados en el Perfil
+- [x] Tabla de clasificación local por XP entre usuarios del dispositivo
+- [x] Modo "Repaso de errores" — practicar solo palabras falladas en niveles anteriores
+- [x] Logros por velocidad — completar un nivel en menos de 60 segundos
+
+### UX
+- [x] Animación de XP/monedas volando al ganar recompensas
+- [x] Sonido de celebración diferente para el desafío del día
+- [x] Vibración háptica al desbloquear logros
+- [x] Contador regresivo hasta el próximo desafío del día en la tarjeta
+
+### Contenido
+- [x] Modo "Solo escucha" — pronunciación sin ver traducción
+- [x] Tarjetas de vocabulario con ejemplo en contexto antes del ejercicio
+- [x] Estadística de palabras más falladas en el perfil
+- [x] Modo difícil — sin mostrar traducción durante el ejercicio
+
+### Notificaciones
+- [x] Notificación de logro desbloqueado cuando la app está cerrada
+- [x] Resumen semanal de progreso los lunes a las 9:00 AM
