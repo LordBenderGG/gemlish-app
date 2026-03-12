@@ -110,9 +110,8 @@ function TimePickerModal({
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const t = useThemeStyles();
-  const { settings, loading, permissionGranted, enableNotifications, disableNotifications, updateTime, scheduleWeeklySummary } = useNotifications();
+  const { settings, loading, permissionGranted, enableNotifications, disableNotifications, updateTime } = useNotifications();
   const { soundEnabled, setSoundEnabled } = useSoundSettings();
-  const { game } = useGame();
   const isDark = true; // Modo oscuro permanente
 
   const openSystemSettings = useCallback(() => {
@@ -132,50 +131,28 @@ export default function SettingsScreen() {
   const handleNotifToggle = useCallback(async (value: boolean) => {
     if (saving) return;
     setSaving(true);
-    if (value) {
-      // Verificar si el permiso ya está concedido antes de pedir
-      const { status: currentStatus } = await Notifications.getPermissionsAsync();
-      if (currentStatus !== 'granted') {
-        // Intentar solicitar el permiso
-        const { status: newStatus } = await Notifications.requestPermissionsAsync();
-        if (newStatus !== 'granted') {
-          // El usuario denegó el permiso — mostrar opción de ir a Configuración
+    try {
+      if (value) {
+        const ok = await enableNotifications(settings.hour, settings.minute);
+        if (!ok) {
           Alert.alert(
             '🔔 Permisos necesarios',
-            'Para recibir recordatorios, activa las notificaciones en la Configuración del sistema y vuelve a activar el recordatorio.',
+            'Para recibir recordatorios, activa las notificaciones en la Configuración del sistema.',
             [
               { text: 'Cancelar', style: 'cancel' },
               { text: '⚙️ Abrir Configuración', onPress: openSystemSettings },
             ]
           );
-          setSaving(false);
-          return;
         }
+      } else {
+        await disableNotifications();
       }
-      // Permiso concedido — activar notificaciones con el nombre del siguiente nivel
-      const nextLevelId = game.maxUnlockedLevel;
-      const { getLevelData } = await import('@/data/lessons');
-      const nextLevelData = getLevelData(nextLevelId);
-      const nextLevelName = nextLevelData ? nextLevelData.name : undefined;
-      const ok = await enableNotifications(settings.hour, settings.minute, nextLevelName);
-      if (ok) {
-        const totalLevels = Object.values(game.levelProgress).filter(p => p.completed).length;
-        const levelsLastWeek = Object.entries(game.levelCompletedDates ?? {}).filter(([date]) => {
-          const d = new Date(date);
-          const weekAgo = new Date(Date.now() - 7 * 86400000);
-          return d >= weekAgo;
-        }).reduce((acc, [, count]) => acc + count, 0);
-        await scheduleWeeklySummary({
-          levelsLastWeek,
-          streak: game.streak,
-          wordsLearned: totalLevels * 10,
-        });
-      }
-    } else {
-      await disableNotifications();
+    } catch (err) {
+      console.warn('[Settings] toggle error:', err);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-  }, [saving, settings, game, enableNotifications, disableNotifications, openSystemSettings, scheduleWeeklySummary]);
+  }, [saving, settings.hour, settings.minute, enableNotifications, disableNotifications, openSystemSettings]);
 
   const handleTimeConfirm = useCallback(async (h: number, m: number) => {
     setShowPicker(false);

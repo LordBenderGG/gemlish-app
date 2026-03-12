@@ -970,6 +970,9 @@ const styles = StyleSheet.create({
   practiceTileSub: { fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
   // Filtro de categorías
   categoryScroll: {
+    flexShrink: 0,
+    flexGrow: 0,
+    height: 50,
     borderBottomWidth: 1,
     borderBottomColor: '#2D3148',
   },
@@ -978,14 +981,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 8,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   categoryChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#2D3148',
+    backgroundColor: '#1E2A3A',
     borderWidth: 1.5,
-    borderColor: '#4A5080',
+    borderColor: '#2D3D55',
+    flexShrink: 0,
   },
   categoryChipActive: {
     backgroundColor: '#38BDF8',
