@@ -13,6 +13,7 @@ import { useSpeech } from '@/hooks/use-speech';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { LESSONS } from '@/data/lessons';
 import type { Word } from '@/data/lessons';
+import { AdBanner } from '@/components/AdBanner';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -236,6 +237,8 @@ function RoundResult({
           ))}
         </View>
       )}
+
+      <AdBanner style={{ marginVertical: 12 }} />
 
       <View style={styles.resultBtns}>
         {stillHard.length > 0 && (

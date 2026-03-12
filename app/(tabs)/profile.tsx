@@ -19,6 +19,7 @@ import {
   getPracticeHistory, formatDuration, formatSessionDate,
   type PracticeSession,
 } from '@/lib/practice-history';
+import { AdBanner } from '@/components/AdBanner';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
@@ -661,6 +662,9 @@ export default function ProfileScreen() {
             <Text style={styles.courseProgressSub}>{stats.levelsCompleted} / 500 niveles completados</Text>
           </View>
         </LinearGradient>
+
+        {/* Banner AdMob — debajo del perfil del usuario */}
+        <AdBanner style={{ marginBottom: 8 }} />
 
         {/* Estadísticas */}
         <Text style={styles.sectionTitle}>📊 Estadísticas</Text>

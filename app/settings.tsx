@@ -12,6 +12,7 @@ import * as Notifications from 'expo-notifications';
 import { useSoundSettings } from '@/lib/sound-settings';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useGame } from '@/context/GameContext';
+import { AdBanner } from '@/components/AdBanner';
 
 // ─── Selector de Hora ─────────────────────────────────────────────────────────
 
@@ -254,6 +255,9 @@ export default function SettingsScreen() {
             <Text style={styles.timeArrow}>›</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Banner AdMob — debajo del selector de hora */}
+        <AdBanner style={{ marginTop: 8 }} />
 
         <View style={{ height: 40 }} />
       </ScrollView>

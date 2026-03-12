@@ -5,6 +5,7 @@ import {
   StatusBar, Alert, ScrollView, Platform,
 } from 'react-native';
 import { useRewardedAd, AD_UNIT_IDS } from '@/hooks/useAdMob';
+import { AdBanner } from '@/components/AdBanner';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { getDailyWords, Word, LESSONS } from '@/data/lessons';
@@ -381,6 +382,9 @@ export default function DailyScreen() {
           <Text style={styles.dueLabel}>📚 {dueWords.length} palabras pendientes de repaso</Text>
         )}
       </View>
+
+      {/* Banner AdMob — Tarea Diaria */}
+      <AdBanner style={{ marginBottom: 4 }} />
 
       <FlatList
         data={words}

@@ -8,6 +8,7 @@ import { useGame } from '@/context/GameContext';
 import { LESSONS } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
+import { AdBanner } from '@/components/AdBanner';
 
 const TOTAL = 10;
 
@@ -128,6 +129,7 @@ export default function OrderModeScreen() {
           <Text style={styles.resultTitle}>¡Sesión completada!</Text>
           <Text style={styles.resultScore}>{score}/{TOTAL} correctas</Text>
           <Text style={styles.resultPct}>{pct}% de acierto</Text>
+          <AdBanner style={{ marginVertical: 16 }} />
           <TouchableOpacity style={styles.doneBtn} onPress={() => router.back()}>
             <Text style={styles.doneBtnText}>Volver al inicio</Text>
           </TouchableOpacity>

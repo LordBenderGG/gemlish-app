@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert,
   ScrollView, Animated, Dimensions,
 } from 'react-native';
+import { AdBanner } from '@/components/AdBanner';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
@@ -395,6 +396,9 @@ export default function GameScreen() {
           {remainingMs <= 0 ? 'Agotado (vuelve mañana)' : formatTime(remainingMs)}
         </Text>
       </View>
+
+      {/* Banner AdMob — inicio del Minijuego */}
+      <AdBanner style={{ marginBottom: 4 }} />
 
       <ScrollView contentContainerStyle={styles.gameList} showsVerticalScrollIndicator={false}>
         <View style={styles.gameCard}>

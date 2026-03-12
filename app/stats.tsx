@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { AdBanner } from '@/components/AdBanner';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 import { useGame } from '@/context/GameContext';
@@ -279,6 +279,9 @@ export default function StatsScreen() {
           <StatCard emoji="⚡" label="XP total" value={String(game.xp)} color="#F59E0B" />
         </View>
 
+        {/* Banner AdMob — debajo del Resumen General */}
+        <AdBanner style={{ marginVertical: 8 }} />
+
         {/* Gráfica: Niveles completados */}
         <View style={[styles.chartCard, { backgroundColor: cardBg, borderColor }]}>
           <Text style={[styles.chartTitle, { color: textPrimary }]}>Niveles completados</Text>
@@ -359,14 +362,7 @@ export default function StatsScreen() {
         <View style={{ height: 32 }} />
       </ScrollView>
 
-      {/* Banner AdMob — parte inferior */}
-      {Platform.OS !== 'web' && (
-        <BannerAd
-          unitId={TestIds.ADAPTIVE_BANNER}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{ requestNonPersonalizedAdsOnly: false }}
-        />
-      )}
+
     </View>
   );
 }

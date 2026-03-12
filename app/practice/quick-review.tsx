@@ -15,6 +15,7 @@ import type { Word } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
+import { AdBanner } from '@/components/AdBanner';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -309,6 +310,8 @@ export default function QuickReviewScreen() {
               <Text style={styles.resultStatLabel}>Tiempo</Text>
             </View>
           </View>
+
+          <AdBanner style={{ marginTop: 16 }} />
 
           <TouchableOpacity style={styles.finishBtn} onPress={handleFinish} activeOpacity={0.85}>
             <Text style={styles.finishBtnText}>✓ Volver al mapa</Text>
