@@ -1,6 +1,5 @@
 'use client';
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
-import { getOrCreateDailyChallenge, completeDailyChallenge, type DailyChallenge } from '@/lib/daily-challenge';
 import { useFocusEffect } from 'expo-router';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
@@ -373,70 +372,6 @@ export default function LevelsScreen() {
   const unlockOpacity = useSharedValue(0);
   const { playUnlock } = useFeedbackSounds();
 
-  // ─── Desafío del día ─────────────────────────────────────────────────────
-  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
-  const [challengeReward, setChallengeReward] = useState<{ xp: number; gems: number } | null>(null);
-  const challengeShineAnim = useSharedValue(0);
-
-  // Contador regresivo hasta medianoche
-  const [countdownText, setCountdownText] = useState('');
-  useEffect(() => {
-    const updateCountdown = () => {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
-      const diff = midnight.getTime() - now.getTime();
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setCountdownText(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
-    };
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const loadDailyChallenge = useCallback(async () => {
-    if (!username) return;
-    const levelData = getLevelData(maxUnlockedLevel > 0 ? maxUnlockedLevel : 1);
-    const challenge = await getOrCreateDailyChallenge(
-      username,
-      maxUnlockedLevel,
-      levelData.xp,
-      5, // gemas base (igual que nivel perfecto)
-    );
-    setDailyChallenge(challenge);
-    // Animación de brillo si no está completado
-    if (!challenge.completed) {
-      challengeShineAnim.value = withDelay(600, withRepeat(
-        withSequence(
-          withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false,
-      ));
-    }
-  }, [username, maxUnlockedLevel, challengeShineAnim]);
-
-  useEffect(() => {
-    loadDailyChallenge();
-  }, [loadDailyChallenge]);
-
-  const handleChallengePress = useCallback(async () => {
-    if (!dailyChallenge || !username) return;
-    if (dailyChallenge.completed) {
-      // Si ya está completado, ir al detalle del nivel
-      router.push(`/level/${dailyChallenge.levelId}` as any);
-      return;
-    }
-    // Ir al ejercicio del nivel del desafío
-    router.push(`/exercise/${dailyChallenge.levelId}` as any);
-  }, [dailyChallenge, username]);
-
-  const challengeShineStyle = useAnimatedStyle(() => ({
-    opacity: 0.15 + challengeShineAnim.value * 0.25,
-  }));
-
   const showUnlockAnimation = useCallback((levelNum: number) => {
     const levelData = getLevelData(levelNum);
     setUnlockAnim({ levelNum, levelData });
@@ -465,8 +400,7 @@ export default function LevelsScreen() {
       }
       prevMaxUnlockedRef.current = maxUnlockedLevel;
       // Recargar desafío del día al volver al mapa
-      loadDailyChallenge();
-    }, [maxUnlockedLevel, showUnlockAnimation, loadDailyChallenge])
+    }, [maxUnlockedLevel, showUnlockAnimation])
   );
 
   const unlockAnimStyle = useAnimatedStyle(() => ({
@@ -541,64 +475,66 @@ export default function LevelsScreen() {
         streak={streak}
       />
 
-      {/* ─── Desafío del día ─── */}
-      {dailyChallenge && (() => {
-        const challengeLevelData = getLevelData(dailyChallenge.levelId);
-        const isCompleted = dailyChallenge.completed;
+      {/* ─── Widget de Progreso del Curso ─── */}
+      {(() => {
+        const nextLevel = maxUnlockedLevel;
+        const nextLevelData = getLevelData(nextLevel);
+        const progressPctLocal = Math.round((completedCount / TOTAL_LEVELS) * 100);
+        const xpToday = Object.entries(game.levelCompletedDates ?? {}).reduce((acc, [date, count]) => {
+          const today = new Date().toISOString().split('T')[0];
+          return date === today ? acc + (count as number) * 20 : acc;
+        }, 0);
         return (
-          <TouchableOpacity
-            style={styles.challengeCardOuter}
-            onPress={handleChallengePress}
-            activeOpacity={0.88}
-          >
+          <View style={styles.progressWidget}>
             <LinearGradient
-              colors={isCompleted
-                ? ['#052E16', '#166534', '#15803D']
-                : ['#0C1A2E', '#0F3460', '#1565C0']}
+              colors={['#0C1A2E', '#0F2A4A', '#0a1628']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.challengeGradient}
+              style={styles.progressWidgetGradient}
             >
-              {/* Brillo animado */}
-              {!isCompleted && (
-                <Reanimated.View
-                  style={[StyleSheet.absoluteFill, styles.challengeShine, challengeShineStyle]}
-                  pointerEvents="none"
-                />
-              )}
-              {/* Badge superior izquierdo */}
-              <View style={styles.challengeTopRow}>
-                <View style={styles.challengeDayBadge}>
-                  <Text style={styles.challengeDayText}>{isCompleted ? '✅ COMPLETADO' : '🔥 DESAFÍO DEL DÍA'}</Text>
+              {/* Fila superior: título y XP de hoy */}
+              <View style={styles.progressWidgetTopRow}>
+                <View style={styles.progressWidgetBadge}>
+                  <Text style={styles.progressWidgetBadgeText}>📈 TU PROGRESO</Text>
                 </View>
-                {!isCompleted && (
-                  <View style={styles.challengeX2BadgeNew}>
-                    <Text style={styles.challengeX2TextNew}>×2 XP</Text>
+                {xpToday > 0 && (
+                  <View style={styles.progressWidgetXpBadge}>
+                    <Text style={styles.progressWidgetXpText}>+{xpToday} XP hoy</Text>
                   </View>
                 )}
               </View>
-              {/* Cuerpo */}
-              <View style={styles.challengeBody}>
-                <View style={styles.challengeIconCircle}>
-                  <Text style={{ fontSize: 32 }}>{isCompleted ? '🏆' : '🎯'}</Text>
+              {/* Stats en fila */}
+              <View style={styles.progressWidgetStats}>
+                <View style={styles.progressWidgetStat}>
+                  <Text style={styles.progressWidgetStatVal}>{completedCount}</Text>
+                  <Text style={styles.progressWidgetStatLbl}>Niveles</Text>
                 </View>
-                <View style={styles.challengeInfo}>
-                  <Text style={styles.challengeLevelNameNew} numberOfLines={1}>
-                    Nivel {dailyChallenge.levelId}: {challengeLevelData.name}
-                  </Text>
-                  {isCompleted ? (
-                    <Text style={styles.challengeCompletedTextNew}>✨ +{dailyChallenge.xpEarned} XP · +{dailyChallenge.gemsEarned} 💎 ganados</Text>
-                  ) : (
-                    <Text style={styles.challengeRewardTextNew}>+{dailyChallenge.xpEarned} XP · +{dailyChallenge.gemsEarned} 💎 al completar</Text>
-                  )}
-                  {!isCompleted && countdownText ? (
-                    <Text style={styles.challengeCountdownNew}>⏱ Expira en {countdownText}</Text>
-                  ) : null}
+                <View style={styles.progressWidgetDivider} />
+                <View style={styles.progressWidgetStat}>
+                  <Text style={styles.progressWidgetStatVal}>{progressPctLocal}%</Text>
+                  <Text style={styles.progressWidgetStatLbl}>Completado</Text>
                 </View>
-                <Text style={styles.challengeArrowNew}>{isCompleted ? '✓' : '›'}</Text>
+                <View style={styles.progressWidgetDivider} />
+                <View style={styles.progressWidgetStat}>
+                  <Text style={styles.progressWidgetStatVal}>{streak}</Text>
+                  <Text style={styles.progressWidgetStatLbl}>Racha 🔥</Text>
+                </View>
+                <View style={styles.progressWidgetDivider} />
+                <View style={styles.progressWidgetStat}>
+                  <Text style={styles.progressWidgetStatVal}>{xp}</Text>
+                  <Text style={styles.progressWidgetStatLbl}>XP Total</Text>
+                </View>
               </View>
+              {/* Barra de progreso */}
+              <View style={styles.progressWidgetBarBg}>
+                <View style={[styles.progressWidgetBarFill, { width: `${progressPctLocal}%` as any }]} />
+              </View>
+              {/* Próximo nivel */}
+              <Text style={styles.progressWidgetNext} numberOfLines={1}>
+                Siguiente: Nivel {nextLevel} — {nextLevelData.name}
+              </Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </View>
         );
       })()}
 
@@ -1257,5 +1193,26 @@ const styles = StyleSheet.create({
   challengeCountdownNew: {
     fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2, fontVariant: ['tabular-nums'],
   },
+  // ─── Widget de Progreso ───
+  progressWidget: {
+    marginHorizontal: 12, marginTop: 10, marginBottom: 4,
+    borderRadius: 20, overflow: 'hidden',
+    shadowColor: '#38BDF8', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2, shadowRadius: 10, elevation: 6,
+  },
+  progressWidgetGradient: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14 },
+  progressWidgetTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  progressWidgetBadge: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  progressWidgetBadgeText: { fontSize: 10, fontWeight: '900', color: '#FFFFFF', letterSpacing: 1.2, textTransform: 'uppercase' },
+  progressWidgetXpBadge: { backgroundColor: 'rgba(88,204,2,0.25)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  progressWidgetXpText: { fontSize: 11, fontWeight: '800', color: '#58CC02' },
+  progressWidgetStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  progressWidgetStat: { flex: 1, alignItems: 'center' },
+  progressWidgetStatVal: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginBottom: 2 },
+  progressWidgetStatLbl: { fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: '600' },
+  progressWidgetDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.12)' },
+  progressWidgetBarBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 100, marginBottom: 8, overflow: 'hidden' },
+  progressWidgetBarFill: { height: '100%' as any, backgroundColor: '#38BDF8', borderRadius: 100 },
+  progressWidgetNext: { fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: '500' },
 });
 

@@ -725,17 +725,18 @@ export default function ProfileScreen() {
         {(() => {
           const today = new Date();
           const days: { date: string; active: boolean }[] = [];
-          // Usamos lastDailyDate y totalDaysCompleted para estimar actividad
-          // Marcamos como activo el día actual si dailyCompleted, y los últimos N días según streak
-          const activeStreak = game.streak;
+          // Usar levelCompletedDates para marcar días con actividad real
+          const completedDates = game.levelCompletedDates ?? {};
+          // También incluir días con tarea diaria completada
+          const todayStr = today.toISOString().split('T')[0];
           for (let i = 89; i >= 0; i--) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
             const key = d.toISOString().split('T')[0];
-            // Activo si está dentro de la racha actual (desde hoy hacia atrás)
-            const isInStreak = i < activeStreak;
-            const isToday = i === 0 && daily.dailyCompleted;
-            days.push({ date: key, active: isInStreak || isToday });
+            // Activo si completó al menos un nivel ese día, o si completó la tarea diaria hoy
+            const hasLevelActivity = (completedDates[key] ?? 0) > 0;
+            const hasDailyToday = key === todayStr && daily.dailyCompleted;
+            days.push({ date: key, active: hasLevelActivity || hasDailyToday });
           }
           const weeks: typeof days[] = [];
           for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));

@@ -161,9 +161,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   ): Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }> => {
     if (!username) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
     const today = new Date().toISOString().split('T')[0];
-    const lastDate = game.lastHeartRefill?.split('T')[0];
+    // Usar levelCompletedDates para detectar si ya hubo actividad hoy
+    const prevDatesCheck = game.levelCompletedDates ?? {};
+    const alreadyActiveToday = (prevDatesCheck[today] ?? 0) > 0;
     let newStreak = game.streak;
-    if (lastDate !== today) newStreak += 1;
+    if (!alreadyActiveToday) newStreak += 1; // Solo incrementar si es la primera actividad del día
 
     // Registrar fecha de nivel completado para gráfica de actividad
     const prevDates = game.levelCompletedDates ?? {};
