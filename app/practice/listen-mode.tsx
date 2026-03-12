@@ -177,14 +177,14 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#1A1D27', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center',
   },
   backBtnText: { color: '#9CA3AF', fontSize: 16, fontWeight: '700' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
-  counter: { fontSize: 14, color: '#8E5AF5', fontWeight: '700' },
+  counter: { fontSize: 14, color: '#38BDF8', fontWeight: '700' },
   scroll: { padding: 20, flexGrow: 1 },
   card: {
-    backgroundColor: '#1A1D27', borderRadius: 20, padding: 24,
+    backgroundColor: '#111122', borderRadius: 20, padding: 24,
     borderWidth: 1, borderColor: '#2D3148',
   },
   instruction: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#3A1A1A' },
   feedback: { fontSize: 15, fontWeight: '600', textAlign: 'center', marginBottom: 12 },
   submitBtn: {
-    backgroundColor: '#8E5AF5', borderRadius: 14, paddingVertical: 16,
+    backgroundColor: '#38BDF8', borderRadius: 14, paddingVertical: 16,
     alignItems: 'center',
   },
   submitBtnDisabled: { backgroundColor: '#2D3148' },
@@ -217,10 +217,10 @@ const styles = StyleSheet.create({
   resultContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   resultEmoji: { fontSize: 72, marginBottom: 16 },
   resultTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
-  resultScore: { fontSize: 48, fontWeight: '900', color: '#8E5AF5', marginBottom: 4 },
+  resultScore: { fontSize: 48, fontWeight: '900', color: '#38BDF8', marginBottom: 4 },
   resultPct: { fontSize: 18, color: '#9CA3AF', marginBottom: 32 },
   doneBtn: {
-    backgroundColor: '#8E5AF5', borderRadius: 16, paddingVertical: 16,
+    backgroundColor: '#38BDF8', borderRadius: 16, paddingVertical: 16,
     paddingHorizontal: 40,
   },
   doneBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' },

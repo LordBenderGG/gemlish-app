@@ -297,12 +297,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#1E2A3A',
   },
   backBtn: {
     width: 40, height: 40, justifyContent: 'center', alignItems: 'center',
-    backgroundColor: '#1A1D27', borderRadius: 12,
-    borderWidth: 1, borderColor: '#2D3148',
+    backgroundColor: '#111122', borderRadius: 12,
+    borderWidth: 1, borderColor: '#1E2A3A',
   },
   backBtnText: { fontSize: 28, color: '#FFFFFF', lineHeight: 34, marginTop: -2 },
   headerTitle: { flex: 1, fontSize: 20, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
@@ -310,8 +310,8 @@ const styles = StyleSheet.create({
   scroll: { padding: 16, gap: 12 },
   sectionTitle: { fontSize: 13, fontWeight: '800', color: '#9CA3AF', letterSpacing: 1, textTransform: 'uppercase', marginTop: 4 },
   card: {
-    backgroundColor: '#1A1D27', borderRadius: 16,
-    borderWidth: 1, borderColor: '#2D3148', overflow: 'hidden',
+    backgroundColor: '#111122', borderRadius: 16,
+    borderWidth: 1, borderColor: '#1E2A3A', overflow: 'hidden',
   },
   settingRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -325,12 +325,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: '#2D3148',
     paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center',
   },
-  resetBtnText: { fontSize: 13, color: '#8E5AF5', fontWeight: '600' },
+  resetBtnText: { fontSize: 13, color: '#38BDF8', fontWeight: '600' },
   // Notificaciones
   notifBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
-    borderWidth: 1.5, borderColor: '#2D3148',
+    backgroundColor: '#111122', borderRadius: 14, padding: 14,
+    borderWidth: 1.5, borderColor: '#1E2A3A',
   },
   notifBannerActive: { borderColor: '#FF960040', backgroundColor: '#FF960010' },
   notifBannerEmoji: { fontSize: 28 },
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   timeRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   timeRowDisabled: { opacity: 0.5 },
-  timeValue: { fontSize: 18, fontWeight: '800', color: '#8E5AF5', marginTop: 2 },
+  timeValue: { fontSize: 18, fontWeight: '800', color: '#38BDF8', marginTop: 2 },
   timeArrow: { fontSize: 24, color: '#6B7280' },
   // Modal
   modalOverlay: {
@@ -352,9 +352,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalBox: {
-    backgroundColor: '#1A1D27', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: '#111122', borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, paddingBottom: 40,
-    borderTopWidth: 1, borderTopColor: '#2D3148',
+    borderTopWidth: 1, borderTopColor: '#1E2A3A',
   },
   modalTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', marginBottom: 4 },
   modalSubtitle: { fontSize: 13, color: '#9CA3AF', textAlign: 'center', marginBottom: 20 },
@@ -366,16 +366,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10,
     alignItems: 'center', marginVertical: 2,
   },
-  pickerItemSelected: { backgroundColor: '#8E5AF520', borderWidth: 1.5, borderColor: '#8E5AF5' },
+  pickerItemSelected: { backgroundColor: '#38BDF820', borderWidth: 1.5, borderColor: '#38BDF8' },
   pickerItemText: { fontSize: 20, fontWeight: '600', color: '#9CA3AF' },
-  pickerItemTextSelected: { color: '#8E5AF5', fontWeight: '800' },
+  pickerItemTextSelected: { color: '#38BDF8', fontWeight: '800' },
   pickerColon: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', marginTop: 20 },
   timePreview: {
     alignItems: 'center', backgroundColor: '#0F1117',
     borderRadius: 12, padding: 12, marginBottom: 20,
     borderWidth: 1, borderColor: '#2D3148',
   },
-  timePreviewText: { fontSize: 32, fontWeight: '900', color: '#8E5AF5' },
+  timePreviewText: { fontSize: 32, fontWeight: '900', color: '#38BDF8' },
   modalBtns: { flexDirection: 'row', gap: 12 },
   modalBtnCancel: {
     flex: 1, paddingVertical: 14, borderRadius: 14,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   modalBtnCancelText: { color: '#9CA3AF', fontSize: 15, fontWeight: '700' },
   modalBtnConfirm: {
     flex: 1, paddingVertical: 14, borderRadius: 14,
-    alignItems: 'center', backgroundColor: '#8E5AF5',
+    alignItems: 'center', backgroundColor: '#38BDF8',
   },
   modalBtnConfirmText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
 });

@@ -89,7 +89,7 @@ function MultipleChoiceView({
       {hideTranslation && <Text style={[styles.questionText, { opacity: 0.4 }]}>🔥 Modo difícil: sin traducción</Text>}
       <View style={styles.optionsGrid}>
         {exercise.options.map((opt, idx) => {
-          let bg = '#1A1D27';
+          let bg = '#111122';
           let border = '#2D3148';
           let textColor = '#FFFFFF';
           if (answered) {
@@ -599,7 +599,7 @@ function FillBlankView({
       {/* Opciones */}
       <View style={styles.fillOptionsGrid}>
         {exercise.options.map((opt, idx) => {
-          let bg = '#1A1D27';
+          let bg = '#111122';
           let border = '#2D3148';
           let textColor = '#FFFFFF';
           if (answered) {
@@ -892,7 +892,7 @@ const perfectStyles = StyleSheet.create({
     fontWeight: '800',
   },
   repeatBtn: {
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 18,
     paddingVertical: 16,
     alignItems: 'center',
@@ -1507,7 +1507,7 @@ const styles = StyleSheet.create({
   },
   exerciseCount: { fontSize: 13, color: '#9CA3AF', fontWeight: '600' },
   hintBtn: {
-    backgroundColor: '#1A1D27', borderRadius: 20,
+    backgroundColor: '#111122', borderRadius: 20,
     paddingHorizontal: 12, paddingVertical: 6,
     borderWidth: 1, borderColor: '#2D3148',
   },
@@ -1541,7 +1541,7 @@ const styles = StyleSheet.create({
   hintText: { color: '#FFD700', fontSize: 14 },
   hintAnswer: { fontWeight: '700' },
   translateInput: {
-    backgroundColor: '#1A1D27', borderWidth: 2, borderColor: '#2D3148',
+    backgroundColor: '#111122', borderWidth: 2, borderColor: '#2D3148',
     borderRadius: 12, padding: 16, color: '#FFFFFF', fontSize: 16, marginBottom: 16,
   },
   inputCorrect: { borderColor: '#58CC02', backgroundColor: '#1A3A1A' },
@@ -1556,7 +1556,7 @@ const styles = StyleSheet.create({
   matchColumn: { flex: 1, gap: 8 },
   matchColHeader: { fontSize: 12, color: '#9CA3AF', fontWeight: '700', textAlign: 'center', marginBottom: 4 },
   matchCard: {
-    backgroundColor: '#1A1D27', borderRadius: 10, borderWidth: 2,
+    backgroundColor: '#111122', borderRadius: 10, borderWidth: 2,
     borderColor: '#2D3148', padding: 12, alignItems: 'center',
     minHeight: 52, justifyContent: 'center', flexDirection: 'row', gap: 4,
   },
@@ -1589,7 +1589,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   pronunciationExampleBox: {
-    backgroundColor: '#1A1D27', borderRadius: 12, padding: 16,
+    backgroundColor: '#111122', borderRadius: 12, padding: 16,
     marginBottom: 20, borderWidth: 1, borderColor: '#2D3148',
   },
   pronunciationExampleEn: {
@@ -1613,12 +1613,12 @@ const styles = StyleSheet.create({
   recordBtnEmoji: { fontSize: 28 },
   recordBtnText: { fontSize: 15, fontWeight: '700', color: '#FF6B6B' },
   playbackBtn: {
-    backgroundColor: '#8E5AF520', borderRadius: 12, padding: 14,
+    backgroundColor: '#38BDF820', borderRadius: 12, padding: 14,
     alignItems: 'center', marginBottom: 12,
-    borderWidth: 2, borderColor: '#8E5AF560',
+    borderWidth: 2, borderColor: '#38BDF860',
   },
-  playbackBtnActive: { backgroundColor: '#8E5AF540', borderColor: '#8E5AF5' },
-  playbackBtnText: { fontSize: 15, fontWeight: '600', color: '#8E5AF5' },
+  playbackBtnActive: { backgroundColor: '#38BDF840', borderColor: '#38BDF8' },
+  playbackBtnText: { fontSize: 15, fontWeight: '600', color: '#38BDF8' },
   noMicBox: {
     backgroundColor: '#FF9500' + '20', borderRadius: 12, padding: 16,
     marginBottom: 16, borderWidth: 1, borderColor: '#FF9500' + '40',
@@ -1633,7 +1633,7 @@ const styles = StyleSheet.create({
   pronunciationDoneText: { fontSize: 18, fontWeight: '700', color: '#58CC02' },
   // Ordenar oración
   sentenceBuilderArea: {
-    minHeight: 80, backgroundColor: '#1A1D27', borderRadius: 12,
+    minHeight: 80, backgroundColor: '#111122', borderRadius: 12,
     borderWidth: 2, borderColor: '#2D3148', padding: 12,
     marginBottom: 16, justifyContent: 'center',
   },
@@ -1664,14 +1664,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: 12, marginTop: 16,
   },
   resetBtn: {
-    backgroundColor: '#1A1D27', borderRadius: 12, padding: 16,
+    backgroundColor: '#111122', borderRadius: 12, padding: 16,
     alignItems: 'center', borderWidth: 1, borderColor: '#2D3148',
     paddingHorizontal: 20,
   },
   resetBtnText: { color: '#9CA3AF', fontSize: 15, fontWeight: '600' },
   // Completar la oración
   fillSentenceBox: {
-    backgroundColor: '#1A1D27', borderRadius: 12, padding: 16,
+    backgroundColor: '#111122', borderRadius: 12, padding: 16,
     marginBottom: 20, borderWidth: 1, borderColor: '#2D3148',
   },
   fillSentenceText: {
@@ -1685,13 +1685,13 @@ const styles = StyleSheet.create({
     fontStyle: 'italic', lineHeight: 18,
   },
   sentenceTranslationBox: {
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
     marginBottom: 14,
     borderLeftWidth: 3,
-    borderLeftColor: '#8E5AF5',
+    borderLeftColor: '#38BDF8',
   },
   sentenceTranslationText: {
     fontSize: 13, color: '#C4A8FF', fontStyle: 'italic', lineHeight: 18,
@@ -1727,7 +1727,7 @@ const styles = StyleSheet.create({
     textShadowColor: '#000', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4,
   },
   breakdownContainer: {
-    width: '100%', backgroundColor: '#1A1D27', borderRadius: 16,
+    width: '100%', backgroundColor: '#111122', borderRadius: 16,
     padding: 16, marginVertical: 16, borderWidth: 1, borderColor: '#2D3148',
   },
   breakdownTitle: {

@@ -431,7 +431,7 @@ function LeaderboardSection() {
               </Text>
               <Text style={{ color: '#9BA1A6', fontSize: 11, marginTop: 2 }}>{entry.levelsCompleted} niveles · 🔥 {entry.streak} días</Text>
             </View>
-            <Text style={{ color: '#8E5AF5', fontWeight: '800', fontSize: 14 }}>{entry.xp.toLocaleString()} XP</Text>
+            <Text style={{ color: '#38BDF8', fontWeight: '800', fontSize: 14 }}>{entry.xp.toLocaleString()} XP</Text>
           </View>
         );
       })}
@@ -540,7 +540,7 @@ export default function ProfileScreen() {
   const levelTitle = useMemo(() => {
     if (stats.levelsCompleted >= 500) return { title: '👑 Maestro', color: '#FFD700' };
     if (stats.levelsCompleted >= 250) return { title: '💎 Experto', color: '#00D4FF' };
-    if (stats.levelsCompleted >= 100) return { title: '🥇 Avanzado', color: '#8E5AF5' };
+    if (stats.levelsCompleted >= 100) return { title: '🥇 Avanzado', color: '#38BDF8' };
     if (stats.levelsCompleted >= 50) return { title: '🌟 Intermedio', color: '#58CC02' };
     if (stats.levelsCompleted >= 10) return { title: '📖 Aprendiz', color: '#1CB0F6' };
     return { title: '🌱 Principiante', color: '#9CA3AF' };
@@ -670,7 +670,7 @@ export default function ProfileScreen() {
             { label: 'Racha', value: `${stats.streak} días`, emoji: '🔥', color: '#FF9600' },
             { label: 'Palabras', value: stats.totalWordsLearned, emoji: '📖', color: '#58CC02' },
             { label: 'Diamantes', value: stats.gems, emoji: '💎', color: '#00D4FF' },
-            { label: 'XP Total', value: stats.xp.toLocaleString(), emoji: '⭐', color: '#8E5AF5' },
+            { label: 'XP Total', value: stats.xp.toLocaleString(), emoji: '⭐', color: '#38BDF8' },
             { label: 'Días Tarea', value: stats.totalDaysCompleted, emoji: '📅', color: '#FF4B4B' },
             { label: 'Desafíos', value: game.dailyChallengesCompleted ?? 0, emoji: '🏆', color: '#FFD700' },
           ].map(stat => (
@@ -688,7 +688,7 @@ export default function ProfileScreen() {
           {(() => {
             const lvls = stats.levelsCompleted;
             let cefr = 'A1', cefrColor = '#9CA3AF', cefrDesc = 'Principiante absoluto', cefrPct = 0;
-            if (lvls >= 400) { cefr = 'B2'; cefrColor = '#8E5AF5'; cefrDesc = 'Independiente avanzado'; cefrPct = 95; }
+            if (lvls >= 400) { cefr = 'B2'; cefrColor = '#38BDF8'; cefrDesc = 'Independiente avanzado'; cefrPct = 95; }
             else if (lvls >= 250) { cefr = 'B1'; cefrColor = '#1CB0F6'; cefrDesc = 'Independiente intermedio'; cefrPct = 70; }
             else if (lvls >= 100) { cefr = 'A2'; cefrColor = '#58CC02'; cefrDesc = 'Usuario básico'; cefrPct = 40; }
             else if (lvls >= 10) { cefr = 'A1+'; cefrColor = '#FF9500'; cefrDesc = 'Principiante avanzado'; cefrPct = 15; }
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   settingsBtn: {
     width: 36, height: 36, borderRadius: 10,
-    backgroundColor: '#1A1D27', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center',
     borderWidth: 1, borderColor: '#2D3148',
   },
   settingsBtnText: { fontSize: 18 },
@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
   logoutBtnText: { color: '#FF4B4B', fontSize: 13, fontWeight: '700' },
   settingsLink: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 16,
+    backgroundColor: '#111122', borderRadius: 14, padding: 16,
     borderWidth: 1, borderColor: '#2D3148',
   },
   settingsLinkEmoji: { fontSize: 22 },
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statCard: {
     width: '30%', flex: 1, minWidth: 90,
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
+    backgroundColor: '#111122', borderRadius: 14, padding: 14,
     alignItems: 'center', borderWidth: 1, borderColor: '#2D3148',
   },
   statEmoji: { fontSize: 24, marginBottom: 6 },
@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
   notifSection: { gap: 10 },
   notifBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
+    backgroundColor: '#111122', borderRadius: 14, padding: 14,
     borderWidth: 1.5, borderColor: '#2D3148',
   },
   notifBannerActive: { borderColor: '#FF960040', backgroundColor: '#FF960010' },
@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
   notifBannerTitle: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', marginBottom: 3 },
   notifBannerSub: { fontSize: 12, color: '#9CA3AF', lineHeight: 17 },
   notifCard: {
-    backgroundColor: '#1A1D27', borderRadius: 16,
+    backgroundColor: '#111122', borderRadius: 16,
     borderWidth: 1, borderColor: '#2D3148', overflow: 'hidden',
   },
   notifRow: {
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   timeRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   timeRowEmoji: { fontSize: 22 },
   timeRowTitle: { fontSize: 13, color: '#9CA3AF', fontWeight: '600', marginBottom: 2 },
-  timeRowValue: { fontSize: 18, fontWeight: '800', color: '#8E5AF5' },
+  timeRowValue: { fontSize: 18, fontWeight: '800', color: '#38BDF8' },
   timeRowArrow: { fontSize: 24, color: '#6B7280', fontWeight: '300' },
   timeRowDisabled: { opacity: 0.5 },
   // Modal picker
@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalBox: {
-    backgroundColor: '#1A1D27', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: '#111122', borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, paddingBottom: 40,
   },
   modalTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', marginBottom: 4 },
@@ -991,15 +991,15 @@ const styles = StyleSheet.create({
     height: 44, justifyContent: 'center', alignItems: 'center',
     borderRadius: 10, marginVertical: 2,
   },
-  pickerItemSelected: { backgroundColor: '#8E5AF520', borderWidth: 1.5, borderColor: '#8E5AF5' },
+  pickerItemSelected: { backgroundColor: '#38BDF820', borderWidth: 1.5, borderColor: '#38BDF8' },
   pickerItemText: { fontSize: 20, fontWeight: '600', color: '#6B7280' },
-  pickerItemTextSelected: { color: '#8E5AF5', fontWeight: '800' },
+  pickerItemTextSelected: { color: '#38BDF8', fontWeight: '800' },
   pickerColon: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', marginTop: 20 },
   timePreview: {
     alignItems: 'center', marginVertical: 16,
     backgroundColor: '#0F1117', borderRadius: 14, paddingVertical: 12,
   },
-  timePreviewText: { fontSize: 32, fontWeight: '800', color: '#8E5AF5', letterSpacing: 2 },
+  timePreviewText: { fontSize: 32, fontWeight: '800', color: '#38BDF8', letterSpacing: 2 },
   modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8 },
   modalBtnCancel: {
     flex: 1, paddingVertical: 14, borderRadius: 14,
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
   modalBtnCancelText: { color: '#9CA3AF', fontWeight: '700', fontSize: 15 },
   modalBtnConfirm: {
     flex: 1, paddingVertical: 14, borderRadius: 14,
-    backgroundColor: '#8E5AF5', alignItems: 'center',
+    backgroundColor: '#38BDF8', alignItems: 'center',
   },
   modalBtnConfirmText: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
   // Logros
@@ -1022,7 +1022,7 @@ const styles = StyleSheet.create({
   achieveList: { gap: 8 },
   achieveCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
+    backgroundColor: '#111122', borderRadius: 14, padding: 14,
     borderWidth: 1.5, borderColor: '#FFD70030',
   },
   achieveCardLocked: { borderColor: '#2D3148', opacity: 0.6 },
@@ -1036,13 +1036,13 @@ const styles = StyleSheet.create({
   achieveCheck: { fontSize: 18 },
   achieveShareBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#8E5AF520', justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: '#8E5AF540',
+    backgroundColor: '#38BDF820', justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: '#38BDF840',
   },
   achieveShareIcon: { fontSize: 16 },
   // Apariencia / Tema
   appearanceCard: {
-    backgroundColor: '#1A1D27', borderRadius: 16,
+    backgroundColor: '#111122', borderRadius: 16,
     borderWidth: 1, borderColor: '#2D3148', overflow: 'hidden',
   },
   themeRow: {
@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: '#2D3148',
     paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center',
   },
-  resetThemeBtnText: { fontSize: 13, color: '#8E5AF5', fontWeight: '600' },
+  resetThemeBtnText: { fontSize: 13, color: '#38BDF8', fontWeight: '600' },
   // Palabras Difíciles
   hardWordsSection: { gap: 10 },
   hardWordsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -1064,7 +1064,7 @@ const styles = StyleSheet.create({
   hardWordsList: { gap: 8 },
   hardWordRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 12,
+    backgroundColor: '#111122', borderRadius: 14, padding: 12,
     borderWidth: 1, borderColor: '#FF4B4B20',
   },
   hardWordRank: {
@@ -1085,7 +1085,7 @@ const styles = StyleSheet.create({
   hardWordFailCount: { fontSize: 20, fontWeight: '800', color: '#FF4B4B' },
   hardWordFailLabel: { fontSize: 10, color: '#9CA3AF', fontWeight: '600' },
   hardWordsEmpty: {
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 20,
+    backgroundColor: '#111122', borderRadius: 14, padding: 20,
     alignItems: 'center', borderWidth: 1, borderColor: '#2D3148',
   },
   hardWordsEmptyEmoji: { fontSize: 36, marginBottom: 8 },
@@ -1100,7 +1100,7 @@ const styles = StyleSheet.create({
   practiceHistorySection: { gap: 8 },
   practiceHistoryCard: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#1A1D27', borderRadius: 14, padding: 14,
+    backgroundColor: '#111122', borderRadius: 14, padding: 14,
     borderWidth: 1, borderColor: '#2D3148',
   },
   practiceHistoryLeft: { flex: 1, gap: 3 },
@@ -1119,7 +1119,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', padding: 24,
   },
   avatarModalBox: {
-    backgroundColor: '#1A1D27', borderRadius: 24, padding: 24,
+    backgroundColor: '#111122', borderRadius: 24, padding: 24,
     width: '100%', maxWidth: 360,
     borderWidth: 1, borderColor: '#2D3148',
   },
@@ -1131,7 +1131,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F1117', justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: '#2D3148',
   },
-  avatarOptionSelected: { borderColor: '#8E5AF5', backgroundColor: '#8E5AF520' },
+  avatarOptionSelected: { borderColor: '#38BDF8', backgroundColor: '#38BDF820' },
   avatarOptionEmoji: { fontSize: 26 },
   avatarModalClose: {
     backgroundColor: '#2D3148', borderRadius: 14,
@@ -1141,9 +1141,9 @@ const styles = StyleSheet.create({
   // Avatar edit button
   avatarEditBtn: {
     position: 'absolute', bottom: -4, right: -4,
-    backgroundColor: '#8E5AF5', borderRadius: 12,
+    backgroundColor: '#38BDF8', borderRadius: 12,
     width: 24, height: 24, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 2, borderColor: '#1A1D27',
+    borderWidth: 2, borderColor: '#111122',
   },
   avatarEditIcon: { fontSize: 12 },
   // Edición de nombre
@@ -1161,11 +1161,11 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: '#0F1117', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 8,
     fontSize: 15, fontWeight: '700', color: '#FFFFFF',
-    borderWidth: 1.5, borderColor: '#8E5AF5',
+    borderWidth: 1.5, borderColor: '#38BDF8',
     textAlign: 'center',
   },
   nameEditSave: {
-    backgroundColor: '#8E5AF5', borderRadius: 10,
+    backgroundColor: '#38BDF8', borderRadius: 10,
     width: 34, height: 34, justifyContent: 'center', alignItems: 'center',
   },
   nameEditSaveText: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
@@ -1177,7 +1177,7 @@ const styles = StyleSheet.create({
   nameError: { fontSize: 12, color: '#FF4B4B', marginTop: 4, textAlign: 'center' },
   // Nivel de inglés A1-B2
   englishLevelCard: {
-    backgroundColor: '#1A1D27', borderRadius: 16, padding: 16,
+    backgroundColor: '#111122', borderRadius: 16, padding: 16,
     marginVertical: 8, borderWidth: 1, borderColor: '#2D3148',
   },
   englishLevelTitle: { fontSize: 13, color: '#9CA3AF', fontWeight: '700', marginBottom: 12, textTransform: 'uppercase' },

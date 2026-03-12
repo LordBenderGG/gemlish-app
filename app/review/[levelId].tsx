@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   headerBackText: {
-    color: '#8E5AF5',
+    color: '#38BDF8',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   headerCounter: {
-    backgroundColor: '#8E5AF5',
+    backgroundColor: '#38BDF8',
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   card: {
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   cardPhonetic: {
-    color: '#8E5AF5',
+    color: '#38BDF8',
     fontSize: 14,
     marginBottom: 6,
   },
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#8E5AF5',
+    borderLeftColor: '#38BDF8',
   },
   exampleEn: {
     color: '#ECEDEE',
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   backBtn: {
-    backgroundColor: '#8E5AF5',
+    backgroundColor: '#38BDF8',
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 16,

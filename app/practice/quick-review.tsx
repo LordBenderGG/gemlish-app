@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: '#2D3148',
   },
   backBtn: {
-    backgroundColor: '#1A1D27', borderRadius: 10,
+    backgroundColor: '#111122', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 8,
     borderWidth: 1, borderColor: '#2D3148',
   },
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
   headerSub: { fontSize: 11, color: '#9CA3AF', marginTop: 1 },
   timerBadge: {
-    backgroundColor: '#1A1D27', borderRadius: 10,
+    backgroundColor: '#111122', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 8,
     borderWidth: 1.5,
   },
@@ -419,11 +419,11 @@ const styles = StyleSheet.create({
   timerBarBg: { height: 4, backgroundColor: '#2D3148' },
   timerBarFill: { height: 4, borderRadius: 2 },
   progressBarBg: { height: 3, backgroundColor: '#2D3148' },
-  progressBarFill: { height: 3, backgroundColor: '#8E5AF5', borderRadius: 2 },
+  progressBarFill: { height: 3, backgroundColor: '#38BDF8', borderRadius: 2 },
   content: { flex: 1, padding: 20, justifyContent: 'center' },
   // Tarjeta de pregunta
   questionCard: {
-    backgroundColor: '#1A1D27', borderRadius: 20, padding: 24,
+    backgroundColor: '#111122', borderRadius: 20, padding: 24,
     borderWidth: 1.5, borderColor: '#2D3148', gap: 14,
   },
   questionCounter: { fontSize: 12, color: '#9CA3AF', fontWeight: '700', textAlign: 'center' },
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#FF4B4B10' },
   feedbackText: { fontSize: 15, fontWeight: '700', textAlign: 'center' },
   submitBtn: {
-    backgroundColor: '#8E5AF5', borderRadius: 14, paddingVertical: 14,
+    backgroundColor: '#38BDF8', borderRadius: 14, paddingVertical: 14,
     alignItems: 'center',
   },
   submitBtnDisabled: { backgroundColor: '#2D3148' },
@@ -465,14 +465,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: 16, marginVertical: 8,
   },
   resultStat: {
-    alignItems: 'center', backgroundColor: '#1A1D27',
+    alignItems: 'center', backgroundColor: '#111122',
     borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14,
     borderWidth: 1, borderColor: '#2D3148', minWidth: 80,
   },
   resultStatNum: { fontSize: 22, fontWeight: '800' },
   resultStatLabel: { fontSize: 11, color: '#9CA3AF', fontWeight: '600', marginTop: 2 },
   finishBtn: {
-    backgroundColor: '#8E5AF5', borderRadius: 16, paddingVertical: 16,
+    backgroundColor: '#38BDF8', borderRadius: 16, paddingVertical: 16,
     paddingHorizontal: 40, alignItems: 'center', marginTop: 8,
   },
   finishBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },

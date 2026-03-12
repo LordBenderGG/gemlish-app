@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 13,
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
   welcomeBackCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,

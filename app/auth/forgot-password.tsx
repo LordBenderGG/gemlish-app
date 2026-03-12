@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     lineHeight: 20, marginBottom: 28,
   },
   card: {
-    backgroundColor: '#1A1D27', borderRadius: 20,
+    backgroundColor: '#111122', borderRadius: 20,
     padding: 20, borderWidth: 1, borderColor: '#2D3148',
     marginBottom: 24,
   },
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   btnPrimaryText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   btnSecondary: {
-    backgroundColor: '#1A1D27', borderRadius: 14,
+    backgroundColor: '#111122', borderRadius: 14,
     padding: 16, alignItems: 'center',
     borderWidth: 1, borderColor: '#2D3148',
   },

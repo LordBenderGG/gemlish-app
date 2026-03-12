@@ -127,7 +127,7 @@ function QuestionCard({ pw, questionType, onAnswer, questionNumber, total }: Que
     }
   }, [questionType, pw.word]);
 
-  const failBadgeColor = pw.failCount >= 5 ? '#FF4B4B' : pw.failCount >= 3 ? '#FF9600' : '#8E5AF5';
+  const failBadgeColor = pw.failCount >= 5 ? '#FF4B4B' : pw.failCount >= 3 ? '#FF9600' : '#38BDF8';
 
   return (
     <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, padding: 16, justifyContent: 'center' },
   // Tarjeta de pregunta
   card: {
-    backgroundColor: '#1A1D27', borderRadius: 20, padding: 20,
+    backgroundColor: '#111122', borderRadius: 20, padding: 20,
     borderWidth: 1.5, borderColor: '#2D3148', gap: 14,
   },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -539,13 +539,13 @@ const styles = StyleSheet.create({
   resultTitle: { fontSize: 24, fontWeight: '800', color: '#FFFFFF' },
   resultStats: { flexDirection: 'row', gap: 16 },
   resultStat: {
-    flex: 1, backgroundColor: '#1A1D27', borderRadius: 16, padding: 16,
+    flex: 1, backgroundColor: '#111122', borderRadius: 16, padding: 16,
     alignItems: 'center', borderWidth: 1.5,
   },
   resultStatValue: { fontSize: 32, fontWeight: '800', color: '#FFFFFF' },
   resultStatLabel: { fontSize: 13, fontWeight: '700', marginTop: 4 },
   hardListBox: {
-    width: '100%', backgroundColor: '#1A1D27', borderRadius: 16, padding: 16,
+    width: '100%', backgroundColor: '#111122', borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: '#FF4B4B30', gap: 8,
   },
   hardListTitle: { fontSize: 13, color: '#9CA3AF', fontWeight: '600', marginBottom: 4 },

@@ -180,7 +180,7 @@ function MiniQuiz({ words, onComplete }: MiniQuizProps) {
       </View>
       <View style={styles.quizOptions}>
         {q.options.map(opt => {
-          let bg = '#1A1D27', border = '#2D3148', textColor = '#FFFFFF';
+          let bg = '#111122', border = '#2D3148', textColor = '#FFFFFF';
           if (selected !== null) {
             if (opt === q.correct) { bg = '#1A3A1A'; border = '#58CC02'; textColor = '#58CC02'; }
             else if (opt === selected && opt !== q.correct) { bg = '#3A1A1A'; border = '#FF4B4B'; textColor = '#FF4B4B'; }
@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
   dueLabel: { color: '#FF9500', fontSize: 12, fontWeight: '600', marginTop: 8 },
   list: { padding: 12, paddingBottom: 20 },
   wordCard: {
-    backgroundColor: '#1A1D27', borderRadius: 16, padding: 16,
+    backgroundColor: '#111122', borderRadius: 16, padding: 16,
     marginBottom: 12, borderWidth: 1, borderColor: '#2D3148',
   },
   wordCardLearned: { borderColor: '#58CC0240', backgroundColor: '#1A2A1A' },
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   doneSub: { fontSize: 16, color: '#FF9600', fontWeight: '700', marginBottom: 4 },
   doneSub2: { fontSize: 14, color: '#9CA3AF', marginBottom: 20 },
   // Quiz
-  quizContainer: { backgroundColor: '#1A1D27', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#2D3148' },
+  quizContainer: { backgroundColor: '#111122', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#2D3148' },
   quizTitle: { fontSize: 14, color: '#9CA3AF', fontWeight: '700', marginBottom: 4 },
   quizInstruction: { fontSize: 18, color: '#FFFFFF', fontWeight: '700', marginBottom: 16 },
   quizWordBox: {
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
   quizOptionText: { fontSize: 16, fontWeight: '600' },
   // Spaced Review
   spacedCard: {
-    backgroundColor: '#1A1D27', borderRadius: 20, padding: 24,
+    backgroundColor: '#111122', borderRadius: 20, padding: 24,
     borderWidth: 1, borderColor: '#2D3148',
   },
   spacedWord: { fontSize: 36, fontWeight: '900', color: '#FFFFFF', textAlign: 'center', marginBottom: 4 },

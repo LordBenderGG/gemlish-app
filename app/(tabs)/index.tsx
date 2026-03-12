@@ -768,7 +768,7 @@ const styles = StyleSheet.create({
   xpText: { fontSize: 13, color: '#FFD700', fontWeight: '600' },
   statBadge: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#1A1D27', borderRadius: 20,
+    backgroundColor: '#111122', borderRadius: 20,
     paddingHorizontal: 10, paddingVertical: 5,
     borderWidth: 1, borderColor: '#2D3148', gap: 4,
   },
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#1E1B3A',
+    borderColor: '#111122',
     backgroundColor: '#0D0D1A',
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
   levelLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   levelIconBgLocked: {
     width: 48, height: 48, borderRadius: 14,
-    backgroundColor: '#1E1B3A',
+    backgroundColor: '#111122',
     justifyContent: 'center', alignItems: 'center', marginRight: 14,
   },
   levelIconBgCompleted: {
@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#1A1D27', borderRadius: 12,
+    backgroundColor: '#111122', borderRadius: 12,
     marginHorizontal: 16, marginVertical: 6,
     paddingHorizontal: 12, paddingVertical: 8,
     borderWidth: 1, borderColor: '#2D3148',
@@ -1023,7 +1023,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalCard: {
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 20,
     borderWidth: 1.5,
     width: '100%',
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   modalWordChip: {
-    backgroundColor: '#252836',
+    backgroundColor: '#111122',
     borderRadius: 10,
     borderWidth: 1,
     paddingHorizontal: 12,
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   unlockCard: {
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#111122',
     borderRadius: 24,
     borderWidth: 2,
     borderColor: '#58CC02',

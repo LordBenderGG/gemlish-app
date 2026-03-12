@@ -241,7 +241,7 @@ export default function StatsScreen() {
 
   const textPrimary = isDark ? '#ECEDEE' : '#11181C';
   const textMuted = isDark ? '#9BA1A6' : '#687076';
-  const cardBg = isDark ? '#1A1D27' : '#F5F5F5';
+  const cardBg = isDark ? '#111122' : '#F5F5F5';
   const borderColor = isDark ? '#2D3148' : '#E5E7EB';
 
   if (loading) {
