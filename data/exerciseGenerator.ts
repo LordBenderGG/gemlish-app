@@ -118,15 +118,18 @@ function buildSentenceOrderExercise(word: Word, levelNum: number): SentenceOrder
   let sentenceEs: string;
 
   if (levelNum <= 5) {
-    // Oraciones simples de 3-4 palabras para principiantes
-    const simpleTemplates = [
-      { en: `I say ${word.word}`, es: `Yo digo ${word.translation}` },
-      { en: `This is ${word.word}`, es: `Esto es ${word.translation}` },
-      { en: `I like ${word.word}`, es: `Me gusta ${word.translation}` },
-    ];
-    const tpl = simpleTemplates[Math.floor(Math.random() * simpleTemplates.length)];
-    sentence = tpl.en;
-    sentenceEs = tpl.es;
+    // Usar directamente el ejemplo de la palabra (siempre gramaticalmente correcto)
+    // en lugar de plantillas genéricas que pueden ser incorrectas (ej: "This is Hi")
+    const raw = word.example.replace(/[.,!?;:]$/, '');
+    const wordCount = raw.split(' ').length;
+    if (wordCount <= 6) {
+      sentence = raw;
+      sentenceEs = word.exampleEs.replace(/[.,!?;:]$/, '');
+    } else {
+      // Recortar a las primeras 5 palabras si es muy larga
+      sentence = raw.split(' ').slice(0, 5).join(' ');
+      sentenceEs = word.exampleEs;
+    }
   } else if (levelNum <= 15) {
     // Oraciones cortas del ejemplo, sin puntuación
     const raw = word.example.replace(/[.,!?;:]$/, '');
@@ -172,15 +175,9 @@ function buildFillBlankExercise(
   let sentenceEs: string;
 
   if (levelNum <= 5) {
-    // Oraciones muy simples para principiantes absolutos
-    const simpleTemplates = [
-      { en: `I say ${word.word} every day.`, es: `Digo ${word.translation} todos los días.` },
-      { en: `This is ${word.word}.`, es: `Esto es ${word.translation}.` },
-      { en: `I know the word ${word.word}.`, es: `Conozco la palabra ${word.translation}.` },
-    ];
-    const tpl = simpleTemplates[Math.floor(Math.random() * simpleTemplates.length)];
-    sentence = tpl.en;
-    sentenceEs = tpl.es;
+    // Usar directamente el ejemplo de la palabra (siempre gramaticalmente correcto)
+    sentence = word.example.replace(/[.,!?;:]$/, '');
+    sentenceEs = word.exampleEs;
   } else if (levelNum <= 15) {
     // Usar el ejemplo de la palabra directamente
     sentence = word.example.replace(/[.,!?;:]$/, '');
