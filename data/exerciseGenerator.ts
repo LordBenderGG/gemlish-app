@@ -15,6 +15,7 @@ export interface MultipleChoiceExercise {
   options: string[];
   correct: number;
   correctAnswer: string;
+  wordEn: string; // palabra en inglés para TTS en modo difícil
 }
 
 export interface TranslateExercise {
@@ -243,6 +244,7 @@ function buildMultipleChoice(
       options: opts,
       correct: opts.indexOf(word.translation),
       correctAnswer: word.translation,
+      wordEn: word.word,
     };
   } else {
     // Pregunta: ¿Cómo se dice "traducción"? → opciones en inglés
@@ -254,6 +256,7 @@ function buildMultipleChoice(
       options: opts,
       correct: opts.indexOf(word.word),
       correctAnswer: word.word,
+      wordEn: word.word,
     };
   }
 }

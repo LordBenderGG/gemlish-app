@@ -64,16 +64,19 @@ function MultipleChoiceView({
   const [selected, setSelected] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const optionLetters = ['A', 'B', 'C', 'D'];
-  const { speak } = useSpeech();
+  const { speak, speaking } = useSpeech();
 
-  // En modo solo escucha, reproducir la palabra al montar
+  // En modo solo escucha: reproducir la respuesta correcta en inglés
+  // En modo difícil: reproducir la palabra en inglés automáticamente
   useEffect(() => {
-    if (listenOnly && exercise.questionEs) {
-      // Reproducir la respuesta correcta en inglés
+    if (listenOnly) {
       const correctOption = exercise.options[exercise.correct];
       if (correctOption) setTimeout(() => speak(correctOption), 400);
+    } else if (hideTranslation && exercise.wordEn) {
+      // Reproducir automáticamente la palabra en inglés en modo difícil
+      setTimeout(() => speak(exercise.wordEn), 500);
     }
-  }, [listenOnly, exercise.correct, exercise.options, speak]);
+  }, [listenOnly, hideTranslation, exercise.correct, exercise.options, exercise.wordEn, speak]);
 
   const handleSelect = (idx: number) => {
     if (answered) return;
@@ -86,7 +89,19 @@ function MultipleChoiceView({
     <View style={styles.exerciseContainer}>
       <Text style={styles.questionLabel}>{listenOnly ? '🎧 Escucha y elige:' : hideTranslation ? '🔥 Modo difícil:' : '¿Cuál es la respuesta?'}</Text>
       {!hideTranslation && <Text style={styles.questionText}>{exercise.questionEs}</Text>}
-      {hideTranslation && <Text style={styles.questionText}>{exercise.question}</Text>}
+      {hideTranslation && (
+        <View style={{ gap: 12 }}>
+          <Text style={styles.questionText}>{exercise.question}</Text>
+          <TouchableOpacity
+            style={[styles.listenBtn, speaking && styles.listenBtnActive]}
+            onPress={() => speak(exercise.wordEn)}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.listenBtnEmoji}>{speaking ? '⏹' : '🔊'}</Text>
+            <Text style={styles.listenBtnText}>{speaking ? 'Reproduciendo...' : 'Escuchar de nuevo'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.optionsGrid}>
         {exercise.options.map((opt, idx) => {
           let bg = '#111122';
