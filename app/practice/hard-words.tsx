@@ -63,11 +63,11 @@ function normalizeAnswer(str: string): string {
 
 // ─── Tarjeta de pregunta ─────────────────────────────────────────────────────
 
-type QuestionType = 'translate-to-en' | 'translate-to-es' | 'listen-write';
+type QuestionType = 'translate-to-en' | 'translate-to-es';
 
 function getQuestionType(idx: number): QuestionType {
-  const types: QuestionType[] = ['translate-to-en', 'translate-to-es', 'listen-write'];
-  return types[idx % types.length];
+  // Alternar entre traducir al inglés y traducir al español
+  return idx % 2 === 0 ? 'translate-to-en' : 'translate-to-es';
 }
 
 interface QuestionCardProps {
@@ -95,12 +95,7 @@ function QuestionCard({ pw, questionType, onAnswer, questionNumber, total }: Que
     ]).start();
   }, [pw.word.word, questionType]);
 
-  useEffect(() => {
-    if (questionType === 'listen-write') {
-      const t = setTimeout(() => speak(pw.word.word), 500);
-      return () => clearTimeout(t);
-    }
-  }, [pw.word.word, questionType]);
+  // speak no se usa en este modo
 
   const handleSubmit = useCallback(() => {
     if (!input.trim() || submitted) return;
@@ -120,10 +115,8 @@ function QuestionCard({ pw, questionType, onAnswer, questionNumber, total }: Que
   const question = useMemo(() => {
     if (questionType === 'translate-to-en') {
       return { label: '🇬🇧 Escribe en inglés:', prompt: pw.word.translation };
-    } else if (questionType === 'translate-to-es') {
-      return { label: '🇪🇸 Escribe en español:', prompt: pw.word.word };
     } else {
-      return { label: '🎧 Escucha y escribe en inglés:', prompt: null };
+      return { label: '🇪🇸 Escribe en español:', prompt: pw.word.word };
     }
   }, [questionType, pw.word]);
 
@@ -153,18 +146,7 @@ function QuestionCard({ pw, questionType, onAnswer, questionNumber, total }: Que
         </View>
       )}
 
-      {questionType === 'listen-write' && (
-        <TouchableOpacity
-          style={[styles.listenBtn, speaking && styles.listenBtnActive]}
-          onPress={() => toggle(pw.word.word)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.listenBtnEmoji}>{speaking ? '⏹' : '🔊'}</Text>
-          <Text style={styles.listenBtnText}>
-            {speaking ? 'Reproduciendo...' : 'Escuchar de nuevo'}
-          </Text>
-        </TouchableOpacity>
-      )}
+
 
       {/* Input */}
       <TextInput
