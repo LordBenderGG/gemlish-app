@@ -7,6 +7,11 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Ensure NODE_ENV is always set — required by Expo bundler
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "production";
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
