@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLevelCompleteAd, useRewardedAd, AD_UNIT_IDS } from '@/hooks/useAdMob';
 import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
   ScrollView, Alert, Animated, StatusBar, Platform,
@@ -931,6 +932,21 @@ export default function ExerciseScreen() {
   const { username, game, completeLevel, saveLevelErrors, loseHeart, spendGems } = useGame();
   const { checkAchievements } = useAchievements();
   const { playCorrect, playWrong, playLevelComplete, playStreak } = useFeedbackSounds();
+  const { showIfNeeded: showLevelCompleteAd } = useLevelCompleteAd();
+  const [showNoHeartsModal, setShowNoHeartsModal] = useState(false);
+  const [hardModeHintUnlocked, setHardModeHintUnlocked] = useState(false);
+  const { showAd: showHardModeHintAd, loaded: hardModeHintAdLoaded } = useRewardedAd(
+    AD_UNIT_IDS.REWARDED_HARD_MODE_HINT,
+    () => setHardModeHintUnlocked(true)
+  );
+  const { showAd: showContinueAd, loaded: continueAdLoaded } = useRewardedAd(
+    AD_UNIT_IDS.REWARDED_CONTINUE,
+    () => {
+      // Recompensa: restaurar 3 corazones y continuar
+      setHearts(3);
+      setShowNoHeartsModal(false);
+    }
+  );
   const levelNum = parseInt(levelId || '1', 10);
   const isHardMode = mode === 'hard';
   const isListenMode = mode === 'listen';
@@ -1116,11 +1132,7 @@ export default function ExerciseScreen() {
       setHearts(newHearts);
       await loseHeart();
       if (newHearts <= 0) {
-        Alert.alert(
-          '💔 Sin vidas',
-          'Te quedaste sin vidas. Vuelve más tarde o gana diamantes jugando.',
-          [{ text: 'Volver', onPress: () => router.back() }]
-        );
+        setShowNoHeartsModal(true);
         return;
       }
     }
@@ -1129,6 +1141,7 @@ export default function ExerciseScreen() {
       animateProgress(1);
       setShowResult(true);
       playLevelComplete();
+      showLevelCompleteAd();
       const xpEarned = level?.xp || 10;
       const gemsEarned = wrongCount === 0 ? 5 : 2;
       const elapsedMs = elapsedSeconds * 1000;
@@ -1424,6 +1437,16 @@ export default function ExerciseScreen() {
           <TouchableOpacity style={styles.hintBtn} onPress={handleHint}>
             <Text style={styles.hintBtnText}>💡 ({game.gems} 💎)</Text>
           </TouchableOpacity>
+          {isHardMode && Platform.OS !== 'web' && !hardModeHintUnlocked && (
+            <TouchableOpacity
+              style={[styles.hintBtn, { backgroundColor: '#FF950020', borderColor: '#FF9500' }]}
+              onPress={() => { if (!showHardModeHintAd()) setHardModeHintUnlocked(true); }}
+            >
+              <Text style={[styles.hintBtnText, { color: '#FF9500' }]}>
+                {hardModeHintAdLoaded ? '🎥 Ayuda' : '⏳'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -1491,6 +1514,51 @@ export default function ExerciseScreen() {
           )}
         </ScrollView>
       </Reanimated.View>
+
+      {/* Modal: Sin vidas — ver anuncio para continuar */}
+      {showNoHeartsModal && (
+        <View style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.85)',
+          justifyContent: 'center', alignItems: 'center', padding: 24,
+        }}>
+          <View style={{
+            backgroundColor: '#111122', borderRadius: 20, padding: 28,
+            alignItems: 'center', width: '100%', borderWidth: 1, borderColor: '#1E2A3A',
+          }}>
+            <Text style={{ fontSize: 48, marginBottom: 12 }}>💔</Text>
+            <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: '800', marginBottom: 8 }}>Sin vidas</Text>
+            <Text style={{ color: '#9BA1A6', fontSize: 14, textAlign: 'center', marginBottom: 24 }}>
+              Ver un anuncio corto para recuperar 3 vidas y continuar
+            </Text>
+            {Platform.OS !== 'web' && (
+              <TouchableOpacity
+                onPress={() => { if (!showContinueAd()) {
+                  // Si el anuncio no está listo, continuar igual
+                  setHearts(3); setShowNoHeartsModal(false);
+                }}}
+                style={{
+                  backgroundColor: '#38BDF8', borderRadius: 12, paddingVertical: 14,
+                  paddingHorizontal: 24, width: '100%', alignItems: 'center', marginBottom: 12,
+                }}
+              >
+                <Text style={{ color: '#0D0D18', fontWeight: '800', fontSize: 16 }}>
+                  {continueAdLoaded ? '🎥 Ver anuncio y continuar' : '⏳ Cargando anuncio...'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => { setShowNoHeartsModal(false); router.back(); }}
+              style={{
+                borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24,
+                width: '100%', alignItems: 'center', borderWidth: 1, borderColor: '#2D3148',
+              }}
+            >
+              <Text style={{ color: '#9BA1A6', fontSize: 14 }}>Salir del nivel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

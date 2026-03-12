@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Rect, Text as SvgText, Line } from 'react-native-svg';
 import { useGame } from '@/context/GameContext';
@@ -357,6 +358,15 @@ export default function StatsScreen() {
 
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      {/* Banner AdMob — parte inferior */}
+      {Platform.OS !== 'web' && (
+        <BannerAd
+          unitId={TestIds.ADAPTIVE_BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{ requestNonPersonalizedAdsOnly: false }}
+        />
+      )}
     </View>
   );
 }

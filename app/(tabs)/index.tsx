@@ -18,6 +18,8 @@ import { getLevelData, getLevelIcon } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { ConfettiOverlay } from '@/components/confetti-overlay';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { Platform } from 'react-native';
 
 const TOTAL_LEVELS = 500;
 
@@ -698,6 +700,15 @@ export default function LevelsScreen() {
           levelNum={previewLevel}
           visible={previewLevel !== null}
           onClose={() => setPreviewLevel(null)}
+        />
+      )}
+
+      {/* Banner AdMob — parte inferior */}
+      {Platform.OS !== 'web' && (
+        <BannerAd
+          unitId={TestIds.ADAPTIVE_BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{ requestNonPersonalizedAdsOnly: false }}
         />
       )}
 

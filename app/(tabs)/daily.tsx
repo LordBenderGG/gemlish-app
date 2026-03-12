@@ -2,8 +2,9 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  StatusBar, Alert, ScrollView,
+  StatusBar, Alert, ScrollView, Platform,
 } from 'react-native';
+import { useRewardedAd, AD_UNIT_IDS } from '@/hooks/useAdMob';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { getDailyWords, Word, LESSONS } from '@/data/lessons';
@@ -213,6 +214,13 @@ export default function DailyScreen() {
   const { username, daily, markWordLearned, finishDaily, resetDailyIfNeeded, game } = useGame();
   const [words] = useState<Word[]>(() => getDailyWords());
   const [phase, setPhase] = useState<Phase>('study');
+  const { showAd: showDailyRetryAd, loaded: dailyRetryAdLoaded } = useRewardedAd(
+    AD_UNIT_IDS.REWARDED_DAILY_RETRY,
+    () => {
+      // Recompensa: permitir repetir el quiz del día
+      setPhase('quiz');
+    }
+  );
   const [sm2Cards, setSm2Cards] = useState<Record<string, SM2Card>>({});
   const [dueWords, setDueWords] = useState<Word[]>([]);
 
@@ -329,6 +337,16 @@ export default function DailyScreen() {
               onPress={() => setPhase('spaced-review')}
             >
               <Text style={styles.completeBtnText}>🔄 Repasar {dueWords.length} palabras pendientes</Text>
+            </TouchableOpacity>
+          )}
+          {Platform.OS !== 'web' && (
+            <TouchableOpacity
+              style={[styles.completeBtn, { marginTop: 12, backgroundColor: '#1E2A3A', borderWidth: 1, borderColor: '#38BDF840' }]}
+              onPress={() => { if (!showDailyRetryAd()) setPhase('quiz'); }}
+            >
+              <Text style={[styles.completeBtnText, { color: '#38BDF8' }]}>
+                {dailyRetryAdLoaded ? '🎥 Ver anuncio para repetir quiz' : '🔄 Repetir quiz'}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
