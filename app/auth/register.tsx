@@ -4,8 +4,23 @@ import {
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
   StatusBar,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useGame } from '@/context/GameContext';
+
+const C = {
+  bg: '#0E1117',
+  surface: '#161B27',
+  surface2: '#1E2535',
+  text: '#F0F4FF',
+  muted: '#8B9CC8',
+  mutedLight: '#C4CEEA',
+  border: '#2A3450',
+  green: '#4ADE80',
+  blue: '#38BDF8',
+  error: '#F87171',
+  gold: '#FBBF24',
+};
 
 // ─── Fortaleza de contraseña ──────────────────────────────────────────────────
 
@@ -24,10 +39,10 @@ function getPasswordStrength(pwd: string): PasswordStrength {
 }
 
 const STRENGTH_CONFIG: Record<PasswordStrength, { label: string; color: string; bars: number }> = {
-  empty:  { label: '',        color: '#1E2A3A', bars: 0 },
-  weak:   { label: 'Débil',   color: '#EF4444', bars: 1 },
-  medium: { label: 'Media',   color: '#FBBF24', bars: 2 },
-  strong: { label: 'Fuerte',  color: '#4ADE80', bars: 3 },
+  empty:  { label: '',        color: C.border, bars: 0 },
+  weak:   { label: 'Débil',   color: C.error,  bars: 1 },
+  medium: { label: 'Media',   color: C.gold,   bars: 2 },
+  strong: { label: 'Fuerte',  color: C.green,  bars: 3 },
 };
 
 function PasswordStrengthBar({ password }: { password: string }) {
@@ -38,7 +53,7 @@ function PasswordStrengthBar({ password }: { password: string }) {
     <View style={sStyles.container}>
       <View style={sStyles.bars}>
         {[1, 2, 3].map(i => (
-          <View key={i} style={[sStyles.bar, { backgroundColor: i <= config.bars ? config.color : '#1E2A3A' }]} />
+          <View key={i} style={[sStyles.bar, { backgroundColor: i <= config.bars ? config.color : C.surface2 }]} />
         ))}
       </View>
       {config.label ? <Text style={[sStyles.label, { color: config.color }]}>{config.label}</Text> : null}
@@ -49,7 +64,7 @@ function PasswordStrengthBar({ password }: { password: string }) {
 const sStyles = StyleSheet.create({
   container: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
   bars: { flexDirection: 'row', gap: 4, flex: 1 },
-  bar: { flex: 1, height: 4, borderRadius: 2 },
+  bar: { flex: 1, height: 5, borderRadius: 3 },
   label: { fontSize: 11, fontWeight: '700', width: 48, textAlign: 'right' },
 });
 
@@ -64,6 +79,7 @@ export default function RegisterScreen() {
   const [showPassword2, setShowPassword2] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleRegister = async () => {
     if (!username.trim() || !password.trim() || !password2.trim()) {
@@ -87,15 +103,19 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0D18" />
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
           {/* Logo */}
           <View style={styles.logoContainer}>
-            <View style={styles.logoCircle}>
+            <LinearGradient
+              colors={['#A78BFA', '#38BDF8']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={styles.logoCircle}
+            >
               <Text style={styles.logoEmoji}>💎</Text>
-            </View>
+            </LinearGradient>
             <Text style={styles.logoText}>Gemlish</Text>
             <Text style={styles.logoSub}>Crea tu cuenta gratis</Text>
           </View>
@@ -106,6 +126,7 @@ export default function RegisterScreen() {
 
             {error ? (
               <View style={styles.errorBox}>
+                <Text style={styles.errorIcon}>⚠️</Text>
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -113,28 +134,32 @@ export default function RegisterScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Nombre de usuario</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, focusedField === 'user' && styles.inputFocused]}
                 placeholder="Mínimo 3 caracteres"
-                placeholderTextColor="#3D4A5C"
+                placeholderTextColor={C.border}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
+                onFocus={() => setFocusedField('user')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Contraseña</Text>
-              <View style={styles.passwordRow}>
+              <View style={[styles.passwordRow, focusedField === 'pass' && styles.inputFocused]}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Mínimo 4 caracteres"
-                  placeholderTextColor="#3D4A5C"
+                  placeholderTextColor={C.border}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   returnKeyType="next"
+                  onFocus={() => setFocusedField('pass')}
+                  onBlur={() => setFocusedField(null)}
                 />
                 <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPassword(v => !v)} activeOpacity={0.7}>
                   <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
@@ -145,38 +170,46 @@ export default function RegisterScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Confirmar contraseña</Text>
-              <View style={styles.passwordRow}>
+              <View style={[styles.passwordRow, focusedField === 'pass2' && styles.inputFocused]}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Repite tu contraseña"
-                  placeholderTextColor="#3D4A5C"
+                  placeholderTextColor={C.border}
                   value={password2}
                   onChangeText={setPassword2}
                   secureTextEntry={!showPassword2}
                   returnKeyType="done"
                   onSubmitEditing={handleRegister}
+                  onFocus={() => setFocusedField('pass2')}
+                  onBlur={() => setFocusedField(null)}
                 />
                 <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPassword2(v => !v)} activeOpacity={0.7}>
                   <Text style={styles.eyeIcon}>{showPassword2 ? '🙈' : '👁️'}</Text>
                 </TouchableOpacity>
               </View>
               {password2.length > 0 && (
-                <Text style={[styles.matchText, { color: password === password2 ? '#4ADE80' : '#EF4444' }]}>
+                <Text style={[styles.matchText, { color: password === password2 ? C.green : C.error }]}>
                   {password === password2 ? '✓ Las contraseñas coinciden' : '✗ No coinciden'}
                 </Text>
               )}
             </View>
 
             <TouchableOpacity
-              style={[styles.btnPrimary, loading && { opacity: 0.6 }]}
+              style={[styles.btnWrap, loading && { opacity: 0.65 }]}
               onPress={handleRegister}
               disabled={loading}
               activeOpacity={0.85}
             >
-              {loading
-                ? <ActivityIndicator color="#0D0D18" />
-                : <Text style={styles.btnPrimaryText}>Crear Cuenta</Text>
-              }
+              <LinearGradient
+                colors={['#A78BFA', '#38BDF8']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={styles.btnPrimary}
+              >
+                {loading
+                  ? <ActivityIndicator color="#0E1117" />
+                  : <Text style={styles.btnPrimaryText}>Crear Cuenta</Text>
+                }
+              </LinearGradient>
             </TouchableOpacity>
 
             <Text style={styles.note}>Tu progreso se guarda localmente en este dispositivo.</Text>
@@ -197,95 +230,87 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D18' },
+  container: { flex: 1, backgroundColor: C.bg },
   scroll: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 52, paddingBottom: 40 },
 
-  logoContainer: { alignItems: 'center', marginBottom: 36 },
+  logoContainer: { alignItems: 'center', marginBottom: 32 },
   logoCircle: {
-    width: 80, height: 80, borderRadius: 22,
-    backgroundColor: '#0F2A4A',
+    width: 80, height: 80, borderRadius: 26,
     justifyContent: 'center', alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: '#38BDF8',
-    shadowColor: '#38BDF8',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 10,
+    marginBottom: 14,
   },
   logoEmoji: { fontSize: 36 },
-  logoText: { fontSize: 34, fontWeight: '900', color: '#F1F5F9', letterSpacing: -0.5 },
-  logoSub: { fontSize: 13, color: '#64748B', marginTop: 5, fontWeight: '500' },
+  logoText: { fontSize: 34, fontWeight: '900', color: C.text, letterSpacing: -0.5 },
+  logoSub: { fontSize: 13, color: C.muted, marginTop: 5, fontWeight: '500' },
 
   form: { width: '100%' },
   formTitle: {
-    fontSize: 20, fontWeight: '800', color: '#CBD5E1',
+    fontSize: 20, fontWeight: '800', color: C.mutedLight,
     marginBottom: 22, textAlign: 'center', letterSpacing: -0.2,
   },
 
   errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.1)',
-    borderRadius: 12, padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,113,113,0.1)',
+    borderRadius: 14, padding: 14,
     marginBottom: 18,
-    borderLeftWidth: 3, borderLeftColor: '#EF4444',
+    borderWidth: 1,
+    borderColor: 'rgba(248,113,113,0.3)',
+    gap: 10,
   },
-  errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '600' },
+  errorIcon: { fontSize: 16 },
+  errorText: { flex: 1, color: C.error, fontSize: 13, fontWeight: '600' },
 
   inputGroup: { marginBottom: 16 },
   label: {
-    fontSize: 11, color: '#64748B', marginBottom: 8,
+    fontSize: 11, color: C.muted, marginBottom: 8,
     fontWeight: '700', letterSpacing: 1.0, textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: '#111122',
-    borderWidth: 1,
-    borderColor: '#1E2A3A',
-    borderRadius: 14,
+    backgroundColor: C.surface,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    color: '#F1F5F9',
+    color: C.text,
     fontSize: 16,
   },
+  inputFocused: { borderColor: C.blue },
   passwordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#111122',
-    borderWidth: 1,
-    borderColor: '#1E2A3A',
-    borderRadius: 14,
+    backgroundColor: C.surface,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 16,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    color: '#F1F5F9',
+    color: C.text,
     fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: 16, paddingVertical: 16 },
   eyeIcon: { fontSize: 18 },
   matchText: { fontSize: 12, fontWeight: '700', marginTop: 8 },
 
+  btnWrap: { marginTop: 8 },
   btnPrimary: {
-    backgroundColor: '#A3E635',
-    borderRadius: 14,
+    borderRadius: 18,
     paddingVertical: 18,
     alignItems: 'center',
-    marginTop: 8,
-    shadowColor: '#A3E635',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 8,
   },
-  btnPrimaryText: { color: '#0D0D18', fontSize: 17, fontWeight: '900', letterSpacing: 0.3 },
+  btnPrimaryText: { color: '#0E1117', fontSize: 17, fontWeight: '900', letterSpacing: 0.2 },
 
-  note: { color: '#374151', fontSize: 12, textAlign: 'center', marginTop: 18 },
+  note: { color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 18, opacity: 0.7 },
 
   footer: {
     flexDirection: 'row', justifyContent: 'center',
     alignItems: 'center', marginTop: 28,
   },
-  footerText: { color: '#475569', fontSize: 14 },
-  footerLink: { color: '#38BDF8', fontSize: 14, fontWeight: '700' },
+  footerText: { color: C.muted, fontSize: 14 },
+  footerLink: { color: C.blue, fontSize: 14, fontWeight: '700' },
 });

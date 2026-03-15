@@ -30,7 +30,7 @@ export function useThemeStyles() {
     gradientGem: ['#0369A1', '#38BDF8'] as string[],
     gradientSuccess: ['#14532D', '#4ADE80'] as string[],
     gradientFire: ['#7F1D1D', '#F97316'] as string[],
-    gradientNight: ['#0D0D18', '#111122'] as string[],
-    gradientCard: ['#111122', '#0D0D18'] as string[],
+    gradientNight: ['#0E1117', '#161B27'] as string[],
+    gradientCard: ['#161B27', '#0E1117'] as string[],
   }), [colors]);
 }

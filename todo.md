@@ -333,3 +333,20 @@
 - [x] Preparación Play Store: eas.json creado con profiles development/preview/production
 - [x] Preparación Play Store: app.config.ts actualizado a v1.0.1 con metadatos GDPR/CCPA para AdMob
 - [x] Preparación Play Store: expo-audio y expo-video plugins eliminados (no se usan, generaban permisos innecesarios)
+
+## v2.0 — Rediseño Total de Interfaz (colores frescos y amigables)
+- [x] Sistema de diseño: nueva paleta fresca v2.0 — azul-gris oscuro, verde lima, azul cielo, violeta, dorado
+- [x] theme.config.js: nuevos tokens de color (primary, secondary, surface, muted, border, etc.)
+- [x] Pantalla de onboarding rediseñada — gradientes por slide, emojis con fondo redondeado
+- [x] Pantalla de login y registro rediseñadas — gradientes en logo, inputs con focus state
+- [x] Pantalla principal (index): header, mapa de niveles, modos de práctica — nueva paleta
+- [x] Pantalla de Tarea Diaria rediseñada — nueva paleta
+- [x] Pantalla de Minijuego rediseñada — nueva paleta
+- [x] Pantalla de ejercicios rediseñada — nueva paleta, verde #4ADE80
+- [x] Pantalla de resultado rediseñada — nueva paleta
+- [x] Pantalla de Perfil rediseñada — nueva paleta
+- [x] Pantalla de Stats rediseñada — nueva paleta
+- [x] Pantalla de Settings rediseñada — nueva paleta
+- [x] Pantalla de Logros rediseñada — nueva paleta
+- [x] Pantalla de detalle de nivel rediseñada — nueva paleta
+- [x] Pantallas de práctica (quick-review, hard-words) rediseñadas — nueva paleta

@@ -43,8 +43,8 @@ function BarChart({ data, maxValue, height = 140, unit = '', isDark }: BarChartP
   const chartW = 320;
   const chartH = height;
   const barW = Math.floor((chartW - 16) / data.length) - 6;
-  const textColor = isDark ? '#9BA1A6' : '#687076';
-  const lineColor = isDark ? '#2D3148' : '#E5E7EB';
+  const textColor = isDark ? '#8B9CC8' : '#687076';
+  const lineColor = isDark ? '#2A3450' : '#E5E7EB';
 
   return (
     <Svg width={chartW} height={chartH + 32} viewBox={`0 0 ${chartW} ${chartH + 32}`}>
@@ -125,7 +125,7 @@ const cardStyles = StyleSheet.create({
   },
   emoji: { fontSize: 24, marginBottom: 4 },
   value: { fontSize: 20, fontWeight: '800', marginBottom: 2 },
-  label: { fontSize: 11, color: '#9CA3AF', textAlign: 'center' },
+  label: { fontSize: 11, color: '#8B9CC8', textAlign: 'center' },
 });
 
 // ─── Pantalla Principal ───────────────────────────────────────────────────────
@@ -208,9 +208,9 @@ export default function StatsScreen() {
     return totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
   }, [sessions]);
 
-  const barColor = '#1CB0F6';
-  const accuracyColor = '#58CC02';
-  const wordsColor = '#FF9600';
+  const barColor = '#38BDF8';
+  const accuracyColor = '#4ADE80';
+  const wordsColor = '#FBBF24';
 
   const sessionBarData = last7Days.map(d => ({
     label: getDayLabel(d),
@@ -237,24 +237,24 @@ export default function StatsScreen() {
   const levelsBarData = last7Days.map(d => ({
     label: getDayLabel(d),
     value: levelsByDay[d],
-    color: '#FF9600',
+    color: '#FBBF24',
   }));
 
   const textPrimary = isDark ? '#ECEDEE' : '#11181C';
-  const textMuted = isDark ? '#9BA1A6' : '#687076';
-  const cardBg = isDark ? '#111122' : '#F5F5F5';
-  const borderColor = isDark ? '#2D3148' : '#E5E7EB';
+  const textMuted = isDark ? '#8B9CC8' : '#687076';
+  const cardBg = isDark ? '#161B27' : '#F5F5F5';
+  const borderColor = isDark ? '#2A3450' : '#E5E7EB';
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: '#0D0D18', paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: '#0E1117', paddingTop: insets.top }]}>
         <ActivityIndicator color="#1CB0F6" size="large" style={{ marginTop: 80 }} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: '#0D0D18', paddingTop: insets.top }]}>
+    <View style={[styles.container, { backgroundColor: '#0E1117', paddingTop: insets.top }]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: borderColor }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
@@ -340,7 +340,7 @@ export default function StatsScreen() {
           <Text style={[styles.chartTitle, { color: textPrimary }]}>Datos del progreso</Text>
           <View style={styles.dataRow}>
             <Text style={[styles.dataLabel, { color: textMuted }]}>Tarea diaria completada</Text>
-            <Text style={[styles.dataValue, { color: '#58CC02' }]}>{daily.totalDaysCompleted} días</Text>
+            <Text style={[styles.dataValue, { color: '#4ADE80' }]}>{daily.totalDaysCompleted} días</Text>
           </View>
           <View style={[styles.divider, { backgroundColor: borderColor }]} />
           <View style={styles.dataRow}>
@@ -350,7 +350,7 @@ export default function StatsScreen() {
           <View style={[styles.divider, { backgroundColor: borderColor }]} />
           <View style={styles.dataRow}>
             <Text style={[styles.dataLabel, { color: textMuted }]}>Nivel máximo alcanzado</Text>
-            <Text style={[styles.dataValue, { color: '#FF9600' }]}>Nivel {game.maxUnlockedLevel}</Text>
+            <Text style={[styles.dataValue, { color: '#FBBF24' }]}>Nivel {game.maxUnlockedLevel}</Text>
           </View>
           <View style={[styles.divider, { backgroundColor: borderColor }]} />
           <View style={styles.dataRow}>

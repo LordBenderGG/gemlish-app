@@ -164,7 +164,7 @@ function QuestionCard({
       />
 
       {submitted && (
-        <Text style={[styles.feedbackText, { color: isCorrect ? '#58CC02' : '#FF4B4B' }]}>
+        <Text style={[styles.feedbackText, { color: isCorrect ? '#4ADE80' : '#FF4B4B' }]}>
           {isCorrect ? '✅ ¡Correcto!' : `❌ Era: ${word.word}`}
         </Text>
       )}
@@ -273,17 +273,17 @@ export default function QuickReviewScreen() {
     router.back();
   }, [username, game, words, correct, currentIdx, showResult, timedOut, checkAchievements]);
 
-  const timerColor = timeLeft > 60000 ? '#58CC02' : timeLeft > 30000 ? '#FF9600' : '#FF4B4B';
+  const timerColor = timeLeft > 60000 ? '#4ADE80' : timeLeft > 30000 ? '#FF9600' : '#FF4B4B';
 
   // ─── Resultado ───────────────────────────────────────────────────────────
 
   if (showResult) {
     const accuracy = words.length > 0 ? Math.round((correct / words.length) * 100) : 0;
-    const accuracyColor = accuracy >= 80 ? '#58CC02' : accuracy >= 60 ? '#FF9600' : '#FF4B4B';
+    const accuracyColor = accuracy >= 80 ? '#4ADE80' : accuracy >= 60 ? '#FF9600' : '#FF4B4B';
     const elapsed = Date.now() - sessionStartRef.current;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.resultContainer}>
           <Text style={styles.resultEmoji}>
@@ -300,7 +300,7 @@ export default function QuickReviewScreen() {
               <Text style={styles.resultStatLabel}>Acierto</Text>
             </View>
             <View style={styles.resultStat}>
-              <Text style={[styles.resultStatNum, { color: '#58CC02' }]}>{correct}/{words.length}</Text>
+              <Text style={[styles.resultStatNum, { color: '#4ADE80' }]}>{correct}/{words.length}</Text>
               <Text style={styles.resultStatLabel}>Correctas</Text>
             </View>
             <View style={styles.resultStat}>
@@ -325,7 +325,7 @@ export default function QuickReviewScreen() {
 
   if (words.length === 0) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📚</Text>
@@ -340,7 +340,7 @@ export default function QuickReviewScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
@@ -402,34 +402,34 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   backBtn: {
-    backgroundColor: '#111122', borderRadius: 10,
+    backgroundColor: '#161B27', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 8,
-    borderWidth: 1, borderColor: '#2D3148',
+    borderWidth: 1, borderColor: '#2A3450',
   },
-  backBtnText: { color: '#9CA3AF', fontSize: 14, fontWeight: '700' },
+  backBtnText: { color: '#8B9CC8', fontSize: 14, fontWeight: '700' },
   headerCenter: { alignItems: 'center' },
   headerTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
-  headerSub: { fontSize: 11, color: '#9CA3AF', marginTop: 1 },
+  headerSub: { fontSize: 11, color: '#8B9CC8', marginTop: 1 },
   timerBadge: {
-    backgroundColor: '#111122', borderRadius: 10,
+    backgroundColor: '#161B27', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 8,
     borderWidth: 1.5,
   },
   timerText: { fontSize: 16, fontWeight: '800', fontVariant: ['tabular-nums'] },
-  timerBarBg: { height: 4, backgroundColor: '#2D3148' },
+  timerBarBg: { height: 4, backgroundColor: '#2A3450' },
   timerBarFill: { height: 4, borderRadius: 2 },
-  progressBarBg: { height: 3, backgroundColor: '#2D3148' },
+  progressBarBg: { height: 3, backgroundColor: '#2A3450' },
   progressBarFill: { height: 3, backgroundColor: '#38BDF8', borderRadius: 2 },
   content: { flex: 1, padding: 20, justifyContent: 'center' },
   // Tarjeta de pregunta
   questionCard: {
-    backgroundColor: '#111122', borderRadius: 20, padding: 24,
-    borderWidth: 1.5, borderColor: '#2D3148', gap: 14,
+    backgroundColor: '#161B27', borderRadius: 20, padding: 24,
+    borderWidth: 1.5, borderColor: '#2A3450', gap: 14,
   },
-  questionCounter: { fontSize: 12, color: '#9CA3AF', fontWeight: '700', textAlign: 'center' },
+  questionCounter: { fontSize: 12, color: '#8B9CC8', fontWeight: '700', textAlign: 'center' },
   speakBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: '#1CB0F620', borderRadius: 14, paddingVertical: 12,
@@ -438,23 +438,23 @@ const styles = StyleSheet.create({
   speakBtnActive: { backgroundColor: '#1CB0F640', borderColor: '#1CB0F6' },
   speakBtnEmoji: { fontSize: 18 },
   speakBtnText: { fontSize: 14, fontWeight: '700', color: '#1CB0F6' },
-  questionLabel: { fontSize: 12, color: '#9CA3AF', fontWeight: '600', textAlign: 'center' },
+  questionLabel: { fontSize: 12, color: '#8B9CC8', fontWeight: '600', textAlign: 'center' },
   questionWord: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', lineHeight: 34 },
-  questionPhonetic: { fontSize: 13, color: '#9CA3AF', textAlign: 'center', fontStyle: 'italic' },
+  questionPhonetic: { fontSize: 13, color: '#8B9CC8', textAlign: 'center', fontStyle: 'italic' },
   input: {
-    backgroundColor: '#0F1117', borderRadius: 14, borderWidth: 1.5, borderColor: '#2D3148',
+    backgroundColor: '#0F1117', borderRadius: 14, borderWidth: 1.5, borderColor: '#2A3450',
     color: '#FFFFFF', fontSize: 16, fontWeight: '600',
     paddingHorizontal: 16, paddingVertical: 14,
     textAlign: 'center',
   },
-  inputCorrect: { borderColor: '#58CC02', backgroundColor: '#58CC0210' },
+  inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#58CC0210' },
   inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#FF4B4B10' },
   feedbackText: { fontSize: 15, fontWeight: '700', textAlign: 'center' },
   submitBtn: {
     backgroundColor: '#38BDF8', borderRadius: 14, paddingVertical: 14,
     alignItems: 'center',
   },
-  submitBtnDisabled: { backgroundColor: '#2D3148' },
+  submitBtnDisabled: { backgroundColor: '#2A3450' },
   submitBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
   // Resultado
   resultContainer: {
@@ -463,17 +463,17 @@ const styles = StyleSheet.create({
   },
   resultEmoji: { fontSize: 64 },
   resultTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
-  resultSubtitle: { fontSize: 14, color: '#9CA3AF', textAlign: 'center' },
+  resultSubtitle: { fontSize: 14, color: '#8B9CC8', textAlign: 'center' },
   resultStats: {
     flexDirection: 'row', gap: 16, marginVertical: 8,
   },
   resultStat: {
-    alignItems: 'center', backgroundColor: '#111122',
+    alignItems: 'center', backgroundColor: '#161B27',
     borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14,
-    borderWidth: 1, borderColor: '#2D3148', minWidth: 80,
+    borderWidth: 1, borderColor: '#2A3450', minWidth: 80,
   },
   resultStatNum: { fontSize: 22, fontWeight: '800' },
-  resultStatLabel: { fontSize: 11, color: '#9CA3AF', fontWeight: '600', marginTop: 2 },
+  resultStatLabel: { fontSize: 11, color: '#8B9CC8', fontWeight: '600', marginTop: 2 },
   finishBtn: {
     backgroundColor: '#38BDF8', borderRadius: 16, paddingVertical: 16,
     paddingHorizontal: 40, alignItems: 'center', marginTop: 8,
@@ -486,5 +486,5 @@ const styles = StyleSheet.create({
   },
   emptyEmoji: { fontSize: 56 },
   emptyTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
-  emptySubtitle: { fontSize: 14, color: '#9CA3AF', textAlign: 'center', lineHeight: 22 },
+  emptySubtitle: { fontSize: 14, color: '#8B9CC8', textAlign: 'center', lineHeight: 22 },
 });

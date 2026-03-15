@@ -288,7 +288,7 @@ export default function GameScreen() {
 
   if (activeGame && gameWon) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>🏆</Text>
@@ -316,7 +316,7 @@ export default function GameScreen() {
 
   if (activeGame && timeUp) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>⏰</Text>
@@ -335,7 +335,7 @@ export default function GameScreen() {
 
   if (activeGame === 'memory') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.gameHeader}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.gameBackBtn}>
@@ -377,7 +377,7 @@ export default function GameScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
@@ -444,10 +444,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF' },
-  headerSub: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  headerSub: { fontSize: 12, color: '#8B9CC8', marginTop: 2 },
   gemsBadge: {
     backgroundColor: '#00D4FF18', borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 7,
@@ -457,36 +457,36 @@ const styles = StyleSheet.create({
   timeBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 8,
-    backgroundColor: '#111122', borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    backgroundColor: '#161B27', borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
-  timeBarLabel: { fontSize: 12, color: '#9CA3AF', fontWeight: '600' },
-  timeBarValue: { fontSize: 13, color: '#58CC02', fontWeight: '700' },
+  timeBarLabel: { fontSize: 12, color: '#8B9CC8', fontWeight: '600' },
+  timeBarValue: { fontSize: 13, color: '#4ADE80', fontWeight: '700' },
   gameList: { padding: 16, paddingBottom: 32, gap: 16 },
   gameCard: {
-    backgroundColor: '#111122', borderRadius: 18, padding: 16,
+    backgroundColor: '#161B27', borderRadius: 18, padding: 16,
     borderWidth: 1.5, borderColor: '#38BDF840',
   },
   gameCardHeader: { flexDirection: 'row', gap: 14, marginBottom: 12 },
   gameCardBigEmoji: { fontSize: 52, lineHeight: 60 },
   gameCardInfo: { flex: 1 },
   gameCardTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF', marginBottom: 4 },
-  gameCardDescEn: { fontSize: 13, color: '#9CA3AF', lineHeight: 18, marginBottom: 4, fontStyle: 'italic' },
+  gameCardDescEn: { fontSize: 13, color: '#8B9CC8', lineHeight: 18, marginBottom: 4, fontStyle: 'italic' },
   gameCardDescEs: { fontSize: 12, color: '#6B7280', lineHeight: 17 },
   gameCardReward: {
     backgroundColor: '#FFD70015', borderRadius: 10, padding: 10,
     borderWidth: 1, borderColor: '#FFD70030',
   },
   gameCardRewardText: { color: '#FFD700', fontSize: 13, fontWeight: '700', textAlign: 'center' },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#9CA3AF', marginBottom: 4 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#8B9CC8', marginBottom: 4 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   catCard: {
-    width: '47%', backgroundColor: '#111122', borderRadius: 14,
-    padding: 12, borderWidth: 1.5, borderColor: '#2D3148', alignItems: 'center',
+    width: '47%', backgroundColor: '#161B27', borderRadius: 14,
+    padding: 12, borderWidth: 1.5, borderColor: '#2A3450', alignItems: 'center',
   },
   catCardDisabled: { opacity: 0.5 },
   catEmoji: { fontSize: 32, marginBottom: 6 },
   catLabel: { fontSize: 14, fontWeight: '800', color: '#FFFFFF', marginBottom: 4 },
-  catDescEn: { fontSize: 11, color: '#9CA3AF', textAlign: 'center', lineHeight: 15, fontStyle: 'italic', marginBottom: 2 },
+  catDescEn: { fontSize: 11, color: '#8B9CC8', textAlign: 'center', lineHeight: 15, fontStyle: 'italic', marginBottom: 2 },
   catDescEs: { fontSize: 11, color: '#6B7280', textAlign: 'center', lineHeight: 15, marginBottom: 10 },
   catPlayBtn: {
     backgroundColor: '#38BDF8', borderRadius: 8,
@@ -496,14 +496,14 @@ const styles = StyleSheet.create({
   gameHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 14, paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   gameBackBtn: {
-    backgroundColor: '#111122', borderRadius: 10,
+    backgroundColor: '#161B27', borderRadius: 10,
     paddingHorizontal: 10, paddingVertical: 6,
-    borderWidth: 1, borderColor: '#2D3148',
+    borderWidth: 1, borderColor: '#2A3450',
   },
-  gameBackBtnText: { color: '#9CA3AF', fontSize: 13, fontWeight: '600' },
+  gameBackBtnText: { color: '#8B9CC8', fontSize: 13, fontWeight: '600' },
   gameHeaderTitle: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   gemsSmall: {
     backgroundColor: '#00D4FF18', borderRadius: 16,
@@ -514,10 +514,10 @@ const styles = StyleSheet.create({
   boardContainer: { flex: 1 },
   boardStats: {
     flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148', gap: 4,
+    borderBottomWidth: 1, borderBottomColor: '#2A3450', gap: 4,
   },
   boardStat: { flex: 1, alignItems: 'center' },
-  boardStatLabel: { fontSize: 9, color: '#9CA3AF', fontWeight: '600', textTransform: 'uppercase' },
+  boardStatLabel: { fontSize: 9, color: '#8B9CC8', fontWeight: '600', textTransform: 'uppercase' },
   boardStatValue: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', marginTop: 1 },
   board: {
     flex: 1,
@@ -542,12 +542,12 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   cardBack: {
-    backgroundColor: '#111122',
+    backgroundColor: '#161B27',
     borderWidth: 1.5,
-    borderColor: '#2D3148',
+    borderColor: '#2A3450',
   },
-  cardMatchedBack: { borderColor: '#58CC02' },
-  cardMatchedFront: { borderColor: '#58CC02', backgroundColor: '#0D2010' },
+  cardMatchedBack: { borderColor: '#4ADE80' },
+  cardMatchedFront: { borderColor: '#4ADE80', backgroundColor: '#0D2010' },
   cardEn: { backgroundColor: '#0D1F2D', borderWidth: 1.5, borderColor: '#1CB0F6' },
   cardEs: { backgroundColor: '#1A0D2D', borderWidth: 1.5, borderColor: '#38BDF8' },
   cardLangFlag: { fontSize: 10, marginBottom: 2 },
@@ -557,23 +557,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#00D4FF10', borderRadius: 10, padding: 8,
     borderWidth: 1, borderColor: '#00D4FF20', alignItems: 'center',
   },
-  rewardHintText: { color: '#9CA3AF', fontSize: 12 },
+  rewardHintText: { color: '#8B9CC8', fontSize: 12 },
   wonScreen: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   wonEmoji: { fontSize: 80, marginBottom: 16 },
   wonTitle: { fontSize: 34, fontWeight: '800', color: '#FFD700', marginBottom: 8 },
-  wonSub: { fontSize: 15, color: '#9CA3AF', textAlign: 'center' },
+  wonSub: { fontSize: 15, color: '#8B9CC8', textAlign: 'center' },
   claimBtn: {
     backgroundColor: '#00D4FF', borderRadius: 16,
     paddingHorizontal: 32, paddingVertical: 16, marginTop: 28, marginBottom: 12,
   },
   claimBtnText: { color: '#0F1117', fontSize: 17, fontWeight: '800' },
   claimedBox: { alignItems: 'center', marginTop: 24, marginBottom: 12 },
-  claimedText: { color: '#58CC02', fontSize: 16, fontWeight: '700' },
-  claimedSub: { color: '#9CA3AF', fontSize: 14, marginTop: 4 },
+  claimedText: { color: '#4ADE80', fontSize: 16, fontWeight: '700' },
+  claimedSub: { color: '#8B9CC8', fontSize: 14, marginTop: 4 },
   backMenuBtn: {
-    backgroundColor: '#111122', borderRadius: 14,
+    backgroundColor: '#161B27', borderRadius: 14,
     paddingHorizontal: 28, paddingVertical: 14, marginTop: 12,
-    borderWidth: 1, borderColor: '#2D3148',
+    borderWidth: 1, borderColor: '#2A3450',
   },
   backMenuBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
 });

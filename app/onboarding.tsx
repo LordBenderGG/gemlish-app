@@ -12,6 +12,21 @@ import { hasExistingUsers } from '@/lib/storage';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
+// ─── Paleta v2.0 ─────────────────────────────────────────────────────────────
+const C = {
+  bg: '#0E1117',
+  surface: '#161B27',
+  surface2: '#1E2535',
+  text: '#F0F4FF',
+  muted: '#8B9CC8',
+  border: '#2A3450',
+  green: '#4ADE80',
+  blue: '#38BDF8',
+  violet: '#A78BFA',
+  gold: '#FBBF24',
+  coral: '#F87171',
+};
+
 // ─── Datos de las slides ─────────────────────────────────────────────────────
 
 interface Slide {
@@ -21,7 +36,7 @@ interface Slide {
   subtitle: string;
   description: string;
   color: string;
-  bgColor: string;
+  gradientColors: [string, string];
   items: { icon: string; text: string }[];
 }
 
@@ -32,8 +47,8 @@ const SLIDES: Slide[] = [
     title: 'Bienvenido a Gemlish',
     subtitle: 'Aprende inglés de forma divertida',
     description: 'Un juego completo para aprender inglés desde cero. Sin internet, sin suscripciones, sin límites.',
-    color: '#38BDF8',
-    bgColor: '#38BDF815',
+    color: C.blue,
+    gradientColors: ['#38BDF8', '#818CF8'],
     items: [
       { icon: '🏆', text: '500 niveles de ejercicios' },
       { icon: '📱', text: '100% offline, sin datos móviles' },
@@ -46,8 +61,8 @@ const SLIDES: Slide[] = [
     title: 'Vidas y Diamantes',
     subtitle: 'Tu sistema de progreso',
     description: 'Gestiona tus recursos para avanzar más rápido y desbloquear pistas cuando las necesites.',
-    color: '#FF4B4B',
-    bgColor: '#FF4B4B15',
+    color: C.coral,
+    gradientColors: ['#F87171', '#FB923C'],
     items: [
       { icon: '❤️', text: '5 vidas — se recuperan con el tiempo' },
       { icon: '💎', text: 'Diamantes — gánalos completando niveles' },
@@ -60,8 +75,8 @@ const SLIDES: Slide[] = [
     title: 'Tarea Diaria',
     subtitle: 'Aprende 30 palabras cada día',
     description: 'Cada día tienes 30 palabras nuevas con pronunciación. Completa la tarea diaria para ganar bonificaciones.',
-    color: '#58CC02',
-    bgColor: '#58CC0215',
+    color: C.green,
+    gradientColors: ['#4ADE80', '#22D3EE'],
     items: [
       { icon: '🔊', text: 'Escucha la pronunciación real de cada palabra' },
       { icon: '🔥', text: 'Mantén tu racha estudiando todos los días' },
@@ -74,8 +89,8 @@ const SLIDES: Slide[] = [
     title: 'Minijuego de Memoria',
     subtitle: 'Refuerza el vocabulario jugando',
     description: 'Empareja cartas de palabras en inglés con su traducción. ¡Cuanto más rápido, más diamantes ganas!',
-    color: '#FF9600',
-    bgColor: '#FF960015',
+    color: C.gold,
+    gradientColors: ['#FBBF24', '#F97316'],
     items: [
       { icon: '🎯', text: '8 categorías de vocabulario para practicar' },
       { icon: '⏱️', text: 'Hasta 30 minutos de juego por día' },
@@ -88,70 +103,82 @@ const SLIDES: Slide[] = [
 
 function WelcomeBackScreen({ onContinue }: { onContinue: () => void }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.85)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(scaleAnim, { toValue: 1, friction: 7, tension: 50, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 8, tension: 60, useNativeDriver: true }),
     ]).start();
   }, []);
 
   return (
     <Animated.View style={[styles.welcomeBackContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
-      <Text style={styles.welcomeBackEmoji}>👋</Text>
+      <View style={styles.welcomeBackEmojiWrap}>
+        <Text style={styles.welcomeBackEmoji}>👋</Text>
+      </View>
       <Text style={styles.welcomeBackTitle}>¡Bienvenido de vuelta!</Text>
       <Text style={styles.welcomeBackSubtitle}>
-        Vemos que ya tienes datos guardados en este dispositivo.{'\n'}
-        ¡Tu progreso te espera!
+        Vemos que ya tienes datos guardados.{'\n'}¡Tu progreso te espera!
       </Text>
 
       <View style={styles.welcomeBackCards}>
-        <View style={styles.welcomeBackCard}>
-          <Text style={styles.welcomeBackCardEmoji}>💎</Text>
-          <Text style={styles.welcomeBackCardText}>Tus gemas y XP están guardados</Text>
-        </View>
-        <View style={styles.welcomeBackCard}>
-          <Text style={styles.welcomeBackCardEmoji}>🏆</Text>
-          <Text style={styles.welcomeBackCardText}>Tus niveles completados te esperan</Text>
-        </View>
-        <View style={styles.welcomeBackCard}>
-          <Text style={styles.welcomeBackCardEmoji}>🔥</Text>
-          <Text style={styles.welcomeBackCardText}>Recupera tu racha de estudio</Text>
-        </View>
+        {[
+          { icon: '💎', text: 'Tus gemas y XP están guardados' },
+          { icon: '🏆', text: 'Tus niveles completados te esperan' },
+          { icon: '🔥', text: 'Recupera tu racha de estudio' },
+        ].map((item, i) => (
+          <View key={i} style={styles.welcomeBackCard}>
+            <Text style={styles.welcomeBackCardEmoji}>{item.icon}</Text>
+            <Text style={styles.welcomeBackCardText}>{item.text}</Text>
+          </View>
+        ))}
       </View>
 
       <TouchableOpacity style={styles.welcomeBackBtn} onPress={onContinue} activeOpacity={0.85}>
-        <Text style={styles.welcomeBackBtnText}>Iniciar sesión →</Text>
+        <LinearGradient
+          colors={['#4ADE80', '#22D3EE']}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={styles.welcomeBackBtnGrad}
+        >
+          <Text style={styles.welcomeBackBtnText}>Iniciar sesión →</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
-// ─── Componente de Slide con Fade-in ─────────────────────────────────────────
+// ─── Componente de Slide ─────────────────────────────────────────────────────
 
 function SlideView({ slide, isActive }: { slide: Slide; isActive: boolean }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const slideAnim = useRef(new Animated.Value(24)).current;
 
   useEffect(() => {
     if (isActive) {
       fadeAnim.setValue(0);
-      slideAnim.setValue(30);
+      slideAnim.setValue(24);
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(slideAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 380, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 320, useNativeDriver: true }),
       ]).start();
     }
   }, [isActive]);
 
   return (
     <View style={[styles.slide, { width: SCREEN_W }]}>
-      <Animated.View style={[styles.emojiContainer, { backgroundColor: slide.bgColor, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        <Text style={styles.slideEmoji}>{slide.emoji}</Text>
+      {/* Emoji hero con gradiente */}
+      <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+        <LinearGradient
+          colors={slide.gradientColors}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          style={styles.emojiContainer}
+        >
+          <Text style={styles.slideEmoji}>{slide.emoji}</Text>
+        </LinearGradient>
       </Animated.View>
 
-      <Animated.Text style={[styles.slideTitle, { color: slide.color, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+      <Animated.Text style={[styles.slideTitle, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {slide.title}
       </Animated.Text>
 
@@ -165,8 +192,10 @@ function SlideView({ slide, isActive }: { slide: Slide; isActive: boolean }) {
 
       <Animated.View style={[styles.itemsContainer, { opacity: fadeAnim }]}>
         {slide.items.map((item, idx) => (
-          <View key={idx} style={[styles.itemRow, { borderColor: slide.color + '30' }]}>
-            <Text style={styles.itemIcon}>{item.icon}</Text>
+          <View key={idx} style={[styles.itemRow, { borderColor: slide.color + '40' }]}>
+            <View style={[styles.itemIconWrap, { backgroundColor: slide.color + '18' }]}>
+              <Text style={styles.itemIcon}>{item.icon}</Text>
+            </View>
             <Text style={styles.itemText}>{item.text}</Text>
           </View>
         ))}
@@ -184,7 +213,6 @@ export default function OnboardingScreen() {
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  // Verificar si hay usuarios existentes al montar
   useEffect(() => {
     hasExistingUsers().then(hasUsers => {
       setShowWelcomeBack(hasUsers);
@@ -223,25 +251,18 @@ export default function OnboardingScreen() {
     }
   );
 
-  // Mientras se verifica, no renderizar nada (evita flash)
   if (showWelcomeBack === null) {
     return <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} />;
   }
 
-  // Si hay usuarios existentes, mostrar pantalla de bienvenida de vuelta
   if (showWelcomeBack) {
     return (
-      <LinearGradient
-        colors={['#0D0D18', '#0D1A2E', '#0D0D18']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      >
-        <StatusBar barStyle="light-content" />
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <StatusBar barStyle="light-content" backgroundColor={C.bg} />
         <View style={styles.welcomeBackWrapper}>
           <WelcomeBackScreen onContinue={handleWelcomeBackContinue} />
         </View>
-      </LinearGradient>
+      </View>
     );
   }
 
@@ -249,13 +270,8 @@ export default function OnboardingScreen() {
   const isLast = currentIndex === SLIDES.length - 1;
 
   return (
-    <LinearGradient
-      colors={['#0D0D18', '#0D1A2E', '#0D0D18']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-    >
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
 
       {/* Botón Saltar */}
       {!isLast && (
@@ -286,25 +302,18 @@ export default function OnboardingScreen() {
           const inputRange = [(idx - 1) * SCREEN_W, idx * SCREEN_W, (idx + 1) * SCREEN_W];
           const dotWidth = scrollX.interpolate({
             inputRange,
-            outputRange: [8, 24, 8],
+            outputRange: [8, 28, 8],
             extrapolate: 'clamp',
           });
           const opacity = scrollX.interpolate({
             inputRange,
-            outputRange: [0.4, 1, 0.4],
+            outputRange: [0.35, 1, 0.35],
             extrapolate: 'clamp',
           });
           return (
             <Animated.View
               key={idx}
-              style={[
-                styles.dot,
-                {
-                  width: dotWidth,
-                  opacity,
-                  backgroundColor: currentSlide.color,
-                },
-              ]}
+              style={[styles.dot, { width: dotWidth, opacity, backgroundColor: currentSlide.color }]}
             />
           );
         })}
@@ -312,21 +321,21 @@ export default function OnboardingScreen() {
 
       {/* Botón de acción */}
       <View style={styles.bottomContainer}>
-        <TouchableOpacity
-          style={[styles.nextBtn, { backgroundColor: currentSlide.color }]}
-          onPress={handleNext}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.nextBtnText}>
-            {isLast ? '¡Empezar a Aprender! 🚀' : 'Siguiente →'}
-          </Text>
+        <TouchableOpacity style={styles.nextBtnWrap} onPress={handleNext} activeOpacity={0.85}>
+          <LinearGradient
+            colors={currentSlide.gradientColors}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            style={styles.nextBtn}
+          >
+            <Text style={styles.nextBtnText}>
+              {isLast ? '¡Empezar a Aprender! 🚀' : 'Siguiente →'}
+            </Text>
+          </LinearGradient>
         </TouchableOpacity>
 
-        <Text style={styles.slideCounter}>
-          {currentIndex + 1} / {SLIDES.length}
-        </Text>
+        <Text style={styles.slideCounter}>{currentIndex + 1} / {SLIDES.length}</Text>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -334,6 +343,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: C.bg,
   },
   skipBtn: {
     alignSelf: 'flex-end',
@@ -342,79 +352,74 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   skipText: {
-    color: '#6B7280',
+    color: C.muted,
     fontSize: 15,
     fontWeight: '600',
   },
-  flatList: {
-    flex: 1,
-  },
+  flatList: { flex: 1 },
   slide: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 28,
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   emojiContainer: {
     width: 120,
     height: 120,
-    borderRadius: 60,
+    borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 28,
-    borderWidth: 2,
-    borderColor: '#FFFFFF10',
   },
-  slideEmoji: {
-    fontSize: 56,
-  },
+  slideEmoji: { fontSize: 56 },
   slideTitle: {
     fontSize: 26,
     fontWeight: '800',
+    color: C.text,
     textAlign: 'center',
     marginBottom: 6,
     letterSpacing: -0.5,
   },
   slideSubtitle: {
-    fontSize: 16,
-    color: '#9CA3AF',
+    fontSize: 15,
+    color: C.muted,
     textAlign: 'center',
     fontWeight: '600',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   slideDescription: {
     fontSize: 14,
-    color: '#D1D5DB',
+    color: '#C4CEEA',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 28,
-    paddingHorizontal: 8,
+    marginBottom: 24,
+    paddingHorizontal: 4,
   },
-  itemsContainer: {
-    width: '100%',
-    gap: 10,
-  },
+  itemsContainer: { width: '100%', gap: 10 },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#111122',
-    borderRadius: 14,
-    paddingHorizontal: 16,
+    backgroundColor: C.surface,
+    borderRadius: 16,
+    paddingHorizontal: 14,
     paddingVertical: 13,
     borderWidth: 1,
     gap: 12,
   },
-  itemIcon: {
-    fontSize: 22,
-    width: 30,
-    textAlign: 'center',
+  itemIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  itemIcon: { fontSize: 20 },
   itemText: {
     flex: 1,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: C.text,
     fontWeight: '600',
     lineHeight: 20,
   },
@@ -423,42 +428,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginVertical: 16,
+    marginVertical: 14,
   },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-  },
+  dot: { height: 8, borderRadius: 4 },
   bottomContainer: {
     width: '100%',
     paddingHorizontal: 24,
     paddingBottom: 8,
-    gap: 12,
+    gap: 10,
     alignItems: 'center',
   },
+  nextBtnWrap: { width: '100%' },
   nextBtn: {
     width: '100%',
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: 17,
+    borderRadius: 18,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
   nextBtnText: {
-    color: '#FFFFFF',
+    color: '#0E1117',
     fontSize: 17,
     fontWeight: '800',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   slideCounter: {
-    color: '#4B5563',
+    color: C.muted,
     fontSize: 13,
     fontWeight: '600',
   },
-  // Pantalla de bienvenida de vuelta
+  // Welcome back
   welcomeBackWrapper: {
     flex: 1,
     width: '100%',
@@ -467,69 +465,62 @@ const styles = StyleSheet.create({
   },
   welcomeBackContainer: {
     alignItems: 'center',
-    gap: 20,
+    gap: 18,
   },
-  welcomeBackEmoji: {
-    fontSize: 72,
+  welcomeBackEmojiWrap: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: C.surface,
+    borderWidth: 2,
+    borderColor: C.border,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  welcomeBackEmoji: { fontSize: 52 },
   welcomeBackTitle: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: C.text,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   welcomeBackSubtitle: {
     fontSize: 15,
-    color: '#9CA3AF',
+    color: C.muted,
     textAlign: 'center',
     lineHeight: 24,
   },
-  welcomeBackCards: {
-    width: '100%',
-    gap: 10,
-    marginTop: 4,
-  },
+  welcomeBackCards: { width: '100%', gap: 10, marginTop: 4 },
   welcomeBackCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#111122',
-    borderRadius: 14,
+    backgroundColor: C.surface,
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#38BDF830',
+    borderColor: C.border,
     gap: 12,
   },
-  welcomeBackCardEmoji: {
-    fontSize: 24,
-    width: 32,
-    textAlign: 'center',
-  },
+  welcomeBackCardEmoji: { fontSize: 24, width: 32, textAlign: 'center' },
   welcomeBackCardText: {
     flex: 1,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: C.text,
     fontWeight: '600',
     lineHeight: 20,
   },
-  welcomeBackBtn: {
-    width: '100%',
-    backgroundColor: '#38BDF8',
-    borderRadius: 16,
-    paddingVertical: 16,
+  welcomeBackBtn: { width: '100%', marginTop: 8 },
+  welcomeBackBtnGrad: {
+    borderRadius: 18,
+    paddingVertical: 17,
     alignItems: 'center',
-    marginTop: 8,
-    shadowColor: '#38BDF8',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
   },
   welcomeBackBtnText: {
-    color: '#FFFFFF',
+    color: '#0E1117',
     fontSize: 17,
     fontWeight: '800',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 });

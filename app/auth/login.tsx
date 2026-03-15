@@ -4,8 +4,22 @@ import {
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
   StatusBar,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useGame } from '@/context/GameContext';
+
+const C = {
+  bg: '#0E1117',
+  surface: '#161B27',
+  surface2: '#1E2535',
+  text: '#F0F4FF',
+  muted: '#8B9CC8',
+  mutedLight: '#C4CEEA',
+  border: '#2A3450',
+  green: '#4ADE80',
+  blue: '#38BDF8',
+  error: '#F87171',
+};
 
 export default function LoginScreen() {
   const { login } = useGame();
@@ -14,6 +28,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -33,15 +48,19 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0D18" />
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
           {/* Logo */}
           <View style={styles.logoContainer}>
-            <View style={styles.logoCircle}>
+            <LinearGradient
+              colors={['#4ADE80', '#22D3EE']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={styles.logoCircle}
+            >
               <Text style={styles.logoEmoji}>💎</Text>
-            </View>
+            </LinearGradient>
             <Text style={styles.logoText}>Gemlish</Text>
             <Text style={styles.logoSub}>Aprende Inglés Jugando</Text>
           </View>
@@ -52,6 +71,7 @@ export default function LoginScreen() {
 
             {error ? (
               <View style={styles.errorBox}>
+                <Text style={styles.errorIcon}>⚠️</Text>
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -59,29 +79,33 @@ export default function LoginScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Usuario</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, focusedField === 'user' && styles.inputFocused]}
                 placeholder="Tu nombre de usuario"
-                placeholderTextColor="#3D4A5C"
+                placeholderTextColor={C.border}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
+                onFocus={() => setFocusedField('user')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Contraseña</Text>
-              <View style={styles.passwordRow}>
+              <View style={[styles.passwordRow, focusedField === 'pass' && styles.inputFocused]}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Tu contraseña"
-                  placeholderTextColor="#3D4A5C"
+                  placeholderTextColor={C.border}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   returnKeyType="done"
                   onSubmitEditing={handleLogin}
+                  onFocus={() => setFocusedField('pass')}
+                  onBlur={() => setFocusedField(null)}
                 />
                 <TouchableOpacity
                   style={styles.eyeBtn}
@@ -94,15 +118,21 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity
-              style={[styles.btnPrimary, loading && { opacity: 0.6 }]}
+              style={[styles.btnWrap, loading && { opacity: 0.65 }]}
               onPress={handleLogin}
               disabled={loading}
               activeOpacity={0.85}
             >
-              {loading
-                ? <ActivityIndicator color="#0D0D18" />
-                : <Text style={styles.btnPrimaryText}>Entrar</Text>
-              }
+              <LinearGradient
+                colors={['#4ADE80', '#22D3EE']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={styles.btnPrimary}
+              >
+                {loading
+                  ? <ActivityIndicator color="#0E1117" />
+                  : <Text style={styles.btnPrimaryText}>Entrar</Text>
+                }
+              </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -129,98 +159,92 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D18' },
+  container: { flex: 1, backgroundColor: C.bg },
   scroll: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 64, paddingBottom: 40 },
 
-  logoContainer: { alignItems: 'center', marginBottom: 48 },
+  logoContainer: { alignItems: 'center', marginBottom: 44 },
   logoCircle: {
-    width: 88, height: 88, borderRadius: 24,
-    backgroundColor: '#0F2A4A',
+    width: 88, height: 88, borderRadius: 28,
     justifyContent: 'center', alignItems: 'center',
-    marginBottom: 18,
-    borderWidth: 2,
-    borderColor: '#38BDF8',
-    shadowColor: '#38BDF8',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 18,
-    elevation: 10,
+    marginBottom: 16,
   },
-  logoEmoji: { fontSize: 40 },
+  logoEmoji: { fontSize: 42 },
   logoText: {
-    fontSize: 38, fontWeight: '900', color: '#F1F5F9',
+    fontSize: 36, fontWeight: '900', color: C.text,
     letterSpacing: -0.5,
   },
-  logoSub: { fontSize: 14, color: '#64748B', marginTop: 6, fontWeight: '500' },
+  logoSub: { fontSize: 14, color: C.muted, marginTop: 6, fontWeight: '500' },
 
   form: { width: '100%' },
   formTitle: {
-    fontSize: 20, fontWeight: '800', color: '#CBD5E1',
+    fontSize: 20, fontWeight: '800', color: C.mutedLight,
     marginBottom: 24, textAlign: 'center', letterSpacing: -0.2,
   },
 
   errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.1)',
-    borderRadius: 12, padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,113,113,0.1)',
+    borderRadius: 14, padding: 14,
     marginBottom: 20,
-    borderLeftWidth: 3, borderLeftColor: '#EF4444',
+    borderWidth: 1,
+    borderColor: 'rgba(248,113,113,0.3)',
+    gap: 10,
   },
-  errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '600' },
+  errorIcon: { fontSize: 16 },
+  errorText: { flex: 1, color: C.error, fontSize: 13, fontWeight: '600' },
 
   inputGroup: { marginBottom: 18 },
   label: {
-    fontSize: 11, color: '#64748B', marginBottom: 8,
+    fontSize: 11, color: C.muted, marginBottom: 8,
     fontWeight: '700', letterSpacing: 1.0, textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: '#111122',
-    borderWidth: 1,
-    borderColor: '#1E2A3A',
-    borderRadius: 14,
+    backgroundColor: C.surface,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    color: '#F1F5F9',
+    color: C.text,
     fontSize: 16,
+  },
+  inputFocused: {
+    borderColor: C.green,
   },
   passwordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#111122',
-    borderWidth: 1,
-    borderColor: '#1E2A3A',
-    borderRadius: 14,
+    backgroundColor: C.surface,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 16,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    color: '#F1F5F9',
+    color: C.text,
     fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: 16, paddingVertical: 16 },
   eyeIcon: { fontSize: 18 },
 
+  btnWrap: { marginTop: 8 },
   btnPrimary: {
-    backgroundColor: '#A3E635',
-    borderRadius: 14,
+    borderRadius: 18,
     paddingVertical: 18,
     alignItems: 'center',
-    marginTop: 8,
-    shadowColor: '#A3E635',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 8,
   },
-  btnPrimaryText: { color: '#0D0D18', fontSize: 17, fontWeight: '900', letterSpacing: 0.3 },
+  btnPrimaryText: { color: '#0E1117', fontSize: 17, fontWeight: '900', letterSpacing: 0.2 },
 
   forgotBtn: { marginTop: 16, alignItems: 'center', paddingVertical: 4 },
-  forgotText: { color: '#475569', fontSize: 13 },
+  forgotText: { color: C.muted, fontSize: 13 },
 
   footer: {
     flexDirection: 'row', justifyContent: 'center',
     alignItems: 'center', marginTop: 40,
   },
-  footerText: { color: '#475569', fontSize: 14 },
-  footerLink: { color: '#38BDF8', fontSize: 14, fontWeight: '700' },
+  footerText: { color: C.muted, fontSize: 14 },
+  footerLink: { color: C.blue, fontSize: 14, fontWeight: '700' },
 });

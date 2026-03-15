@@ -183,25 +183,25 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#8B9CC8',
     lineHeight: 16,
   },
   closeBtn: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#2D3148',
+    backgroundColor: '#2A3450',
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeBtnText: {
-    color: '#9CA3AF',
+    color: '#8B9CC8',
     fontSize: 12,
     fontWeight: '700',
   },
   progressBarBg: {
     height: 3,
-    backgroundColor: '#2D3148',
+    backgroundColor: '#2A3450',
   },
   progressBarFill: {
     height: 3,

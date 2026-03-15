@@ -88,7 +88,7 @@ export default function ListenModeScreen() {
   if (showResult) {
     const pct = Math.round((score / TOTAL) * 100);
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle="light-content" />
         <View style={styles.resultContainer}>
           <Text style={styles.resultEmoji}>{pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'}</Text>
@@ -105,7 +105,7 @@ export default function ListenModeScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
@@ -150,7 +150,7 @@ export default function ListenModeScreen() {
           />
 
           {submitted && (
-            <Text style={[styles.feedback, { color: isCorrect ? '#58CC02' : '#FF4B4B' }]}>
+            <Text style={[styles.feedback, { color: isCorrect ? '#4ADE80' : '#FF4B4B' }]}>
               {isCorrect ? '¡Correcto! ✅' : `La palabra era: "${word?.word}" ❌`}
             </Text>
           )}
@@ -175,22 +175,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#161B27', justifyContent: 'center', alignItems: 'center',
   },
-  backBtnText: { color: '#9CA3AF', fontSize: 16, fontWeight: '700' },
+  backBtnText: { color: '#8B9CC8', fontSize: 16, fontWeight: '700' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
   counter: { fontSize: 14, color: '#38BDF8', fontWeight: '700' },
   scroll: { padding: 20, flexGrow: 1 },
   card: {
-    backgroundColor: '#111122', borderRadius: 20, padding: 24,
-    borderWidth: 1, borderColor: '#2D3148',
+    backgroundColor: '#161B27', borderRadius: 20, padding: 24,
+    borderWidth: 1, borderColor: '#2A3450',
   },
   instruction: {
-    fontSize: 15, color: '#9CA3AF', textAlign: 'center', marginBottom: 24,
+    fontSize: 15, color: '#8B9CC8', textAlign: 'center', marginBottom: 24,
   },
   speakBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -204,23 +204,23 @@ const styles = StyleSheet.create({
   speakBtnText: { fontSize: 16, color: '#1CB0F6', fontWeight: '700' },
   input: {
     backgroundColor: '#0D0F18', borderRadius: 12, padding: 16,
-    fontSize: 18, color: '#FFFFFF', borderWidth: 2, borderColor: '#2D3148',
+    fontSize: 18, color: '#FFFFFF', borderWidth: 2, borderColor: '#2A3450',
     marginBottom: 16, textAlign: 'center',
   },
-  inputCorrect: { borderColor: '#58CC02', backgroundColor: '#1A3A1A' },
+  inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#1A3A1A' },
   inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#3A1A1A' },
   feedback: { fontSize: 15, fontWeight: '600', textAlign: 'center', marginBottom: 12 },
   submitBtn: {
     backgroundColor: '#38BDF8', borderRadius: 14, paddingVertical: 16,
     alignItems: 'center',
   },
-  submitBtnDisabled: { backgroundColor: '#2D3148' },
+  submitBtnDisabled: { backgroundColor: '#2A3450' },
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   resultContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   resultEmoji: { fontSize: 72, marginBottom: 16 },
   resultTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
   resultScore: { fontSize: 48, fontWeight: '900', color: '#38BDF8', marginBottom: 4 },
-  resultPct: { fontSize: 18, color: '#9CA3AF', marginBottom: 32 },
+  resultPct: { fontSize: 18, color: '#8B9CC8', marginBottom: 32 },
   doneBtn: {
     backgroundColor: '#38BDF8', borderRadius: 16, paddingVertical: 16,
     paddingHorizontal: 40,

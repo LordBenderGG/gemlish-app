@@ -121,7 +121,7 @@ export default function ReviewScreen() {
 
   if (errorWords.length === 0) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>🎉</Text>
@@ -137,7 +137,7 @@ export default function ReviewScreen() {
 
   if (finished) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>🏆</Text>
@@ -155,7 +155,7 @@ export default function ReviewScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
@@ -271,15 +271,15 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   card: {
-    backgroundColor: '#111122',
+    backgroundColor: '#161B27',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#2D3148',
+    borderColor: '#2A3450',
   },
   cardMastered: {
-    borderColor: '#58CC02',
+    borderColor: '#4ADE80',
     opacity: 0.6,
   },
   cardFront: {
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   exampleToggle: {
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: '#2D3148',
+    borderTopColor: '#2A3450',
   },
   exampleToggleText: {
     color: '#9BA1A6',
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   actionBtnGreen: {
     backgroundColor: '#1A3A1A',
     borderWidth: 1,
-    borderColor: '#58CC02',
+    borderColor: '#4ADE80',
   },
   actionBtnOrange: {
     backgroundColor: '#1A2A3A',

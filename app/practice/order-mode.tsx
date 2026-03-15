@@ -122,7 +122,7 @@ export default function OrderModeScreen() {
   if (showResult) {
     const pct = Math.round((score / TOTAL) * 100);
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle="light-content" />
         <View style={styles.resultContainer}>
           <Text style={styles.resultEmoji}>{pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '💪'}</Text>
@@ -139,7 +139,7 @@ export default function OrderModeScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
@@ -179,7 +179,7 @@ export default function OrderModeScreen() {
                   >
                     <Text style={[
                       styles.chipText,
-                      submitted && (isCorrect ? { color: '#58CC02' } : { color: '#FF4B4B' }),
+                      submitted && (isCorrect ? { color: '#4ADE80' } : { color: '#FF4B4B' }),
                     ]}>{word}</Text>
                   </TouchableOpacity>
                 ))}
@@ -205,7 +205,7 @@ export default function OrderModeScreen() {
           </View>
 
           {submitted && (
-            <Text style={[styles.feedback, { color: isCorrect ? '#58CC02' : '#FF4B4B', marginTop: 16 }]}>
+            <Text style={[styles.feedback, { color: isCorrect ? '#4ADE80' : '#FF4B4B', marginTop: 16 }]}>
               {isCorrect ? '¡Correcto! ✅' : `Oración correcta: "${ex.sentence}" ❌`}
             </Text>
           )}
@@ -235,21 +235,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#161B27', justifyContent: 'center', alignItems: 'center',
   },
-  backBtnText: { color: '#9CA3AF', fontSize: 16, fontWeight: '700' },
+  backBtnText: { color: '#8B9CC8', fontSize: 16, fontWeight: '700' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
   counter: { fontSize: 14, color: '#FF9500', fontWeight: '700' },
   scroll: { padding: 20, flexGrow: 1 },
   card: {
-    backgroundColor: '#111122', borderRadius: 20, padding: 20,
-    borderWidth: 1, borderColor: '#2D3148',
+    backgroundColor: '#161B27', borderRadius: 20, padding: 20,
+    borderWidth: 1, borderColor: '#2A3450',
   },
-  instruction: { fontSize: 16, color: '#9CA3AF', marginBottom: 12 },
+  instruction: { fontSize: 16, color: '#8B9CC8', marginBottom: 12 },
   translationBox: {
     backgroundColor: '#0D0F18', borderRadius: 10,
     paddingHorizontal: 14, paddingVertical: 10,
@@ -258,38 +258,38 @@ const styles = StyleSheet.create({
   translationText: { fontSize: 13, color: '#FFB347', fontStyle: 'italic' },
   builderArea: {
     minHeight: 80, backgroundColor: '#0D0F18', borderRadius: 12,
-    padding: 12, marginBottom: 12, borderWidth: 1, borderColor: '#2D3148',
+    padding: 12, marginBottom: 12, borderWidth: 1, borderColor: '#2A3450',
     justifyContent: 'center',
   },
-  placeholder: { color: '#4B5563', fontSize: 14, textAlign: 'center' },
+  placeholder: { color: '#3D4F6E', fontSize: 14, textAlign: 'center' },
   wordRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
-    backgroundColor: '#2D3148', borderRadius: 10, paddingHorizontal: 14,
+    backgroundColor: '#2A3450', borderRadius: 10, paddingHorizontal: 14,
     paddingVertical: 10, borderWidth: 1, borderColor: '#3D4168',
   },
   chipSelected: { backgroundColor: '#3D2A6A', borderColor: '#38BDF8' },
-  chipCorrect: { borderColor: '#58CC02', backgroundColor: '#1A3A1A' },
+  chipCorrect: { borderColor: '#4ADE80', backgroundColor: '#1A3A1A' },
   chipWrong: { borderColor: '#FF4B4B', backgroundColor: '#3A1A1A' },
   chipText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
-  divider: { height: 1, backgroundColor: '#2D3148', marginVertical: 14 },
+  divider: { height: 1, backgroundColor: '#2A3450', marginVertical: 14 },
   feedback: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
   btnRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
   resetBtn: {
-    backgroundColor: '#111122', borderRadius: 12, paddingVertical: 14,
-    paddingHorizontal: 16, borderWidth: 1, borderColor: '#2D3148',
+    backgroundColor: '#161B27', borderRadius: 12, paddingVertical: 14,
+    paddingHorizontal: 16, borderWidth: 1, borderColor: '#2A3450',
   },
-  resetBtnText: { color: '#9CA3AF', fontSize: 14, fontWeight: '600' },
+  resetBtnText: { color: '#8B9CC8', fontSize: 14, fontWeight: '600' },
   submitBtn: {
     flex: 1, backgroundColor: '#FF9500', borderRadius: 12,
     paddingVertical: 14, alignItems: 'center',
   },
-  submitBtnDisabled: { backgroundColor: '#2D3148' },
+  submitBtnDisabled: { backgroundColor: '#2A3450' },
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   resultContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   resultEmoji: { fontSize: 72, marginBottom: 16 },
   resultTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
   resultScore: { fontSize: 48, fontWeight: '900', color: '#FF9500', marginBottom: 4 },
-  resultPct: { fontSize: 18, color: '#9CA3AF', marginBottom: 32 },
+  resultPct: { fontSize: 18, color: '#8B9CC8', marginBottom: 32 },
   doneBtn: {
     backgroundColor: '#FF9500', borderRadius: 16, paddingVertical: 16,
     paddingHorizontal: 40,

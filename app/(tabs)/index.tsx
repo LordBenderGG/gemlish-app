@@ -84,7 +84,7 @@ function OfflineBadge() {
       </View>
       <View style={styles.offlineStatusPill}>
         <Text style={styles.offlineDot}>{isOnline ? '🟢' : '🔴'}</Text>
-        <Text style={[styles.offlineStatusText, { color: isOnline ? '#58CC02' : '#FF9600' }]}>
+        <Text style={[styles.offlineStatusText, { color: isOnline ? '#4ADE80' : '#FF9600' }]}>
           {isOnline ? 'Online' : 'Offline'}
         </Text>
       </View>
@@ -236,8 +236,8 @@ function LevelPreviewModal({
               </View>
             ))}
             {levelData.words.length > 10 && (
-              <View style={[styles.modalWordChip, { borderColor: '#4B5563' }]}>
-                <Text style={[styles.modalWordEn, { color: '#9CA3AF' }]}>+{levelData.words.length - 10} más</Text>
+              <View style={[styles.modalWordChip, { borderColor: '#3D4F6E' }]}>
+                <Text style={[styles.modalWordEn, { color: '#8B9CC8' }]}>+{levelData.words.length - 10} más</Text>
               </View>
             )}
           </View>
@@ -331,7 +331,7 @@ function LevelCard({ levelNum, isCompleted, isUnlocked, onPress, onPressLocked }
       activeOpacity={0.8}
     >
       <LinearGradient
-        colors={['#0F1A2E', '#0D0D18']}
+        colors={['#0E1420', '#0E1117']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.levelCardGradientInner}
@@ -471,8 +471,8 @@ export default function LevelsScreen() {
   const progressPct = Math.round((completedCount / TOTAL_LEVELS) * 100);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0D18" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
+      <StatusBar barStyle="light-content" backgroundColor="#0E1117" />
       <StatsHeader
         username={username || 'Estudiante'}
         gems={gems}
@@ -491,7 +491,7 @@ export default function LevelsScreen() {
         return (
           <View style={styles.progressWidget}>
             <LinearGradient
-              colors={['#0C1A2E', '#0F2A4A', '#0a1628']}
+              colors={['#0C1A2E', '#0E1A30', '#0a1628']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.progressWidgetGradient}
@@ -593,7 +593,7 @@ export default function LevelsScreen() {
         <Text style={styles.practiceSectionLabel}>MODOS DE PRÁCTICA</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.practiceRow}>
           {[
-            { emoji: '⚡', title: 'Repaso', bg: '#0F2A4A', accent: '#38BDF8', route: '/practice/quick-review' },
+            { emoji: '⚡', title: 'Repaso', bg: '#0E1A30', accent: '#38BDF8', route: '/practice/quick-review' },
             { emoji: '🎧', title: 'Escucha', bg: '#0A2A1A', accent: '#4ADE80', route: '/practice/listen-mode' },
             { emoji: '📝', title: 'Ordenar', bg: '#2A1F0A', accent: '#FBBF24', route: '/practice/order-mode' },
             { emoji: '🔥', title: 'Difíciles', bg: '#2A0A0A', accent: '#F87171', route: '/practice/hard-words' },
@@ -673,11 +673,11 @@ export default function LevelsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D18' },
+  container: { flex: 1, backgroundColor: '#0E1117' },
   headerWrapper: {
-    backgroundColor: '#111122',
+    backgroundColor: '#161B27',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E1E3A',
+    borderBottomColor: '#2A3450',
   },
   header: {
     flexDirection: 'row',
@@ -688,39 +688,39 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   headerLeft: { flex: 1 },
-  greetingTime: { fontSize: 12, fontWeight: '500', color: '#94A3B8', letterSpacing: 0.2 },
-  greetingName: { fontSize: 20, fontWeight: '900', color: '#F1F5F9', marginTop: 1, letterSpacing: -0.4 },
+  greetingTime: { fontSize: 12, fontWeight: '500', color: '#8B9CC8', letterSpacing: 0.2 },
+  greetingName: { fontSize: 20, fontWeight: '900', color: '#F0F4FF', marginTop: 1, letterSpacing: -0.4 },
   xpRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
   xpStar: { fontSize: 12 },
-  xpAmount: { fontSize: 13, fontWeight: '700', color: '#A3E635', marginLeft: 4 },
+  xpAmount: { fontSize: 13, fontWeight: '700', color: '#4ADE80', marginLeft: 4 },
   xpLabel: { fontSize: 11, fontWeight: '600', color: '#A3E63580' },
   headerRight: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   statPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 7,
     gap: 5,
-    backgroundColor: '#1E1E3A',
+    backgroundColor: '#1E2535',
     borderWidth: 1,
-    borderColor: '#2A2A4A',
+    borderColor: '#2A3450',
   },
   statPillFire: {
-    backgroundColor: '#2A1010',
-    borderColor: '#7F1D1D',
+    backgroundColor: '#2A1A0A',
+    borderColor: '#92400E',
   },
   statPillEmoji: { fontSize: 14 },
-  statPillValue: { fontSize: 15, fontWeight: '900', color: '#F1F5F9' },
+  statPillValue: { fontSize: 15, fontWeight: '900', color: '#F0F4FF' },
   // Legacy aliases (keep for backward compat)
   greeting: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
   progressRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
   xpText: { fontSize: 13, color: '#FFD700', fontWeight: '600' },
   statBadge: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#111122', borderRadius: 20,
+    backgroundColor: '#161B27', borderRadius: 20,
     paddingHorizontal: 10, paddingVertical: 5,
-    borderWidth: 1, borderColor: '#2D3148', gap: 4,
+    borderWidth: 1, borderColor: '#2A3450', gap: 4,
   },
   statBadgeGradient: {
     flexDirection: 'row', alignItems: 'center',
@@ -733,13 +733,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#2D3148',
+    borderBottomColor: '#2A3450',
   },
   progressLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  progressLabel: { fontSize: 12, color: '#9CA3AF', fontWeight: '600' },
-  progressPct: { fontSize: 12, color: '#58CC02', fontWeight: '700' },
-  progressBarBg: { height: 6, backgroundColor: '#2D3148', borderRadius: 3 },
-  progressBarFill: { height: 6, backgroundColor: '#58CC02', borderRadius: 3 },
+  progressLabel: { fontSize: 12, color: '#8B9CC8', fontWeight: '600' },
+  progressPct: { fontSize: 12, color: '#4ADE80', fontWeight: '700' },
+  progressBarBg: { height: 7, backgroundColor: '#1E2535', borderRadius: 4 },
+  progressBarFill: { height: 7, backgroundColor: '#4ADE80', borderRadius: 4 },
   list: { padding: 10, paddingBottom: 20 },
   // Tarjeta bloqueada
   levelCardLocked: {
@@ -748,18 +748,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#111122',
-    backgroundColor: '#0D0D1A',
+    borderColor: '#1E2535',
+    backgroundColor: '#131820',
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginBottom: 8,
-    opacity: 0.45,
+    opacity: 0.4,
   },
   // Tarjeta completada
   levelCardCompleted: {
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#34D39950',
+    borderColor: '#4ADE8050',
     marginBottom: 8,
     overflow: 'hidden',
   },
@@ -767,12 +767,12 @@ const styles = StyleSheet.create({
   levelCardUnlocked: {
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#38BDF840',
+    borderColor: '#38BDF850',
     marginBottom: 8,
     overflow: 'hidden',
     shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
@@ -786,7 +786,7 @@ const styles = StyleSheet.create({
   levelLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   levelIconBgLocked: {
     width: 48, height: 48, borderRadius: 14,
-    backgroundColor: '#111122',
+    backgroundColor: '#1E2535',
     justifyContent: 'center', alignItems: 'center', marginRight: 14,
   },
   levelIconBgCompleted: {
@@ -800,14 +800,14 @@ const styles = StyleSheet.create({
   levelIconText: { fontSize: 24 },
   levelInfo: { flex: 1 },
   levelNum: { fontSize: 15, fontWeight: '800', letterSpacing: -0.2 },
-  levelNumLocked: { fontSize: 15, fontWeight: '700', color: '#4B5563' },
+  levelNumLocked: { fontSize: 15, fontWeight: '700', color: '#3D4F6E' },
   levelTopic: { fontSize: 13, fontWeight: '700', marginTop: 2 },
-  levelTopicLocked: { fontSize: 12, fontWeight: '500', marginTop: 2, color: '#374151' },
+  levelTopicLocked: { fontSize: 12, fontWeight: '500', marginTop: 2, color: '#2A3A55' },
   levelRight: { alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
   completedRight: { alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
   completedBadge: { fontSize: 22 },
   completedBadgeGradient: {
-    width: 38, height: 38, borderRadius: 19,
+    width: 40, height: 40, borderRadius: 20,
     justifyContent: 'center', alignItems: 'center',
   },
   completedBadgeText: { color: '#FFFFFF', fontSize: 18, fontWeight: '900' },
@@ -841,20 +841,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 7,
     paddingHorizontal: 14,
-    backgroundColor: '#0C1A2E',
+    backgroundColor: '#0E1420',
     gap: 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#2D3148',
+    borderBottomColor: '#2A3450',
   },
   offlineBadgeOk: {},
   offlineBadgeNoConn: {},
   offlineLogo: { width: 28, height: 28, borderRadius: 6 },
   offlineBrandCol: { flex: 1, marginLeft: 8 },
-  offlineBrandName: { fontSize: 14, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.2 },
-  offlineBrandTagline: { fontSize: 10, color: '#8899AA', fontWeight: '500', marginTop: 1 },
-  offlineStatusPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#1A2840', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
+  offlineBrandName: { fontSize: 14, fontWeight: '800', color: '#F0F4FF', letterSpacing: 0.2 },
+  offlineBrandTagline: { fontSize: 10, color: '#8B9CC8', fontWeight: '500', marginTop: 1 },
+  offlineStatusPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#1E2535', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
   offlineDot: { fontSize: 8 },
   offlineStatusText: { fontSize: 10, fontWeight: '700' },
   offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
@@ -865,12 +865,12 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E1E3A',
+    borderBottomColor: '#2A3450',
   },
   practiceSectionLabel: {
     fontSize: 9,
     fontWeight: '800',
-    color: '#475569',
+    color: '#8B9CC8',
     letterSpacing: 1.2,
     marginBottom: 6,
   },
@@ -890,7 +890,7 @@ const styles = StyleSheet.create({
   },
   practiceTileEmojiNew: { fontSize: 18, marginBottom: 4 },
   practiceTileTitleNew: { fontSize: 11, fontWeight: '800', letterSpacing: -0.2, textAlign: 'center' },
-  practiceTileSubNew: { fontSize: 10, color: '#64748B', marginTop: 2, fontWeight: '500' },
+  practiceTileSubNew: { fontSize: 10, color: '#8B9CC8', marginTop: 2, fontWeight: '500' },
   practiceRowContent: {
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
   // Legacy grid styles (kept for compat)
   practiceSectionTitle: { fontSize: 12, fontWeight: '700', color: '#6B7280', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
   practiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  practiceTile: { width: '47.5%', backgroundColor: '#1A1D2E', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2D3148', alignItems: 'flex-start' },
+  practiceTile: { width: '47.5%', backgroundColor: '#161B27', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2A3450', alignItems: 'flex-start' },
   practiceTileWrapper: { width: '47.5%', borderRadius: 18, overflow: 'hidden' },
   practiceTileGradient: { padding: 18, alignItems: 'flex-start', minHeight: 110, justifyContent: 'space-between' },
   practiceTileEmojiLg: { fontSize: 32, marginBottom: 8 },
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     height: 50,
     borderBottomWidth: 1,
-    borderBottomColor: '#2D3148',
+    borderBottomColor: '#2A3450',
   },
   categoryScrollContent: {
     paddingHorizontal: 12,
@@ -946,9 +946,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#1E2A3A',
+    backgroundColor: '#1E2535',
     borderWidth: 1.5,
-    borderColor: '#2D3D55',
+    borderColor: '#2A3450',
     flexShrink: 0,
   },
   categoryChipActive: {
@@ -958,26 +958,26 @@ const styles = StyleSheet.create({
   categoryChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#C4CEEA',
   },
   categoryChipTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: '#0E1117',
+    fontWeight: '800',
   },
   searchContainer: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#111122', borderRadius: 12,
+    backgroundColor: '#161B27', borderRadius: 14,
     marginHorizontal: 16, marginVertical: 6,
-    paddingHorizontal: 12, paddingVertical: 8,
-    borderWidth: 1, borderColor: '#2D3148',
+    paddingHorizontal: 14, paddingVertical: 10,
+    borderWidth: 1.5, borderColor: '#2A3450',
   },
   searchIcon: { fontSize: 14, marginRight: 8 },
   searchInput: {
-    flex: 1, color: '#FFFFFF', fontSize: 14,
+    flex: 1, color: '#F0F4FF', fontSize: 14,
     paddingVertical: 0,
   },
   searchClear: { padding: 4 },
-  searchClearText: { color: '#9CA3AF', fontSize: 14 },
+  searchClearText: { color: '#8B9CC8', fontSize: 14 },
   // ─── Modal de vista previa ─────────────────────────────────────────
   modalOverlay: {
     flex: 1,
@@ -987,8 +987,8 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalCard: {
-    backgroundColor: '#111122',
-    borderRadius: 20,
+    backgroundColor: '#161B27',
+    borderRadius: 22,
     borderWidth: 1.5,
     width: '100%',
     maxWidth: 400,
@@ -1009,13 +1009,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalIcon: { fontSize: 26 },
-  modalTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  modalTitle: { fontSize: 16, fontWeight: '800', color: '#F0F4FF' },
   modalSubtitle: { fontSize: 13, fontWeight: '600', marginTop: 2 },
   modalClose: { padding: 6 },
-  modalCloseText: { fontSize: 16, color: '#9CA3AF', fontWeight: '700' },
+  modalCloseText: { fontSize: 16, color: '#8B9CC8', fontWeight: '700' },
   modalDesc: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: '#8B9CC8',
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 10,
@@ -1029,8 +1029,8 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   modalWordChip: {
-    backgroundColor: '#111122',
-    borderRadius: 10,
+    backgroundColor: '#1E2535',
+    borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 7,
@@ -1038,7 +1038,7 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   modalWordEn: { fontSize: 13, fontWeight: '700' },
-  modalWordEs: { fontSize: 11, color: '#9CA3AF', marginTop: 2 },
+  modalWordEs: { fontSize: 11, color: '#8B9CC8', marginTop: 2 },
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1046,10 +1046,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#2D3148',
+    borderTopColor: '#2A3450',
   },
   modalXp: { fontSize: 13, fontWeight: '700', color: '#FFD700' },
-  modalExercises: { fontSize: 13, fontWeight: '600', color: '#9CA3AF' },
+  modalExercises: { fontSize: 13, fontWeight: '600', color: '#8B9CC8' },
   // ─── Animación de desbloqueo ──────────────────────────────────────────
   unlockOverlay: {
     position: 'absolute',
@@ -1060,18 +1060,18 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   unlockCard: {
-    backgroundColor: '#111122',
-    borderRadius: 24,
+    backgroundColor: '#161B27',
+    borderRadius: 28,
     borderWidth: 2,
-    borderColor: '#58CC02',
+    borderColor: '#4ADE80',
     padding: 32,
     alignItems: 'center',
     width: 280,
   },
   unlockEmoji: { fontSize: 56, marginBottom: 12 },
-  unlockTitle: { fontSize: 22, fontWeight: '900', color: '#58CC02', marginBottom: 6 },
-  unlockSubtitle: { fontSize: 15, color: '#FFFFFF', fontWeight: '600', marginBottom: 4 },
-  unlockDesc: { fontSize: 13, color: '#9CA3AF', textAlign: 'center' },
+  unlockTitle: { fontSize: 22, fontWeight: '900', color: '#4ADE80', marginBottom: 6 },
+  unlockSubtitle: { fontSize: 15, color: '#F0F4FF', fontWeight: '600', marginBottom: 4 },
+  unlockDesc: { fontSize: 13, color: '#8B9CC8', textAlign: 'center' },
   //  // ─── Desafío del día (nuevo diseño) ─────────────────────────────────────
   challengeCardOuter: {
     marginHorizontal: 12,
@@ -1183,11 +1183,11 @@ const styles = StyleSheet.create({
   challengeLevelNameNew: {
     fontSize: 15, fontWeight: '800', color: '#FFFFFF', marginBottom: 2,
   },
-  challengeRewardText: { fontSize: 11, color: '#9CA3AF', fontWeight: '500' },
+  challengeRewardText: { fontSize: 11, color: '#8B9CC8', fontWeight: '500' },
   challengeRewardTextNew: {
     fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: '600',
   },
-  challengeCompletedText: { fontSize: 11, color: '#58CC02', fontWeight: '600' },
+  challengeCompletedText: { fontSize: 11, color: '#4ADE80', fontWeight: '600' },
   challengeCompletedTextNew: {
     fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: '700',
   },
@@ -1199,7 +1199,7 @@ const styles = StyleSheet.create({
   },
   challengeArrowNew: { fontSize: 22, fontWeight: '900', color: '#FFFFFF' },
   challengeCountdown: {
-    fontSize: 10, color: '#9CA3AF', marginTop: 2, fontVariant: ['tabular-nums'],
+    fontSize: 10, color: '#8B9CC8', marginTop: 2, fontVariant: ['tabular-nums'],
   },
   challengeCountdownNew: {
     fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2, fontVariant: ['tabular-nums'],
@@ -1216,14 +1216,14 @@ const styles = StyleSheet.create({
   progressWidgetBadge: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   progressWidgetBadgeText: { fontSize: 10, fontWeight: '900', color: '#FFFFFF', letterSpacing: 1.2, textTransform: 'uppercase' },
   progressWidgetXpBadge: { backgroundColor: 'rgba(88,204,2,0.25)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
-  progressWidgetXpText: { fontSize: 11, fontWeight: '800', color: '#58CC02' },
+  progressWidgetXpText: { fontSize: 11, fontWeight: '800', color: '#4ADE80' },
   progressWidgetStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   progressWidgetStat: { flex: 1, alignItems: 'center' },
   progressWidgetStatVal: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginBottom: 2 },
   progressWidgetStatLbl: { fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: '600' },
   progressWidgetDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.12)' },
   progressWidgetBarBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 100, marginBottom: 8, overflow: 'hidden' },
-  progressWidgetBarFill: { height: '100%' as any, backgroundColor: '#38BDF8', borderRadius: 100 },
-  progressWidgetNext: { fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: '500' },
+  progressWidgetBarFill: { height: '100%' as any, backgroundColor: '#4ADE80', borderRadius: 100 },
+  progressWidgetNext: { fontSize: 11, color: 'rgba(196,206,234,0.6)', fontWeight: '500' },
 });
 

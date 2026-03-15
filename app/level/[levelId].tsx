@@ -30,7 +30,7 @@ function WordReviewCard({ word, t }: { word: Word; t: ReturnType<typeof useTheme
           <Text style={styles.speakBtnText}>{isThisWordSpeaking ? '⏹' : '🔊'}</Text>
         </TouchableOpacity>
       </View>
-      <View style={[styles.exampleBox, { backgroundColor: '#0D0D18', borderLeftColor: '#38BDF8' }]}>
+      <View style={[styles.exampleBox, { backgroundColor: '#0E1117', borderLeftColor: '#38BDF8' }]}>
         <Text style={[styles.exampleEn, { color: t.text }]}>"{word.example}"</Text>
         <Text style={[styles.exampleEs, { color: t.muted }]}>{word.exampleEs}</Text>
       </View>
@@ -60,7 +60,7 @@ export default function LevelDetailScreen() {
   ), [t]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
@@ -85,7 +85,7 @@ export default function LevelDetailScreen() {
           </View>
           {isCompleted && (
             <View style={[styles.metaChip, styles.metaCompleted]}>
-              <Text style={[styles.metaText, { color: '#58CC02' }]}>✅ Completado</Text>
+              <Text style={[styles.metaText, { color: '#4ADE80' }]}>✅ Completado</Text>
             </View>
           )}
         </View>
@@ -107,7 +107,7 @@ export default function LevelDetailScreen() {
       />
 
       {/* Botón de acción */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 8, borderTopColor: t.border, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 8, borderTopColor: t.border, backgroundColor: '#0E1117' }]}>
         <TouchableOpacity
           style={[styles.startBtn, { backgroundColor: levelData.color }]}
           onPress={() => handleStartLevel()}
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5,
     borderWidth: 1,
   },
-  metaCompleted: { borderColor: '#58CC02', backgroundColor: '#1A3A1A' },
+  metaCompleted: { borderColor: '#4ADE80', backgroundColor: '#1A3A1A' },
   metaText: { fontSize: 12, fontWeight: '600' },
   levelDesc: { fontSize: 14, lineHeight: 20 },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12, paddingHorizontal: 16 },

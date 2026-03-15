@@ -182,9 +182,9 @@ function MiniQuiz({ words, onComplete }: MiniQuizProps) {
       </View>
       <View style={styles.quizOptions}>
         {q.options.map(opt => {
-          let bg = '#111122', border = '#2D3148', textColor = '#FFFFFF';
+          let bg = '#161B27', border = '#2A3450', textColor = '#FFFFFF';
           if (selected !== null) {
-            if (opt === q.correct) { bg = '#1A3A1A'; border = '#58CC02'; textColor = '#58CC02'; }
+            if (opt === q.correct) { bg = '#1A3A1A'; border = '#4ADE80'; textColor = '#4ADE80'; }
             else if (opt === selected && opt !== q.correct) { bg = '#3A1A1A'; border = '#FF4B4B'; textColor = '#FF4B4B'; }
           }
           return (
@@ -290,12 +290,12 @@ export default function DailyScreen() {
   // ─── Fase: Quiz ───────────────────────────────────────────────────────────
   if (phase === 'quiz') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle="light-content" />
         <View style={styles.header}>
           <Text style={styles.headerTitle}>📅 Tarea Diaria</Text>
           <TouchableOpacity onPress={() => setPhase('study')} activeOpacity={0.7}>
-            <Text style={{ color: '#9CA3AF', fontSize: 14 }}>← Volver</Text>
+            <Text style={{ color: '#8B9CC8', fontSize: 14 }}>← Volver</Text>
           </TouchableOpacity>
         </View>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -325,7 +325,7 @@ export default function DailyScreen() {
   // ─── Fase: Completado ─────────────────────────────────────────────────────
   if (phase === 'done' || daily.dailyCompleted) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <StatusBar barStyle="light-content" />
         <View style={styles.doneContainer}>
           <Text style={styles.doneEmoji}>🎉</Text>
@@ -357,7 +357,7 @@ export default function DailyScreen() {
 
   // ─── Fase: Estudio ────────────────────────────────────────────────────────
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <StatusBar barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
@@ -435,7 +435,7 @@ function SpacedReviewPhase({
 
   if (idx >= words.length) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
         <View style={styles.doneContainer}>
           <Text style={styles.doneEmoji}>✅</Text>
           <Text style={styles.doneTitle}>¡Repaso completado!</Text>
@@ -456,10 +456,10 @@ function SpacedReviewPhase({
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0D18' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0E1117' }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🔄 Repaso Espaciado</Text>
-        <Text style={{ color: '#9CA3AF', fontSize: 14 }}>{idx + 1}/{words.length}</Text>
+        <Text style={{ color: '#8B9CC8', fontSize: 14 }}>{idx + 1}/{words.length}</Text>
       </View>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <View style={styles.spacedCard}>
@@ -486,9 +486,9 @@ function SpacedReviewPhase({
                   <Text style={styles.rateBtnEmoji}>🤔</Text>
                   <Text style={[styles.rateBtnText, { color: '#FF9500' }]}>Más o menos</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.rateBtn, { backgroundColor: '#58CC0220', borderColor: '#58CC02' }]} onPress={() => handleRate(5)}>
+                <TouchableOpacity style={[styles.rateBtn, { backgroundColor: '#58CC0220', borderColor: '#4ADE80' }]} onPress={() => handleRate(5)}>
                   <Text style={styles.rateBtnEmoji}>😄</Text>
-                  <Text style={[styles.rateBtnText, { color: '#58CC02' }]}>¡La sabía!</Text>
+                  <Text style={[styles.rateBtnText, { color: '#4ADE80' }]}>¡La sabía!</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -504,10 +504,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   headerTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF' },
-  headerSub: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  headerSub: { fontSize: 12, color: '#8B9CC8', marginTop: 2 },
   streakBadge: {
     backgroundColor: '#FF960020', borderRadius: 20,
     paddingHorizontal: 12, paddingVertical: 6,
@@ -516,24 +516,24 @@ const styles = StyleSheet.create({
   streakText: { color: '#FF9600', fontSize: 13, fontWeight: '700' },
   progressSection: {
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#2D3148',
+    borderBottomWidth: 1, borderBottomColor: '#2A3450',
   },
   progressLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  progressLabel: { fontSize: 13, color: '#9CA3AF', fontWeight: '600' },
+  progressLabel: { fontSize: 13, color: '#8B9CC8', fontWeight: '600' },
   progressCount: { fontSize: 13, color: '#1CB0F6', fontWeight: '700' },
-  progressBarBg: { height: 8, backgroundColor: '#2D3148', borderRadius: 4, overflow: 'hidden' },
+  progressBarBg: { height: 8, backgroundColor: '#2A3450', borderRadius: 4, overflow: 'hidden' },
   progressBarFill: { height: 8, backgroundColor: '#1CB0F6', borderRadius: 4 },
   dueLabel: { color: '#FF9500', fontSize: 12, fontWeight: '600', marginTop: 8 },
   list: { padding: 12, paddingBottom: 20 },
   wordCard: {
-    backgroundColor: '#111122', borderRadius: 16, padding: 16,
-    marginBottom: 12, borderWidth: 1, borderColor: '#2D3148',
+    backgroundColor: '#161B27', borderRadius: 16, padding: 16,
+    marginBottom: 12, borderWidth: 1, borderColor: '#2A3450',
   },
   wordCardLearned: { borderColor: '#58CC0240', backgroundColor: '#1A2A1A' },
   wordHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
   wordMain: { flex: 1 },
   wordEnglish: { fontSize: 24, fontWeight: '800', color: '#FFFFFF' },
-  wordPronunciation: { fontSize: 13, color: '#9CA3AF', marginTop: 2, fontStyle: 'italic' },
+  wordPronunciation: { fontSize: 13, color: '#8B9CC8', marginTop: 2, fontStyle: 'italic' },
   speakBtn: {
     width: 48, height: 48, borderRadius: 24,
     backgroundColor: '#1CB0F620', justifyContent: 'center', alignItems: 'center',
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3, borderLeftColor: '#1CB0F640',
   },
   exampleEn: { fontSize: 14, color: '#ECEDEE', fontStyle: 'italic', marginBottom: 4 },
-  exampleEs: { fontSize: 12, color: '#9CA3AF' },
+  exampleEs: { fontSize: 12, color: '#8B9CC8' },
   learnBtn: {
     backgroundColor: '#1CB0F620', borderRadius: 10, paddingVertical: 12,
     alignItems: 'center', borderWidth: 1, borderColor: '#1CB0F640',
@@ -556,31 +556,31 @@ const styles = StyleSheet.create({
   learnBtnText: { color: '#1CB0F6', fontSize: 14, fontWeight: '700' },
   footer: {
     paddingHorizontal: 16, paddingTop: 12,
-    borderTopWidth: 1, borderTopColor: '#2D3148',
+    borderTopWidth: 1, borderTopColor: '#2A3450',
     backgroundColor: '#0D0F18',
   },
   completeBtn: {
-    backgroundColor: '#58CC02', borderRadius: 14, paddingVertical: 16,
+    backgroundColor: '#4ADE80', borderRadius: 14, paddingVertical: 16,
     alignItems: 'center',
   },
-  completeBtnDisabled: { backgroundColor: '#2D3148' },
+  completeBtnDisabled: { backgroundColor: '#2A3450' },
   completeBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   // Done
   doneContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   doneEmoji: { fontSize: 72, marginBottom: 16 },
   doneTitle: { fontSize: 24, fontWeight: '800', color: '#FFFFFF', marginBottom: 8, textAlign: 'center' },
   doneSub: { fontSize: 16, color: '#FF9600', fontWeight: '700', marginBottom: 4 },
-  doneSub2: { fontSize: 14, color: '#9CA3AF', marginBottom: 20 },
+  doneSub2: { fontSize: 14, color: '#8B9CC8', marginBottom: 20 },
   // Quiz
-  quizContainer: { backgroundColor: '#111122', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#2D3148' },
-  quizTitle: { fontSize: 14, color: '#9CA3AF', fontWeight: '700', marginBottom: 4 },
+  quizContainer: { backgroundColor: '#161B27', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#2A3450' },
+  quizTitle: { fontSize: 14, color: '#8B9CC8', fontWeight: '700', marginBottom: 4 },
   quizInstruction: { fontSize: 18, color: '#FFFFFF', fontWeight: '700', marginBottom: 16 },
   quizWordBox: {
     backgroundColor: '#0D0F18', borderRadius: 14, padding: 20,
     alignItems: 'center', marginBottom: 20,
   },
   quizWord: { fontSize: 32, fontWeight: '900', color: '#FFFFFF', marginBottom: 4 },
-  quizPhonetic: { fontSize: 14, color: '#9CA3AF', fontStyle: 'italic' },
+  quizPhonetic: { fontSize: 14, color: '#8B9CC8', fontStyle: 'italic' },
   quizOptions: { gap: 10 },
   quizOption: {
     borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16,
@@ -589,18 +589,18 @@ const styles = StyleSheet.create({
   quizOptionText: { fontSize: 16, fontWeight: '600' },
   // Spaced Review
   spacedCard: {
-    backgroundColor: '#111122', borderRadius: 20, padding: 24,
-    borderWidth: 1, borderColor: '#2D3148',
+    backgroundColor: '#161B27', borderRadius: 20, padding: 24,
+    borderWidth: 1, borderColor: '#2A3450',
   },
   spacedWord: { fontSize: 36, fontWeight: '900', color: '#FFFFFF', textAlign: 'center', marginBottom: 4 },
-  spacedPhonetic: { fontSize: 14, color: '#9CA3AF', fontStyle: 'italic', textAlign: 'center', marginBottom: 20 },
+  spacedPhonetic: { fontSize: 14, color: '#8B9CC8', fontStyle: 'italic', textAlign: 'center', marginBottom: 20 },
   spacedTranslation: { fontSize: 24, fontWeight: '800', color: '#1CB0F6', textAlign: 'center', marginBottom: 16 },
   revealBtn: {
     backgroundColor: '#1CB0F620', borderRadius: 12, paddingVertical: 14,
     alignItems: 'center', borderWidth: 1, borderColor: '#1CB0F640',
   },
   revealBtnText: { color: '#1CB0F6', fontSize: 16, fontWeight: '700' },
-  rateLabel: { fontSize: 14, color: '#9CA3AF', textAlign: 'center', marginVertical: 12 },
+  rateLabel: { fontSize: 14, color: '#8B9CC8', textAlign: 'center', marginVertical: 12 },
   rateRow: { flexDirection: 'row', gap: 8 },
   rateBtn: {
     flex: 1, borderRadius: 12, paddingVertical: 12,
