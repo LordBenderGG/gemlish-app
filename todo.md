@@ -350,3 +350,6 @@
 - [x] Pantalla de Logros rediseñada — nueva paleta
 - [x] Pantalla de detalle de nivel rediseñada — nueva paleta
 - [x] Pantallas de práctica (quick-review, hard-words) rediseñadas — nueva paleta
+
+## v2.1 — Fix Build Gradle
+- [x] Fix: minSdkVersion 22 → 24 confirmado en app.config.ts + buildArchs arm64-v8a/x86_64 + cache deshabilitado en eas.json

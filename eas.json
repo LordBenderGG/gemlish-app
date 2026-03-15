@@ -8,6 +8,9 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "cache": {
+        "disabled": true
+      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleDebug"
@@ -15,12 +18,18 @@
     },
     "preview": {
       "distribution": "internal",
+      "cache": {
+        "disabled": true
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
       "autoIncrement": true,
+      "cache": {
+        "disabled": true
+      },
       "android": {
         "buildType": "app-bundle"
       },

@@ -100,6 +100,7 @@ const config: ExpoConfig = {
           minSdkVersion: 24,
           compileSdkVersion: 35,
           targetSdkVersion: 35,
+          buildArchs: ["arm64-v8a", "x86_64"],
         },
       },
     ],
