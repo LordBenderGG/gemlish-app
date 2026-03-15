@@ -320,3 +320,16 @@
 - [ ] Tarjeta del Desafío del día con nueva paleta
 - [ ] Modos de práctica visibles y bien diseñados
 - [ ] Tarjetas de nivel con nueva paleta y mejor contraste
+
+## v1.37 — QA Completo + Preparación Play Store
+- [x] Bug crítico: Streak (racha) no se reseteaba cuando el usuario saltaba días — corregido en completeLevel
+- [x] Bug crítico: finishDaily incrementaba streak dos veces (también lo hacía completeLevel) — eliminado de finishDaily
+- [x] Bug crítico: errorWords se mutaba directamente con .push() — corregido con spread operator
+- [x] Bug: gemsEarned calculado antes del último error — corregido con finalWrongCount
+- [x] Bug: Timer del ejercicio no se detenía al mostrar pantalla de resultado — corregido con showResult en useEffect
+- [x] Bug: achievements.tsx no estaba registrado en el Stack del layout raíz — corregido
+- [x] Bug: progressPctLocal calculado dos veces en index.tsx — eliminado duplicado, usa progressPct
+- [x] Mejora: completedCount en index.tsx envuelto en useMemo para evitar recálculo en cada render
+- [x] Preparación Play Store: eas.json creado con profiles development/preview/production
+- [x] Preparación Play Store: app.config.ts actualizado a v1.0.1 con metadatos GDPR/CCPA para AdMob
+- [x] Preparación Play Store: expo-audio y expo-video plugins eliminados (no se usan, generaban permisos innecesarios)

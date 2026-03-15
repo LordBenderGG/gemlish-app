@@ -161,11 +161,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
   ): Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }> => {
     if (!username) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
     const today = new Date().toISOString().split('T')[0];
+    // Calcular la fecha de ayer para verificar continuidad de racha
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
     // Usar levelCompletedDates para detectar si ya hubo actividad hoy
     const prevDatesCheck = game.levelCompletedDates ?? {};
     const alreadyActiveToday = (prevDatesCheck[today] ?? 0) > 0;
+    const wasActiveYesterday = (prevDatesCheck[yesterdayStr] ?? 0) > 0;
     let newStreak = game.streak;
-    if (!alreadyActiveToday) newStreak += 1; // Solo incrementar si es la primera actividad del día
+    if (!alreadyActiveToday) {
+      // Primera actividad del día: incrementar solo si hubo actividad ayer o la racha es 0
+      if (wasActiveYesterday || game.streak === 0) {
+        newStreak += 1;
+      } else {
+        // El usuario saltó al menos un día — resetear racha
+        newStreak = 1;
+      }
+    }
 
     // Registrar fecha de nivel completado para gráfica de actividad
     const prevDates = game.levelCompletedDates ?? {};
@@ -310,12 +323,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setDaily(next);
     await saveDailyState(username, next);
 
-    // Recompensar: +10 💎 +20 XP +1 racha
+    // Recompensar: +10 💸 +20 XP
+    // NOTA: NO incrementar streak aquí. La racha se maneja únicamente en completeLevel
+    // para evitar doble incremento cuando el usuario completa un nivel Y la tarea diaria el mismo día.
     const nextGame: GameState = {
       ...game,
       gems: game.gems + 10,
       xp: game.xp + 20,
-      streak: game.streak + 1,
     };
     setGame(nextGame);
     await saveGameState(username, nextGame);

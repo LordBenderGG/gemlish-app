@@ -973,14 +973,22 @@ export default function ExerciseScreen() {
   const [challengeBonus, setChallengeBonus] = useState<{ xp: number; gems: number }>({ xp: 0, gems: 0 });
 
   // Cronómetro
+  // Detener el timer cuando se muestra el resultado
   useEffect(() => {
+    if (showResult) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
     timerRef.current = setInterval(() => {
       setElapsedSeconds(s => s + 1);
     }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [showResult]);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -1143,7 +1151,9 @@ export default function ExerciseScreen() {
       playLevelComplete();
       showLevelCompleteAd();
       const xpEarned = level?.xp || 10;
-      const gemsEarned = wrongCount === 0 ? 5 : 2;
+      // Calcular gemsEarned con el wrongCount final (incluyendo el error actual si aplica)
+      const finalWrongCount = wrongCount + (!correct ? 1 : 0);
+      const gemsEarned = finalWrongCount === 0 ? 5 : 2;
       const elapsedMs = elapsedSeconds * 1000;
       const completionResult = await completeLevel(levelNum, xpEarned, gemsEarned, elapsedMs);
       setWasChallengeLevel(completionResult.wasChallenge);
@@ -1157,25 +1167,23 @@ export default function ExerciseScreen() {
           levelsCompleted,
           streak: game.streak,
           totalWordsLearned: 0,
-          gems: game.gems + (wrongCount === 0 ? 5 : 2),
-          xp: game.xp + (level?.xp || 10),
+          gems: game.gems + gemsEarned,
+          xp: game.xp + xpEarned,
           totalDaysCompleted: 0,
           practiceSessionsCompleted: 0,
-          ...({
-            bestLevelTime,
+           ...({bestLevelTime,
             dailyChallengesCompleted: (game.dailyChallengesCompleted ?? 0) + (completionResult.wasChallenge ? 1 : 0),
             challengeStreak: (game.challengeStreak ?? 0) + (completionResult.wasChallenge ? 1 : 0),
           } as any),
         });
       }
-      const finalErrors = errorWords;
-      if (wordEn && !correct && !finalErrors.includes(wordEn)) {
-        finalErrors.push(wordEn);
-      }
+      // Construir lista final de errores sin mutar el estado directamente
+      const finalErrors = wordEn && !correct && !errorWords.includes(wordEn)
+        ? [...errorWords, wordEn]
+        : [...errorWords];
       if (finalErrors.length > 0) {
         await saveLevelErrors(levelNum, finalErrors);
-      }
-    } else {
+      }    } else {
       transitionToNext();
       animateProgress(next / TOTAL_EXERCISES);
       setCurrentIdx(next);

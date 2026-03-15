@@ -20,7 +20,9 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.0",
+  version: "1.0.1",
+  // Play Store: versionCode debe incrementarse en cada release
+  // Se gestiona automáticamente por EAS Build con autoIncrement: true en eas.json
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -68,21 +70,15 @@ const config: ExpoConfig = {
     [
       "react-native-google-mobile-ads",
       {
+        // IDs de PRUEBA de Google. Reemplazar con IDs reales de AdMob antes de publicar.
         androidAppId: "ca-app-pub-3940256099942544~3347511713",
         iosAppId: "ca-app-pub-3940256099942544~1458002511",
-      },
-    ],
-    [
-      "expo-audio",
-      {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
-      },
-    ],
-    [
-      "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
+        // Cumplimiento GDPR/CCPA: solicitar consentimiento antes de mostrar anuncios personalizados
+        userTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you.",
+        skAdNetworkItems: [
+          { skAdNetworkIdentifier: "cstr6suwn9.skadnetwork" },
+          { skAdNetworkIdentifier: "4fzdc2evr5.skadnetwork" },
+        ],
       },
     ],
     [

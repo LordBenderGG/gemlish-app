@@ -467,7 +467,7 @@ export default function LevelsScreen() {
     );
   }, [levelProgress, maxUnlockedLevel, handleLevelPress]);
 
-  const completedCount = Object.values(levelProgress).filter(v => v?.completed).length;
+  const completedCount = useMemo(() => Object.values(levelProgress).filter(v => v?.completed).length, [levelProgress]);
   const progressPct = Math.round((completedCount / TOTAL_LEVELS) * 100);
 
   return (
@@ -484,7 +484,6 @@ export default function LevelsScreen() {
       {(() => {
         const nextLevel = maxUnlockedLevel;
         const nextLevelData = getLevelData(nextLevel);
-        const progressPctLocal = Math.round((completedCount / TOTAL_LEVELS) * 100);
         const xpToday = Object.entries(game.levelCompletedDates ?? {}).reduce((acc, [date, count]) => {
           const today = new Date().toISOString().split('T')[0];
           return date === today ? acc + (count as number) * 20 : acc;
@@ -516,7 +515,7 @@ export default function LevelsScreen() {
                 </View>
                 <View style={styles.progressWidgetDivider} />
                 <View style={styles.progressWidgetStat}>
-                  <Text style={styles.progressWidgetStatVal}>{progressPctLocal}%</Text>
+                  <Text style={styles.progressWidgetStatVal}>{progressPct}%</Text>
                   <Text style={styles.progressWidgetStatLbl}>Completado</Text>
                 </View>
                 <View style={styles.progressWidgetDivider} />
@@ -532,7 +531,7 @@ export default function LevelsScreen() {
               </View>
               {/* Barra de progreso */}
               <View style={styles.progressWidgetBarBg}>
-                <View style={[styles.progressWidgetBarFill, { width: `${progressPctLocal}%` as any }]} />
+                <View style={[styles.progressWidgetBarFill, { width: `${progressPct}%` as any }]} />
               </View>
               {/* Próximo nivel */}
               <Text style={styles.progressWidgetNext} numberOfLines={1}>
