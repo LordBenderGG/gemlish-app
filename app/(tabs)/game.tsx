@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   cardMatchedBack: { borderColor: '#4ADE80' },
-  cardMatchedFront: { borderColor: '#4ADE80', backgroundColor: '#0D2010' },
+  cardMatchedFront: { borderColor: '#4ADE80', backgroundColor: '#F0FDF4' },
   cardEn: { backgroundColor: '#EFF6FF', borderWidth: 1.5, borderColor: '#4F46E5' },
   cardEs: { backgroundColor: '#EFF6FF', borderWidth: 1.5, borderColor: '#38BDF8' },
   cardLangFlag: { fontSize: 10, marginBottom: 2 },
