@@ -565,7 +565,7 @@ export default function ProfileScreen() {
       <StatusBar barStyle="light-content" />
 
       <LinearGradient
-        colors={['#0C1A2E', '#0E1117']}
+        colors={['#1A2744', '#0E1A2E', '#0E1117']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
@@ -596,7 +596,7 @@ export default function ProfileScreen() {
 
         {/* Tarjeta de usuario — Hero con gradiente */}
         <LinearGradient
-          colors={['#0C1A2E', '#0E1117', '#0E1117']}
+          colors={['#0A2540', '#0D3060', '#0A1E40']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.userCard}
@@ -607,7 +607,7 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#38BDF8', '#38BDF8']}
+              colors={['#38BDF8', '#0EA5E9', '#0284C7']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.avatarCircle}
@@ -909,8 +909,13 @@ const styles = StyleSheet.create({
   scroll: { padding: 16, gap: 16 },
   userCard: {
     borderRadius: 24, padding: 24,
-    alignItems: 'center', borderWidth: 1.5, borderColor: '#2A3450',
+    alignItems: 'center', borderWidth: 2, borderColor: '#1E3A5F',
     overflow: 'hidden',
+    shadowColor: '#38BDF8',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
   },
   avatarCircle: {
     width: 88, height: 88, borderRadius: 44,
@@ -935,8 +940,8 @@ const styles = StyleSheet.create({
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statCard: {
     width: '30%', flex: 1, minWidth: 90,
-    backgroundColor: '#161B27', borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1, borderColor: '#2A3450',
+    backgroundColor: '#0E1A30', borderRadius: 14, padding: 14,
+    alignItems: 'center', borderWidth: 1.5, borderColor: '#1E3A5F',
   },
   statEmoji: { fontSize: 24, marginBottom: 6 },
   statValue: { fontSize: 18, fontWeight: '800', marginBottom: 2 },

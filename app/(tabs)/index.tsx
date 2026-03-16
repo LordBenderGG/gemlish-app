@@ -155,7 +155,12 @@ function StatsHeader({ username, gems, xp, streak }: {
   const timeGreeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
 
   return (
-    <View style={styles.headerWrapper}>
+    <LinearGradient
+      colors={['#1A2744', '#0E1A2E', '#0E1117']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.headerWrapper}
+    >
       <View style={styles.header}>
         {/* Izquierda: saludo + nombre + XP */}
         <View style={styles.headerLeft}>
@@ -168,18 +173,28 @@ function StatsHeader({ username, gems, xp, streak }: {
         </View>
         {/* Derecha: gemas y racha */}
         <View style={styles.headerRight}>
-          <View style={styles.statPill}>
+          <LinearGradient
+            colors={['#1E3A5F', '#0E2A4A']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.statPillGradient}
+          >
             <Text style={styles.statPillEmoji}>💎</Text>
-            <Text style={styles.statPillValue}>{gems}</Text>
-          </View>
-          <View style={[styles.statPill, streak >= 3 && styles.statPillFire]}>
+            <Text style={[styles.statPillValue, { color: '#38BDF8' }]}>{gems}</Text>
+          </LinearGradient>
+          <LinearGradient
+            colors={streak >= 3 ? ['#3D1A00', '#2A1000'] : ['#1E2535', '#161B27']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.statPillGradient}
+          >
             <FireAnimation streak={streak} />
-            <Text style={styles.statPillValue}>{streak}</Text>
-          </View>
+            <Text style={[styles.statPillValue, { color: streak >= 3 ? '#FBBF24' : '#F0F4FF' }]}>{streak}</Text>
+          </LinearGradient>
         </View>
       </View>
       <OfflineBadge />
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -491,7 +506,7 @@ export default function LevelsScreen() {
         return (
           <View style={styles.progressWidget}>
             <LinearGradient
-              colors={['#0C1A2E', '#0E1A30', '#0a1628']}
+              colors={['#0A2540', '#0D3060', '#0A1E40']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.progressWidgetGradient}
@@ -593,19 +608,26 @@ export default function LevelsScreen() {
         <Text style={styles.practiceSectionLabel}>MODOS DE PRÁCTICA</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.practiceRow}>
           {[
-            { emoji: '⚡', title: 'Repaso', bg: '#0E1A30', accent: '#38BDF8', route: '/practice/quick-review' },
-            { emoji: '🎧', title: 'Escucha', bg: '#0A2A1A', accent: '#4ADE80', route: '/practice/listen-mode' },
-            { emoji: '📝', title: 'Ordenar', bg: '#2A1F0A', accent: '#FBBF24', route: '/practice/order-mode' },
-            { emoji: '🔥', title: 'Difíciles', bg: '#2A0A0A', accent: '#F87171', route: '/practice/hard-words' },
+            { emoji: '⚡', title: 'Repaso', colors: ['#0A2040', '#1A3A6A'] as [string,string], accent: '#38BDF8', route: '/practice/quick-review' },
+            { emoji: '🎧', title: 'Escucha', colors: ['#0A2A14', '#1A4A2A'] as [string,string], accent: '#4ADE80', route: '/practice/listen-mode' },
+            { emoji: '📝', title: 'Ordenar', colors: ['#2A1A00', '#4A3000'] as [string,string], accent: '#FBBF24', route: '/practice/order-mode' },
+            { emoji: '🔥', title: 'Difíciles', colors: ['#2A0808', '#4A1010'] as [string,string], accent: '#F87171', route: '/practice/hard-words' },
           ].map((mode) => (
             <TouchableOpacity
               key={mode.title}
               onPress={() => router.push(mode.route as any)}
               activeOpacity={0.75}
-              style={[styles.practiceTileNew, { backgroundColor: mode.bg, borderColor: mode.accent + '40' }]}
+              style={[styles.practiceChipWrapper, { borderColor: mode.accent + '50' }]}
             >
-              <Text style={styles.practiceTileEmojiNew}>{mode.emoji}</Text>
-              <Text style={[styles.practiceTileTitleNew, { color: mode.accent }]}>{mode.title}</Text>
+              <LinearGradient
+                colors={mode.colors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.practiceChip}
+              >
+                <Text style={styles.practiceChipEmoji}>{mode.emoji}</Text>
+                <Text style={[styles.practiceChipTitle, { color: mode.accent }]}>{mode.title}</Text>
+              </LinearGradient>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -705,6 +727,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E2535',
     borderWidth: 1,
     borderColor: '#2A3450',
+  },
+  statPillGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    gap: 5,
   },
   statPillFire: {
     backgroundColor: '#2A1A0A',
@@ -901,6 +931,7 @@ const styles = StyleSheet.create({
   practiceChipWrapper: {
     borderRadius: 20,
     overflow: 'hidden',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
