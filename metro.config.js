@@ -3,6 +3,19 @@ const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
 
+// Exclude native-only modules from web bundle
+config.resolver = config.resolver || {};
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && moduleName === 'react-native-google-mobile-ads') {
+    return { type: 'empty' };
+  }
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = withNativeWind(config, {
   input: "./global.css",
   // Force write CSS to file system instead of virtual modules
