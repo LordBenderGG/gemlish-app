@@ -288,8 +288,8 @@ export default function GameScreen() {
 
   if (activeGame && gameWon) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-        <StatusBar barStyle={scheme === 'dark' ? 'dark-content' : 'dark-content'} />
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>🏆</Text>
           <Text style={styles.wonTitle}>¡Ganaste!</Text>
@@ -316,8 +316,8 @@ export default function GameScreen() {
 
   if (activeGame && timeUp) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-        <StatusBar barStyle={scheme === 'dark' ? 'dark-content' : 'dark-content'} />
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
         <View style={styles.wonScreen}>
           <Text style={styles.wonEmoji}>⏰</Text>
           <Text style={[styles.wonTitle, { color: '#EF4444' }]}>Tiempo Agotado</Text>
@@ -335,8 +335,8 @@ export default function GameScreen() {
 
   if (activeGame === 'memory') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-        <StatusBar barStyle={scheme === 'dark' ? 'dark-content' : 'dark-content'} />
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+        <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
         <View style={styles.gameHeader}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.gameBackBtn}>
             <Text style={styles.gameBackBtnText}>← Salir</Text>
@@ -354,6 +354,8 @@ export default function GameScreen() {
           onTimeUp={handleTimeUp}
           remainingMs={remainingMs}
         />
+        {/* Banner AdMob dentro del tablero de juego */}
+        <AdBanner style={{ marginHorizontal: 0 }} />
         <View style={styles.rewardHint}>
           <Text style={styles.rewardHintText}>
             💡 Completa el juego para ganar <Text style={{ color: '#4F46E5', fontWeight: '700' }}>+{GEMS_REWARD} 💎</Text>
@@ -377,8 +379,8 @@ export default function GameScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-      <StatusBar barStyle={scheme === 'dark' ? 'dark-content' : 'dark-content'} />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
         <View>

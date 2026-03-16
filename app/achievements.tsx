@@ -10,6 +10,7 @@ import {
   ACHIEVEMENTS, getAchievementDates,
   type Achievement, type AchievementStats,
 } from '@/lib/achievements';
+import { useThemeStyles } from '@/hooks/use-theme-styles';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ interface AchievementItemProps {
 }
 
 function AchievementItem({ achievement, unlocked, date, username }: AchievementItemProps) {
+  const t = useThemeStyles();
   const handleShare = useCallback(async () => {
     if (!unlocked) return;
     try {
@@ -49,15 +51,15 @@ function AchievementItem({ achievement, unlocked, date, username }: AchievementI
   }, [achievement, unlocked]);
 
   return (
-    <View style={[styles.card, !unlocked && styles.cardLocked]}>
-      <View style={[styles.emojiBox, !unlocked && styles.emojiBoxLocked]}>
+    <View style={[styles.card, { backgroundColor: t.surface, borderColor: t.border }, !unlocked && styles.cardLocked]}>
+      <View style={[styles.emojiBox, !unlocked && { borderColor: t.border, backgroundColor: t.bg }]}>
         <Text style={styles.emoji}>{unlocked ? achievement.emoji : '🔒'}</Text>
       </View>
       <View style={styles.info}>
-        <Text style={[styles.title, !unlocked && styles.titleLocked]}>
+        <Text style={[styles.title, { color: t.text }, !unlocked && { color: t.muted }]}>
           {achievement.title}
         </Text>
-        <Text style={[styles.desc, !unlocked && styles.descLocked]}>
+        <Text style={[styles.desc, !unlocked && { color: t.muted }]}>
           {achievement.description}
         </Text>
         {unlocked && date && (
@@ -65,7 +67,7 @@ function AchievementItem({ achievement, unlocked, date, username }: AchievementI
         )}
       </View>
       {unlocked && (
-        <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.shareBtn, { backgroundColor: t.bg }]} onPress={handleShare} activeOpacity={0.7}>
           <Text style={styles.shareIcon}>📤</Text>
         </TouchableOpacity>
       )}
@@ -77,6 +79,7 @@ function AchievementItem({ achievement, unlocked, date, username }: AchievementI
 
 export default function AchievementsScreen() {
   const insets = useSafeAreaInsets();
+  const t = useThemeStyles();
   const { username, game, daily } = useGame();
   const [dates, setDates] = useState<Record<string, string>>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -126,15 +129,15 @@ export default function AchievementsScreen() {
   const pct = Math.round((unlockedCount / ACHIEVEMENTS.length) * 100);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="dark-content" />
+    <View style={[styles.root, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Text style={styles.backIcon}>←</Text>
+          <Text style={[styles.backIcon, { color: t.text }]}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Logros</Text>
+        <Text style={[styles.headerTitle, { color: t.text }]}>Logros</Text>
         <View style={styles.backBtn} />
       </View>
 
@@ -144,7 +147,7 @@ export default function AchievementsScreen() {
           <Text style={styles.progressLabel}>🏆 {unlockedCount} / {ACHIEVEMENTS.length} logros</Text>
           <Text style={styles.progressPct}>{pct}%</Text>
         </View>
-        <View style={styles.progressTrack}>
+        <View style={[styles.progressTrack, { backgroundColor: t.border }]}>
           <View style={[styles.progressFill, { width: `${pct}%` as any }]} />
         </View>
       </View>
@@ -159,7 +162,7 @@ export default function AchievementsScreen() {
           contentContainerStyle={styles.filterList}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={[styles.chip, selectedCategory === item && styles.chipActive]}
+              style={[styles.chip, { backgroundColor: t.surface, borderColor: t.border }, selectedCategory === item && styles.chipActive]}
               onPress={() => setSelectedCategory(item)}
               activeOpacity={0.7}
             >
@@ -193,7 +196,7 @@ export default function AchievementsScreen() {
 // ─── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#151718' },
+  root: { flex: 1 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 12,
@@ -206,42 +209,42 @@ const styles = StyleSheet.create({
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   progressLabel: { fontSize: 14, color: '#64748B' },
   progressPct: { fontSize: 14, fontWeight: '700', color: '#F59E0B' },
-  progressTrack: { height: 8, backgroundColor: '#2A2D2E', borderRadius: 4, overflow: 'hidden' },
+  progressTrack: { height: 8, backgroundColor: '#E2E8F0', borderRadius: 4, overflow: 'hidden' }, // dynamic in JSX
   progressFill: { height: '100%', backgroundColor: '#F59E0B', borderRadius: 4 },
 
   filterWrap: { marginBottom: 8 },
   filterList: { paddingHorizontal: 16, gap: 8 },
   chip: {
     paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
-    backgroundColor: '#2A2D2E', borderWidth: 1, borderColor: '#3A3D3E',
+    borderWidth: 1,
   },
-  chipActive: { backgroundColor: '#38BDF8', borderColor: '#38BDF8' },
+  chipActive: { backgroundColor: '#4F46E5', borderColor: '#4F46E5' },
   chipText: { fontSize: 13, color: '#64748B', fontWeight: '500' },
-  chipTextActive: { color: '#1E293B', fontWeight: '700' },
+  chipTextActive: { color: '#FFFFFF', fontWeight: '700' },
 
   list: { paddingHorizontal: 16, paddingBottom: 32, gap: 10 },
 
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#1E2022', borderRadius: 14, padding: 14,
-    borderWidth: 1, borderColor: '#2A2D2E',
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
+    borderWidth: 1, borderColor: '#E2E8F0',
   },
-  cardLocked: { opacity: 0.45 },
+  cardLocked: { opacity: 0.5 },
   emojiBox: {
-    width: 52, height: 52, borderRadius: 26, backgroundColor: '#2A2D2E',
+    width: 52, height: 52, borderRadius: 26, backgroundColor: '#EFF6FF',
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: '#38BDF8',
+    borderWidth: 2, borderColor: '#4F46E5',
   },
-  emojiBoxLocked: { borderColor: '#3A3D3E' },
+  emojiBoxLocked: { borderColor: '#CBD5E1', backgroundColor: '#F1F5F9' },
   emoji: { fontSize: 26 },
   info: { flex: 1 },
   title: { fontSize: 15, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
-  titleLocked: { color: '#687076' },
+  titleLocked: { color: '#94A3B8' },
   desc: { fontSize: 12, color: '#64748B', lineHeight: 16 },
-  descLocked: { color: '#4A4D4E' },
-  date: { fontSize: 11, color: '#38BDF8', marginTop: 4, fontWeight: '600' },
+  descLocked: { color: '#94A3B8' },
+  date: { fontSize: 11, color: '#4F46E5', marginTop: 4, fontWeight: '600' },
   shareBtn: {
-    width: 36, height: 36, borderRadius: 18, backgroundColor: '#2A2D2E',
+    width: 36, height: 36, borderRadius: 18, backgroundColor: '#EFF6FF',
     alignItems: 'center', justifyContent: 'center',
   },
   shareIcon: { fontSize: 16 },

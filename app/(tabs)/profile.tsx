@@ -561,7 +561,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
       <StatusBar barStyle="dark-content" />
 
       <View style={styles.header}>

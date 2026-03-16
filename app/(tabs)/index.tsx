@@ -471,8 +471,8 @@ export default function LevelsScreen() {
   const progressPct = Math.round((completedCount / TOTAL_LEVELS) * 100);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFF" />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
       <StatsHeader
         username={username || 'Estudiante'}
         gems={gems}
@@ -680,7 +680,7 @@ export default function LevelsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFF' },
+  container: { flex: 1 },
   headerWrapper: {
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,

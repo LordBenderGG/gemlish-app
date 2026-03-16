@@ -392,3 +392,11 @@
 - [x] Textos blancos en quiz, spaced review, done screen del daily
 - [x] Textos blancos en game (títulos de cartas, categorías, tablero)
 - [x] Toggle de modo nocturno: marcado como "Próximamente" (pantallas usan colores hardcodeados)
+
+## v1.26 — Mejoras solicitadas
+- [x] Icono de la app: reemplazar con logo del usuario (cristal arcoíris con rayo)
+- [x] Splash screen: fondo blanco con logo centrado (eliminar fondo negro)
+- [x] Banner AdMob dentro del tablero del juego de memoria
+- [x] Logros: corregir al tema claro (fondo blanco, texto negro)
+- [x] Settings: mover banner de perfil arriba de la sección Apariencia
+- [x] Modo nocturno: implementar completamente (toggle funcional con Switch)

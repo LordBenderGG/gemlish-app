@@ -290,7 +290,7 @@ export default function DailyScreen() {
   // ─── Fase: Quiz ───────────────────────────────────────────────────────────
   if (phase === 'quiz') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
         <StatusBar barStyle="dark-content" />
         <View style={styles.header}>
           <Text style={styles.headerTitle}>📅 Tarea Diaria</Text>
@@ -325,7 +325,7 @@ export default function DailyScreen() {
   // ─── Fase: Completado ─────────────────────────────────────────────────────
   if (phase === 'done' || daily.dailyCompleted) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
         <StatusBar barStyle="dark-content" />
         <View style={styles.doneContainer}>
           <Text style={styles.doneEmoji}>🎉</Text>
@@ -357,8 +357,8 @@ export default function DailyScreen() {
 
   // ─── Fase: Estudio ────────────────────────────────────────────────────────
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-      <StatusBar barStyle={scheme === 'dark' ? 'dark-content' : 'dark-content'} />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
         <View>
@@ -435,7 +435,7 @@ function SpacedReviewPhase({
 
   if (idx >= words.length) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
         <View style={styles.doneContainer}>
           <Text style={styles.doneEmoji}>✅</Text>
           <Text style={styles.doneTitle}>¡Repaso completado!</Text>
@@ -456,7 +456,7 @@ function SpacedReviewPhase({
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🔄 Repaso Espaciado</Text>
         <Text style={{ color: '#64748B', fontSize: 14 }}>{idx + 1}/{words.length}</Text>

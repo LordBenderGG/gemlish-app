@@ -164,8 +164,8 @@ export default function SettingsScreen() {
   }, [updateTime]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F8FAFF' }]}>
-      <StatusBar barStyle={isDark ? 'dark-content' : 'dark-content'} />
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -199,19 +199,29 @@ export default function SettingsScreen() {
         </View>
 
         {/* ── Apariencia ──────────────────────────────────────────────────────────────────────────────────── */}
+        {/* Banner AdMob — encima de Apariencia */}
+        <AdBanner style={{ marginVertical: 4 }} />
+
         <Text style={styles.sectionTitle}>🌙 Apariencia</Text>
         <View style={styles.card}>
           <View style={styles.settingRow}>
-            <Text style={styles.settingEmoji}>☀️</Text>
+            <Text style={styles.settingEmoji}>{isDark ? '🌙' : '☀️'}</Text>
             <View style={styles.settingInfo}>
               <Text style={styles.settingTitle}>Modo Nocturno</Text>
-              <Text style={styles.settingSub}>Próximamente disponible</Text>
+              <Text style={styles.settingSub}>
+                {isDark ? 'Fondo oscuro activo' : 'Fondo claro activo'}
+              </Text>
             </View>
-            <View style={{ backgroundColor: '#F1F5F9', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
-              <Text style={{ fontSize: 11, color: '#94A3B8', fontWeight: '600' }}>Pronto</Text>
-            </View>
+            <Switch
+              value={isDark}
+              onValueChange={(val) => setColorScheme(val ? 'dark' : 'light')}
+              trackColor={{ false: '#E2E8F0', true: '#6366F1' }}
+              thumbColor={isDark ? '#4F46E5' : '#94A3B8'}
+            />
           </View>
-        </View>       {/* ── Notificaciones ─────────────────────────────────────────────────────────────────── */}
+        </View>
+
+        {/* ── Notificaciones ────────────────────────────────────────────────────────────────────────────────────── */}
         <Text style={styles.sectionTitle}>🔔 Recordatorio de Racha</Text>  {/* Banner informativo */}
         <View style={[styles.notifBanner, settings.enabled && styles.notifBannerActive]}>
           <Text style={styles.notifBannerEmoji}>{settings.enabled ? '🔥' : '💤'}</Text>
@@ -267,9 +277,6 @@ export default function SettingsScreen() {
             <Text style={styles.timeArrow}>›</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Banner AdMob — debajo del selector de hora */}
-        <AdBanner style={{ marginTop: 8 }} />
 
         <View style={{ height: 40 }} />
       </ScrollView>
