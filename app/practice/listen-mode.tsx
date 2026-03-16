@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center',
   },
   backBtnText: { color: '#64748B', fontSize: 16, fontWeight: '700' },
-  headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: '#1E293B' },
   counter: { fontSize: 14, color: '#38BDF8', fontWeight: '700' },
   scroll: { padding: 20, flexGrow: 1 },
   card: {
@@ -203,11 +203,11 @@ const styles = StyleSheet.create({
   speakBtnEmoji: { fontSize: 32 },
   speakBtnText: { fontSize: 16, color: '#1CB0F6', fontWeight: '700' },
   input: {
-    backgroundColor: '#0D0F18', borderRadius: 12, padding: 16,
-    fontSize: 18, color: '#FFFFFF', borderWidth: 2, borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16,
+    fontSize: 18, color: '#1E293B', borderWidth: 2, borderColor: '#CBD5E1',
     marginBottom: 16, textAlign: 'center',
   },
-  inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#1A3A1A' },
+  inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#F0FDF4' },
   inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#3A1A1A' },
   feedback: { fontSize: 15, fontWeight: '600', textAlign: 'center', marginBottom: 12 },
   submitBtn: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   resultContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   resultEmoji: { fontSize: 72, marginBottom: 16 },
-  resultTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
+  resultTitle: { fontSize: 26, fontWeight: '800', color: '#1E293B', marginBottom: 8 },
   resultScore: { fontSize: 48, fontWeight: '900', color: '#38BDF8', marginBottom: 4 },
   resultPct: { fontSize: 18, color: '#64748B', marginBottom: 32 },
   doneBtn: {

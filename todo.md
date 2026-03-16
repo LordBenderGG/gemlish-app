@@ -422,3 +422,9 @@
 
 ## v1.31 — Pantalla de resultado del ejercicio
 - [x] Corregido contraste en pantalla ¡Perfecto! (fondo blanco, textos oscuros), resultado normal (gradiente claro, títulos oscuros, rewardBadge claro), breakdown (breakdownLabel oscuro), modal Sin vidas (texto oscuro)
+
+## v1.32 — Contraste en pantallas de práctica
+- [x] quick-review: questionWord, answerInput (fondo negro), resultTitle, emptyTitle corregidos
+- [x] listen-mode: headerTitle, answerInput (fondo negro), inputCorrect (verde oscuro), resultTitle corregidos
+- [x] order-mode: headerTitle, chips (fondo negro), dropZone (fondo negro), chipText, resultTitle corregidos
+- [x] hard-words: headerTitle, promptCard (fondo negro), promptText, answerInput (fondo negro), resultTitle, resultStatValue, hardListEn, emptyTitle, backBtnText corregidos

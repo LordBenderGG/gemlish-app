@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   },
   closeBtnText: { color: '#64748B', fontSize: 16, fontWeight: '700' },
   headerCenter: { alignItems: 'center' },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: '#1E293B' },
   headerSubtitle: { fontSize: 12, color: '#64748B', marginTop: 2 },
   progressBarBg: { height: 6, backgroundColor: '#E2E8F0' },
   progressBarFill: { height: 6, backgroundColor: '#EF4444', borderRadius: 3 },
@@ -485,10 +485,10 @@ const styles = StyleSheet.create({
   failBadgeText: { fontSize: 11, fontWeight: '700' },
   questionLabel: { fontSize: 14, color: '#64748B', fontWeight: '600' },
   promptBox: {
-    backgroundColor: '#0F1117', borderRadius: 14, padding: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16,
     alignItems: 'center', borderWidth: 1, borderColor: '#E2E8F0',
   },
-  promptText: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  promptText: { fontSize: 26, fontWeight: '800', color: '#1E293B', textAlign: 'center' },
   promptPhonetic: { fontSize: 13, color: '#64748B', marginTop: 4, fontStyle: 'italic' },
   listenBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -499,8 +499,8 @@ const styles = StyleSheet.create({
   listenBtnEmoji: { fontSize: 20 },
   listenBtnText: { fontSize: 15, color: '#4F46E5', fontWeight: '700' },
   input: {
-    backgroundColor: '#0F1117', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14,
-    fontSize: 18, color: '#FFFFFF', borderWidth: 1.5, borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14,
+    fontSize: 18, color: '#1E293B', borderWidth: 1.5, borderColor: '#CBD5E1',
     fontWeight: '600',
   },
   inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#58CC0210' },
@@ -521,13 +521,13 @@ const styles = StyleSheet.create({
   // Resultado de ronda
   resultContainer: { alignItems: 'center', gap: 20 },
   resultEmoji: { fontSize: 64 },
-  resultTitle: { fontSize: 24, fontWeight: '800', color: '#FFFFFF' },
+  resultTitle: { fontSize: 24, fontWeight: '800', color: '#1E293B' },
   resultStats: { flexDirection: 'row', gap: 16 },
   resultStat: {
     flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16,
     alignItems: 'center', borderWidth: 1.5,
   },
-  resultStatValue: { fontSize: 32, fontWeight: '800', color: '#FFFFFF' },
+  resultStatValue: { fontSize: 32, fontWeight: '800', color: '#1E293B' },
   resultStatLabel: { fontSize: 13, fontWeight: '700', marginTop: 4 },
   hardListBox: {
     width: '100%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16,
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E2E8F0',
   },
-  hardListEn: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  hardListEn: { fontSize: 15, fontWeight: '700', color: '#1E293B' },
   hardListEs: { fontSize: 13, color: '#64748B' },
   resultBtns: { width: '100%', gap: 10 },
   continueBtn: {
@@ -554,11 +554,11 @@ const styles = StyleSheet.create({
   // Pantalla vacía
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, gap: 16 },
   emptyEmoji: { fontSize: 64 },
-  emptyTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  emptyTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B', textAlign: 'center' },
   emptySubtitle: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 22 },
   backBtn: {
     backgroundColor: '#E2E8F0', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 12,
     marginTop: 8,
   },
-  backBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  backBtnText: { color: '#4F46E5', fontSize: 15, fontWeight: '700' },
 });

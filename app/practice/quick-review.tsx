@@ -439,11 +439,11 @@ const styles = StyleSheet.create({
   speakBtnEmoji: { fontSize: 18 },
   speakBtnText: { fontSize: 14, fontWeight: '700', color: '#4F46E5' },
   questionLabel: { fontSize: 12, color: '#64748B', fontWeight: '600', textAlign: 'center' },
-  questionWord: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', lineHeight: 34 },
+  questionWord: { fontSize: 26, fontWeight: '800', color: '#1E293B', textAlign: 'center', lineHeight: 34 },
   questionPhonetic: { fontSize: 13, color: '#64748B', textAlign: 'center', fontStyle: 'italic' },
   input: {
-    backgroundColor: '#0F1117', borderRadius: 14, borderWidth: 1.5, borderColor: '#E2E8F0',
-    color: '#FFFFFF', fontSize: 16, fontWeight: '600',
+    backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1.5, borderColor: '#CBD5E1',
+    color: '#1E293B', fontSize: 16, fontWeight: '600',
     paddingHorizontal: 16, paddingVertical: 14,
     textAlign: 'center',
   },
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     padding: 24, gap: 16,
   },
   resultEmoji: { fontSize: 64 },
-  resultTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  resultTitle: { fontSize: 26, fontWeight: '800', color: '#1E293B', textAlign: 'center' },
   resultSubtitle: { fontSize: 14, color: '#64748B', textAlign: 'center' },
   resultStats: {
     flexDirection: 'row', gap: 16, marginVertical: 8,
@@ -485,6 +485,6 @@ const styles = StyleSheet.create({
     padding: 32, gap: 12,
   },
   emptyEmoji: { fontSize: 56 },
-  emptyTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  emptyTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B', textAlign: 'center' },
   emptySubtitle: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 22 },
 });
