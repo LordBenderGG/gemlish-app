@@ -323,7 +323,8 @@ export default function DailyScreen() {
   }
 
   // ─── Fase: Completado ─────────────────────────────────────────────────────
-  if (phase === 'done' || daily.dailyCompleted) {
+  // phase === 'study' tiene prioridad: permite ver la lista incluso si dailyCompleted
+  if ((phase === 'done' || daily.dailyCompleted) && phase !== 'study') {
     return (
       <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
         <StatusBar barStyle="dark-content" />
@@ -362,18 +363,31 @@ export default function DailyScreen() {
     );
   }
 
-  // ─── Fase: Estudio ────────────────────────────────────────────────────────
+    // ─── Fase: Estudio ─────────────────────────────────────────────────────
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
       <StatusBar barStyle={t.isDark ? 'light-content' : 'dark-content'} />
 
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>📅 Tarea Diaria</Text>
-          <Text style={styles.headerSub}>Aprende 30 palabras nuevas hoy</Text>
+          <Text style={styles.headerSub}>
+            {daily.dailyCompleted ? 'Palabras de hoy — pulsa 🔊 para escuchar' : 'Aprende 30 palabras nuevas hoy'}
+          </Text>
         </View>
-        <View style={styles.streakBadge}>
-          <Text style={styles.streakText}>🔥 {game.streak} días</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {daily.dailyCompleted && (
+            <TouchableOpacity
+              onPress={() => setPhase('done')}
+              style={{ backgroundColor: '#EFF6FF', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#BFDBFE' }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ color: '#4F46E5', fontSize: 13, fontWeight: '700' }}>← Volver</Text>
+            </TouchableOpacity>
+          )}
+          <View style={styles.streakBadge}>
+            <Text style={styles.streakText}>🔥 {game.streak} días</Text>
+          </View>
         </View>
       </View>
 
