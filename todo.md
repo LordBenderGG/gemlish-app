@@ -432,3 +432,7 @@
 ## v1.33 — Contraste en pantalla de estadísticas
 - [x] stats.tsx: sin problemas de contraste (ya usa colores dinámicos correctamente)
 - [x] review/[levelId].tsx: headerTitle, progressBar, cardWordEn, exampleBox (fondo negro), exampleEn, actionBtnGreen/Orange (fondos oscuros), actionBtnText, emptyTitle corregidos
+
+## v1.34 — Texto invisible en niveles y Mini Quiz
+- [x] index.tsx: texto "Nivel N" cambiado de #F0EEFF (blanco) a #1E293B (negro) en tarjetas completadas y desbloqueadas
+- [x] daily.tsx: textColor por defecto del Mini Quiz cambiado de #FFFFFF (blanco) a #1E293B (negro); estados correcto/incorrecto con fondos claros y texto oscuro

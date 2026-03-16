@@ -182,10 +182,10 @@ function MiniQuiz({ words, onComplete }: MiniQuizProps) {
       </View>
       <View style={styles.quizOptions}>
         {q.options.map(opt => {
-          let bg = '#FFFFFF', border = '#E2E8F0', textColor = '#FFFFFF';
+          let bg = '#FFFFFF', border = '#E2E8F0', textColor = '#1E293B';
           if (selected !== null) {
-            if (opt === q.correct) { bg = '#1A3A1A'; border = '#4ADE80'; textColor = '#4ADE80'; }
-            else if (opt === selected && opt !== q.correct) { bg = '#FEE2E2'; border = '#FF4B4B'; textColor = '#FF4B4B'; }
+            if (opt === q.correct) { bg = '#F0FDF4'; border = '#4ADE80'; textColor = '#166534'; }
+            else if (opt === selected && opt !== q.correct) { bg = '#FEE2E2'; border = '#FF4B4B'; textColor = '#991B1B'; }
           }
           return (
             <TouchableOpacity

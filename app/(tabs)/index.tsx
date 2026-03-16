@@ -304,7 +304,7 @@ function LevelCard({ levelNum, isCompleted, isUnlocked, onPress, onPressLocked }
               <Text style={styles.levelIconText}>{icon}</Text>
             </View>
             <View style={styles.levelInfo}>
-              <Text style={[styles.levelNum, { color: '#F0EEFF' }]}>Nivel {levelNum}</Text>
+              <Text style={[styles.levelNum, { color: '#1E293B' }]}>Nivel {levelNum}</Text>
               <Text style={[styles.levelTopic, { color: levelData.color }]} numberOfLines={1}>{levelData.name}</Text>
             </View>
           </View>
@@ -346,7 +346,7 @@ function LevelCard({ levelNum, isCompleted, isUnlocked, onPress, onPressLocked }
             <Text style={styles.levelIconText}>{icon}</Text>
           </LinearGradient>
           <View style={styles.levelInfo}>
-            <Text style={[styles.levelNum, { color: '#F0EEFF' }]}>Nivel {levelNum}</Text>
+            <Text style={[styles.levelNum, { color: '#1E293B' }]}>Nivel {levelNum}</Text>
             <Text style={[styles.levelTopic, { color: levelData.color }]} numberOfLines={1}>{levelData.name}</Text>
           </View>
         </View>
