@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: '#1E293B',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1E2235',
+    backgroundColor: '#E2E8F0',
   },
   progressFill: {
     height: 4,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardWordEn: {
-    color: '#FFFFFF',
+    color: '#1E293B',
     fontSize: 28,
     fontWeight: '800',
   },
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   exampleBox: {
-    backgroundColor: '#0F1117',
+    backgroundColor: '#EFF6FF',
     borderRadius: 10,
     padding: 12,
     marginTop: 8,
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#38BDF8',
   },
   exampleEn: {
-    color: '#ECEDEE',
+    color: '#1E293B',
     fontSize: 14,
     fontStyle: 'italic',
     marginBottom: 4,
@@ -360,17 +360,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionBtnGreen: {
-    backgroundColor: '#1A3A1A',
+    backgroundColor: '#F0FDF4',
     borderWidth: 1,
     borderColor: '#4ADE80',
   },
   actionBtnOrange: {
-    backgroundColor: '#1A2A3A',
+    backgroundColor: '#EFF6FF',
     borderWidth: 1,
     borderColor: '#1CB0F6',
   },
   actionBtnText: {
-    color: '#FFFFFF',
+    color: '#1E293B',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyTitle: {
-    color: '#FFFFFF',
+    color: '#1E293B',
     fontSize: 24,
     fontWeight: '800',
     marginBottom: 12,
