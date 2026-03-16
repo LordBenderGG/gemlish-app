@@ -13,13 +13,31 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Platform } from "react-native";
-import {
-  InterstitialAd,
-  RewardedAd,
-  AdEventType,
-  RewardedAdEventType,
-  TestIds,
-} from "react-native-google-mobile-ads";
+
+// On web, react-native-google-mobile-ads is excluded from the bundle.
+// We provide safe fallback values to prevent runtime errors.
+let InterstitialAd: any = null;
+let RewardedAd: any = null;
+let AdEventType: any = {};
+let RewardedAdEventType: any = {};
+let TestIds: any = {
+  ADAPTIVE_BANNER: 'ca-app-pub-3940256099942544/6300978111',
+  INTERSTITIAL: 'ca-app-pub-3940256099942544/1033173712',
+  REWARDED: 'ca-app-pub-3940256099942544/5224354917',
+};
+
+if (Platform.OS !== 'web') {
+  try {
+    const ads = require('react-native-google-mobile-ads');
+    InterstitialAd = ads.InterstitialAd;
+    RewardedAd = ads.RewardedAd;
+    AdEventType = ads.AdEventType;
+    RewardedAdEventType = ads.RewardedAdEventType;
+    TestIds = ads.TestIds;
+  } catch (e) {
+    // Module not available
+  }
+}
 
 // ─── IDs de anuncios ──────────────────────────────────────────────────────────
 // Estos son los IDs de PRUEBA oficiales de Google.
@@ -46,11 +64,11 @@ const INTERSTITIAL_EVERY_N_LEVELS = 3;
 
 // ─── Hook para Interstitial ───────────────────────────────────────────────────
 export function useInterstitialAd(adUnitId: string) {
-  const adRef = useRef<InterstitialAd | null>(null);
+  const adRef = useRef<any | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   const loadAd = useCallback(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === "web" || !InterstitialAd) return;
     const ad = InterstitialAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: false,
     });
@@ -109,13 +127,13 @@ export function useRewardedAd(
   adUnitId: string,
   onRewarded: () => void
 ) {
-  const adRef = useRef<RewardedAd | null>(null);
+  const adRef = useRef<any | null>(null);
   const [loaded, setLoaded] = useState(false);
   const onRewardedRef = useRef(onRewarded);
   onRewardedRef.current = onRewarded;
 
   const loadAd = useCallback(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === "web" || !RewardedAd) return;
     const ad = RewardedAd.createForAdRequest(adUnitId, {
       requestNonPersonalizedAdsOnly: false,
     });
