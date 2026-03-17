@@ -1,5 +1,12 @@
 import "@/global.css";
 import "@/lib/force-light-mode";
+import { initDatabase } from "@/lib/database";
+import { migrateFromAsyncStorageIfNeeded } from "@/lib/migrate-from-asyncstorage";
+
+// Inicializar base de datos SQLite al arrancar (síncrono, antes de cualquier render)
+if (typeof window === 'undefined' || typeof (globalThis as any).ExpoDomWebView !== 'undefined' || require('react-native').Platform.OS !== 'web') {
+  try { initDatabase(); } catch {}
+}
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useSegments, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -118,6 +125,8 @@ export default function RootLayout() {
   // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
+    // Migrar datos de AsyncStorage a SQLite (solo se ejecuta una vez, en la primera actualización)
+    migrateFromAsyncStorageIfNeeded().catch(() => {});
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {

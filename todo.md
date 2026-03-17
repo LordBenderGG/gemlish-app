@@ -443,3 +443,10 @@
 ## BUGS CRÍTICOS — Reportados en producción
 - [x] Bug crítico: Eliminar OfflineBadge completamente — la app no debe mostrar estado de conexión
 - [x] Bug crítico: Sesión permanente — gemlish_current_user nunca debe perderse, respaldo automático en gemlish_current_user_bk con recuperación automática
+
+## v2.0 — Migración a SQLite local
+- [x] Instalar expo-sqlite
+- [x] Crear lib/database.ts con sistema de migraciones versionadas
+- [x] Migrar lib/storage.ts para usar SQLite en lugar de AsyncStorage
+- [x] Migrar datos existentes de AsyncStorage a SQLite al primer arranque (sin perder progreso)
+- [x] Verificar TypeScript y tests

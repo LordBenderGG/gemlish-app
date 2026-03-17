@@ -69,6 +69,7 @@ const config: ExpoConfig = {
   backgroundColor: "#F8FAFF",
   plugins: [
     "expo-router",
+    "expo-sqlite",
     "expo-system-ui",
     [
       "react-native-google-mobile-ads",
