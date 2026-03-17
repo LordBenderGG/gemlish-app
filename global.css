@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 /* Force light mode — override browser prefers-color-scheme: dark */
-:root {
+:root, html, body {
   color-scheme: light only !important;
+}
+
+/* Block dark mode media query — NativeWind/Tailwind must never activate dark variants */
+@media (prefers-color-scheme: dark) {
+  :root, html, body {
+    color-scheme: light only !important;
+    background-color: #ffffff !important;
+    color: #11181C !important;
+  }
 }

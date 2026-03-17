@@ -1,4 +1,5 @@
 import "@/global.css";
+import "@/lib/force-light-mode";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useSegments, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
