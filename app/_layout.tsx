@@ -182,7 +182,7 @@ export default function RootLayout() {
             <Stack.Screen name="achievements" />
             <Stack.Screen name="oauth/callback" />
           </Stack>
-          <StatusBar style="auto" />
+          <StatusBar style="dark" />
         </QueryClientProvider>
       </trpc.Provider>
       </AuthGuard>

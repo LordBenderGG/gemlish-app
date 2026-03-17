@@ -436,3 +436,6 @@
 ## v1.34 — Texto invisible en niveles y Mini Quiz
 - [x] index.tsx: texto "Nivel N" cambiado de #F0EEFF (blanco) a #1E293B (negro) en tarjetas completadas y desbloqueadas
 - [x] daily.tsx: textColor por defecto del Mini Quiz cambiado de #FFFFFF (blanco) a #1E293B (negro); estados correcto/incorrecto con fondos claros y texto oscuro
+
+## v1.49 — Modo claro forzado
+- [x] Forzar modo claro permanente en toda la app (sin modo oscuro bajo ningún modo)

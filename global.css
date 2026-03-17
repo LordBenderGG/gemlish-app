@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Force light mode — override browser prefers-color-scheme: dark */
+:root {
+  color-scheme: light only !important;
+}
