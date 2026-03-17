@@ -51,6 +51,8 @@ export interface MiniGameState {
 const KEYS = {
   USERS: 'gemlish_users',
   CURRENT_USER: 'gemlish_current_user',
+  // Clave de respaldo para recuperar la sesión si la principal se pierde
+  CURRENT_USER_BACKUP: 'gemlish_current_user_bk',
   GAME: (username: string) => `gemlish_game_${username}`,
   DAILY: (username: string) => `gemlish_daily_${username}`,
   MINIGAME: (username: string) => `gemlish_minigame_${username}`,
@@ -93,7 +95,11 @@ export async function registerUser(username: string, password: string): Promise<
     createdAt: new Date().toISOString(),
   };
   await saveUsers(users);
-  await AsyncStorage.setItem(KEYS.CURRENT_USER, key);
+  // Guardar sesión en clave principal Y en respaldo
+  await AsyncStorage.multiSet([
+    [KEYS.CURRENT_USER, key],
+    [KEYS.CURRENT_USER_BACKUP, key],
+  ]);
   return { ok: true };
 }
 
@@ -103,16 +109,31 @@ export async function loginUser(username: string, password: string): Promise<{ o
   const user = users[key];
   if (!user) return { ok: false, error: 'Usuario no encontrado' };
   if (user.passwordHash !== simpleHash(password)) return { ok: false, error: 'Contraseña incorrecta' };
-  await AsyncStorage.setItem(KEYS.CURRENT_USER, key);
+  // Guardar sesión en clave principal Y en respaldo
+  await AsyncStorage.multiSet([
+    [KEYS.CURRENT_USER, key],
+    [KEYS.CURRENT_USER_BACKUP, key],
+  ]);
   return { ok: true };
 }
 
 export async function getCurrentUser(): Promise<string | null> {
-  return AsyncStorage.getItem(KEYS.CURRENT_USER);
+  // Intentar clave principal primero
+  let user = await AsyncStorage.getItem(KEYS.CURRENT_USER);
+  if (user) return user;
+  // Si la clave principal se perdió, recuperar del respaldo automáticamente
+  const backup = await AsyncStorage.getItem(KEYS.CURRENT_USER_BACKUP);
+  if (backup) {
+    // Restaurar la clave principal desde el respaldo
+    await AsyncStorage.setItem(KEYS.CURRENT_USER, backup);
+    return backup;
+  }
+  return null;
 }
 
 export async function logoutUser(): Promise<void> {
-  await AsyncStorage.removeItem(KEYS.CURRENT_USER);
+  // Borrar AMBAS claves (principal y respaldo) solo cuando el usuario pide cerrar sesión explicitamente
+  await AsyncStorage.multiRemove([KEYS.CURRENT_USER, KEYS.CURRENT_USER_BACKUP]);
 }
 
 // Detecta si hay usuarios registrados (para el onboarding de bienvenida de vuelta)
@@ -158,7 +179,11 @@ export async function renameUser(oldUsername: string, newUsername: string): Prom
 
   users[newKey] = { ...(users[newKey] || users[oldKey] || { passwordHash: '', createdAt: new Date().toISOString() }), username: trimmed };
   await saveUsers(users);
-  await AsyncStorage.setItem(KEYS.CURRENT_USER, newKey);
+  // Actualizar ambas claves de sesión
+  await AsyncStorage.multiSet([
+    [KEYS.CURRENT_USER, newKey],
+    [KEYS.CURRENT_USER_BACKUP, newKey],
+  ]);
   return { ok: true };
 }
 

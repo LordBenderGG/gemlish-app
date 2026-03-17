@@ -439,3 +439,7 @@
 
 ## v1.49 — Modo claro forzado
 - [x] Forzar modo claro permanente en toda la app (sin modo oscuro bajo ningún modo)
+
+## BUGS CRÍTICOS — Reportados en producción
+- [x] Bug crítico: Eliminar OfflineBadge completamente — la app no debe mostrar estado de conexión
+- [x] Bug crítico: Sesión permanente — gemlish_current_user nunca debe perderse, respaldo automático en gemlish_current_user_bk con recuperación automática

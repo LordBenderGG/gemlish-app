@@ -3,7 +3,7 @@ import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react'
 import { useFocusEffect } from 'expo-router';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  StatusBar, Animated, ScrollView, TextInput, Modal, Image,
+  StatusBar, Animated, ScrollView, TextInput, Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Reanimated, {
@@ -51,47 +51,7 @@ const CATEGORIES = [
   { id: 'phrasal', label: '🔗 Phrasal Verbs', levels: [39, 40] },
 ];
 
-function OfflineBadge() {
-  const [isOnline, setIsOnline] = useState<boolean>(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    const check = async () => {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 3000);
-        await fetch('https://1.1.1.1', { signal: controller.signal, mode: 'no-cors' });
-        clearTimeout(timeout);
-        if (!cancelled) setIsOnline(true);
-      } catch {
-        if (!cancelled) setIsOnline(false);
-      }
-    };
-    check();
-    const interval = setInterval(check, 15000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, []);
-
-  return (
-    <View style={styles.offlineBadge}>
-      <Image
-        source={require('@/assets/images/icon.png')}
-        style={styles.offlineLogo}
-        resizeMode="contain"
-      />
-      <View style={styles.offlineBrandCol}>
-        <Text style={styles.offlineBrandName}>Gemlish</Text>
-        <Text style={styles.offlineBrandTagline}>Aprende Inglés Jugando</Text>
-      </View>
-      <View style={styles.offlineStatusPill}>
-        <Text style={styles.offlineDot}>{isOnline ? '🟢' : '🔴'}</Text>
-        <Text style={[styles.offlineStatusText, { color: isOnline ? '#4ADE80' : '#FF9600' }]}>
-          {isOnline ? 'Online' : 'Offline'}
-        </Text>
-      </View>
-    </View>
-  );
-}
 
 function FireAnimation({ streak }: { streak: number }) {
   // Animación de llama cuando la racha es > 3 días
@@ -185,7 +145,7 @@ function StatsHeader({ username, gems, xp, streak }: {
           </View>
         </View>
       </View>
-      <OfflineBadge />
+
     </View>
   );
 }
@@ -864,27 +824,7 @@ const styles = StyleSheet.create({
   statValueStreak: { color: '#FF9500' },
   streakLabel: { fontSize: 9, color: '#FF9500', fontWeight: '600', marginLeft: 2 },
   streakHot: { fontSize: 10, marginLeft: 1 },
-  offlineBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    backgroundColor: '#F0F9FF',
-    gap: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  offlineBadgeOk: {},
-  offlineBadgeNoConn: {},
-  offlineLogo: { width: 28, height: 28, borderRadius: 6 },
-  offlineBrandCol: { flex: 1, marginLeft: 8 },
-  offlineBrandName: { fontSize: 14, fontWeight: '800', color: '#1E293B', letterSpacing: 0.2 },
-  offlineBrandTagline: { fontSize: 10, color: '#64748B', fontWeight: '500', marginTop: 1 },
-  offlineStatusPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#EFF6FF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
-  offlineDot: { fontSize: 8 },
-  offlineStatusText: { fontSize: 10, fontWeight: '700' },
-  offlineText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
+
   // Sección de modos de práctica
   practiceSection: {
     flexShrink: 0,
