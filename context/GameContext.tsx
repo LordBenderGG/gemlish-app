@@ -24,7 +24,7 @@ interface GameContextValue {
   // Juego
   game: GameState;
   updateGame: (patch: Partial<GameState>) => Promise<void>;
-  completeLevel: (levelId: number, xpEarned: number, gemsEarned: number, elapsedMs?: number) => Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }>;
+  completeLevel: (levelId: number, xpEarned: number, gemsEarned: number, elapsedMs?: number, score?: number) => Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }>;
   saveLevelErrors: (levelId: number, errorWords: string[]) => Promise<void>;
   loseHeart: () => Promise<void>;
   spendGems: (amount: number) => Promise<boolean>;
@@ -192,6 +192,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     xpEarned: number,
     gemsEarned: number,
     elapsedMs?: number,
+    score?: number,
   ): Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }> => {
     const u = usernameRef.current;
     if (!u) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
@@ -277,7 +278,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       maxUnlockedLevel: Math.max(current.maxUnlockedLevel, levelId + 1),
       levelProgress: {
         ...current.levelProgress,
-        [levelId]: { completed: true, score: 100 },
+        [levelId]: { completed: true, score: score ?? 100 },
       },
       levelCompletedDates: updatedDates,
       levelBestTimes: updatedBestTimes,
@@ -385,12 +386,34 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setDaily(nextDaily);
     dailyRef.current = nextDaily;
     await saveDailyState(u, nextDaily);
-    // Recompensar: +10 💎 +20 XP
+    // Recompensar: +10 💎 +20 XP + actualizar streak
     const currentGame = gameRef.current;
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const prevDates = currentGame.levelCompletedDates ?? {};
+    const alreadyActiveToday = (prevDates[today] ?? 0) > 0;
+    const wasActiveYesterday = (prevDates[yesterdayStr] ?? 0) > 0;
+    let newStreak = currentGame.streak;
+    if (!alreadyActiveToday) {
+      if (wasActiveYesterday || currentGame.streak === 0) {
+        newStreak += 1;
+      } else {
+        newStreak = 1;
+      }
+    }
+    // Registrar la tarea diaria como actividad del día
+    const updatedDates = {
+      ...prevDates,
+      [today]: (prevDates[today] ?? 0) + 1,
+    };
     const nextGame: GameState = {
       ...currentGame,
       gems: currentGame.gems + 10,
       xp: currentGame.xp + 20,
+      streak: newStreak,
+      levelCompletedDates: updatedDates,
     };
     setGame(nextGame);
     gameRef.current = nextGame;

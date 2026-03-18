@@ -468,3 +468,9 @@
 - [x] BUG: claimDailyBonus nunca se llamaba desde ninguna pantalla — conectado en index.tsx con toast visual "+25 💎 Bono diario"
 - [x] BUG: checkAchievements y username faltaban en dependencias de handleAnswer useCallback
 - [x] MEJORA: Nueva función addGems() en GameContext para incrementos seguros de gemas sin stale closure
+
+## v1.33 — Auditoría QA completa (segunda ronda)
+- [x] BUG: gemsEarned en pantalla de resultado (render) usa `wrongCount` stale cuando el último ejercicio es incorrecto — corregido con finalWrongCountRef
+- [x] BUG: completeLevel siempre guardaba `score: 100` — corregido para guardar el porcentaje real de aciertos (TOTAL_EXERCISES - finalWrongCount) / TOTAL_EXERCISES * 100
+- [x] BUG: finishDaily no actualizaba el streak del juego — corregido para actualizar streak y levelCompletedDates al completar la tarea diaria
+- [x] BUG: Sistema de Gemas v2 — items actualizados a [x] (ya estaban implementados)

@@ -959,6 +959,7 @@ export default function ExerciseScreen() {
   const [showResult, setShowResult] = useState(false);
   const [exerciseKey, setExerciseKey] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
+  const finalWrongCountRef = useRef(0); // ref para evitar stale en pantalla de resultado
   const [errorWords, setErrorWords] = useState<string[]>([]);
   const [internalStreak, setInternalStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
@@ -1153,9 +1154,12 @@ export default function ExerciseScreen() {
       const xpEarned = level?.xp || 10;
       // Calcular gemsEarned con el wrongCount final (incluyendo el error actual si aplica)
       const finalWrongCount = wrongCount + (!correct ? 1 : 0);
+      finalWrongCountRef.current = finalWrongCount; // guardar para la pantalla de resultado
       const gemsEarned = finalWrongCount === 0 ? 10 : 5;
       const elapsedMs = elapsedSeconds * 1000;
-      const completionResult = await completeLevel(levelNum, xpEarned, gemsEarned, elapsedMs);
+      // Calcular score real: porcentaje de aciertos sobre el total de ejercicios
+      const realScore = Math.round(((TOTAL_EXERCISES - finalWrongCount) / TOTAL_EXERCISES) * 100);
+      const completionResult = await completeLevel(levelNum, xpEarned, gemsEarned, elapsedMs, realScore);
       setWasChallengeLevel(completionResult.wasChallenge);
       setChallengeBonus(completionResult.challengeBonus);
       if (username) {
@@ -1227,9 +1231,11 @@ export default function ExerciseScreen() {
   // ─── Pantalla de Resultado ───────────────────────────────────────────────
 
   if (showResult) {
-    const gemsEarned = wrongCount === 0 ? 10 : 5;
+    // Usar el ref para evitar stale closure cuando el último ejercicio fue incorrecto
+    const finalWrongCount = finalWrongCountRef.current;
+    const gemsEarned = finalWrongCount === 0 ? 10 : 5;
     const xpEarned = level.xp;
-    const isPerfect = wrongCount === 0;
+    const isPerfect = finalWrongCount === 0;
     const totalTime = formatTime(elapsedSeconds);
     const typeLabels: Record<string, string> = {
       'multiple-choice': '📝 Opción múltiple',
