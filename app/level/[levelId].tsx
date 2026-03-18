@@ -48,7 +48,17 @@ export default function LevelDetailScreen() {
 
   const levelData = useMemo(() => getLevelData(levelNum), [levelNum]);
   const icon = useMemo(() => getLevelIcon(levelNum), [levelNum]);
-  const isCompleted = !!game.levelProgress[levelNum]?.completed;
+  const levelProgress = game.levelProgress[levelNum];
+  const isCompleted = !!levelProgress?.completed;
+  const levelScore = levelProgress?.score;
+
+  // Sistema de estrellas: 1 = <70%, 2 = 70-99%, 3 = 100% perfecto
+  const starRating = isCompleted
+    ? (levelScore === undefined || levelScore === null) ? 1
+      : levelScore >= 100 ? 3
+      : levelScore >= 70 ? 2
+      : 1
+    : 0;
 
   const handleStartLevel = useCallback((mode?: 'hard' | 'listen') => {
     const params = mode ? `?mode=${mode}` : '';
@@ -86,6 +96,13 @@ export default function LevelDetailScreen() {
           {isCompleted && (
             <View style={[styles.metaChip, styles.metaCompleted]}>
               <Text style={[styles.metaText, { color: '#4ADE80' }]}>✅ Completado</Text>
+            </View>
+          )}
+          {isCompleted && (
+            <View style={[styles.metaChip, { backgroundColor: starRating === 3 ? '#78350F' : t.surface, borderColor: starRating === 3 ? '#F59E0B' : t.border }]}>
+              <Text style={[styles.metaText, { color: starRating === 3 ? '#F59E0B' : t.muted }]}>
+                {starRating === 3 ? '★★★ Perfecto' : starRating === 2 ? '★★☆ Bien' : '★☆☆ Completado'}
+              </Text>
             </View>
           )}
         </View>

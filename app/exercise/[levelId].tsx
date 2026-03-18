@@ -734,6 +734,12 @@ function PerfectScreen({
         <Reanimated.View style={titleStyle}>
           <Text style={perfectStyles.perfectTitle}>¡Perfecto!</Text>
           <Text style={perfectStyles.perfectSubtitle}>Nivel {levelNum}: {levelTopic}</Text>
+          {/* 3 estrellas doradas */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: 8 }}>
+            <Text style={{ fontSize: 32, color: '#F59E0B', textShadowColor: '#FBBF2480', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }}>★</Text>
+            <Text style={{ fontSize: 32, color: '#F59E0B', textShadowColor: '#FBBF2480', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }}>★</Text>
+            <Text style={{ fontSize: 32, color: '#F59E0B', textShadowColor: '#FBBF2480', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }}>★</Text>
+          </View>
           <Text style={perfectStyles.perfectTagline}>Sin ningún error • ¡Increíble!</Text>
         </Reanimated.View>
 
@@ -1237,6 +1243,9 @@ export default function ExerciseScreen() {
     const xpEarned = level.xp;
     const isPerfect = finalWrongCount === 0;
     const totalTime = formatTime(elapsedSeconds);
+    // Calcular estrellas para la pantalla de resultado
+    const realScore = Math.round(((TOTAL_EXERCISES - finalWrongCount) / TOTAL_EXERCISES) * 100);
+    const resultStars = realScore >= 100 ? 3 : realScore >= 70 ? 2 : 1;
     const typeLabels: Record<string, string> = {
       'multiple-choice': '📝 Opción múltiple',
       'translate': '🔄 Traducción',
@@ -1284,6 +1293,17 @@ export default function ExerciseScreen() {
           <Text style={styles.resultEmoji}>⭐</Text>
           <Text style={styles.resultTitle}>¡Nivel Completado!</Text>
           <Text style={styles.resultSubtitle}>Nivel {levelNum}: {level.topic}</Text>
+          {/* Estrellas obtenidas */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 8, marginBottom: 4 }}>
+            {[1, 2, 3].map((i) => (
+              <Text key={i} style={{ fontSize: 28, color: i <= resultStars ? '#F59E0B' : '#CBD5E1' }}>
+                {i <= resultStars ? '★' : '☆'}
+              </Text>
+            ))}
+          </View>
+          <Text style={{ textAlign: 'center', color: '#64748B', fontSize: 13, marginBottom: 4 }}>
+            {resultStars === 3 ? 'Perfecto' : resultStars === 2 ? 'Bien hecho' : 'Completado'} • {realScore}%
+          </Text>
 
           {/* Recompensas */}
           <View style={styles.rewardsRow}>

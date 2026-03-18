@@ -220,15 +220,51 @@ function LevelPreviewModal({
   );
 }
 
+// ─── Sistema de Estrellas ───────────────────────────────────────────────────
+// 0 = no completado, 1 = score < 70%, 2 = score 70-99%, 3 = score 100% (perfecto)
+// Nota: score undefined en nivel completado = score 100 (guardado por defecto antes del fix)
+function getStarRating(score: number | undefined): 1 | 2 | 3 {
+  if (score === undefined || score === null || score >= 100) return 3;
+  if (score >= 70) return 2;
+  return 1;
+}
+
+function StarRow({ stars, size = 14 }: { stars: 1 | 2 | 3; size?: number }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 1, marginTop: 3 }}>
+      {[1, 2, 3].map((i) => {
+        const filled = i <= stars;
+        const isPerfect = stars === 3;
+        return (
+          <Text
+            key={i}
+            style={{
+              fontSize: size,
+              color: filled ? (isPerfect ? '#F59E0B' : '#94A3B8') : '#CBD5E1',
+              textShadowColor: filled && isPerfect ? '#FBBF2480' : 'transparent',
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 4,
+            }}
+          >
+            {filled ? '★' : '☆'}
+          </Text>
+        );
+      })}
+    </View>
+  );
+}
+
 interface LevelCardProps {
   levelNum: number;
   isCompleted: boolean;
   isUnlocked: boolean;
+  score?: number;
   onPress: () => void;
   onPressLocked?: () => void;
 }
 
-function LevelCard({ levelNum, isCompleted, isUnlocked, onPress, onPressLocked }: LevelCardProps) {
+function LevelCard({ levelNum, isCompleted, isUnlocked, score, onPress, onPressLocked }: LevelCardProps) {
+  const stars: 0 | 1 | 2 | 3 = isCompleted ? getStarRating(score) : 0;
   const levelData = useMemo(() => getLevelData(levelNum), [levelNum]);
   const icon = useMemo(() => getLevelIcon(levelNum), [levelNum]);
 
@@ -273,16 +309,17 @@ function LevelCard({ levelNum, isCompleted, isUnlocked, onPress, onPressLocked }
             <View style={styles.levelInfo}>
               <Text style={[styles.levelNum, { color: '#1E293B' }]}>Nivel {levelNum}</Text>
               <Text style={[styles.levelTopic, { color: levelData.color }]} numberOfLines={1}>{levelData.name}</Text>
+              {stars > 0 && <StarRow stars={stars as 1 | 2 | 3} size={13} />}
             </View>
           </View>
           <View style={styles.completedRight}>
             <LinearGradient
-              colors={['#059669', '#34D399']}
+              colors={stars === 3 ? ['#D97706', '#F59E0B'] : ['#059669', '#34D399']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.completedBadgeGradient}
             >
-              <Text style={styles.completedBadgeText}>✓</Text>
+              <Text style={styles.completedBadgeText}>{stars === 3 ? '★' : '✓'}</Text>
             </LinearGradient>
           </View>
         </LinearGradient>
@@ -428,13 +465,15 @@ export default function LevelsScreen() {
   }, [game.levelProgress]);
 
   const renderItem = useCallback(({ item: levelNum }: { item: number }) => {
-    const isCompleted = !!levelProgress[levelNum]?.completed;
+    const progress = levelProgress[levelNum];
+    const isCompleted = !!progress?.completed;
     const isUnlocked = levelNum <= maxUnlockedLevel;
     return (
       <LevelCard
         levelNum={levelNum}
         isCompleted={isCompleted}
         isUnlocked={isUnlocked}
+        score={progress?.score}
         onPress={() => handleLevelPress(levelNum)}
         onPressLocked={() => setPreviewLevel(levelNum)}
       />

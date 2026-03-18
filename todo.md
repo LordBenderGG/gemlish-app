@@ -474,3 +474,11 @@
 - [x] BUG: completeLevel siempre guardaba `score: 100` — corregido para guardar el porcentaje real de aciertos (TOTAL_EXERCISES - finalWrongCount) / TOTAL_EXERCISES * 100
 - [x] BUG: finishDaily no actualizaba el streak del juego — corregido para actualizar streak y levelCompletedDates al completar la tarea diaria
 - [x] BUG: Sistema de Gemas v2 — items actualizados a [x] (ya estaban implementados)
+
+## v1.34 — Estrellas en tarjetas de nivel
+- [x] Implementar función getStarRating(score): 1 estrella (score < 70), 2 estrellas (70-99), 3 estrellas doradas (100 o undefined=default)
+- [x] Mostrar estrellas en las tarjetas de nivel en la pantalla principal (index.tsx) + badge dorado en nivel perfecto
+- [x] Mostrar estrellas en la pantalla de detalle de nivel (level/[levelId].tsx)
+- [x] Mostrar estrellas en la pantalla de resultado del ejercicio (exercise/[levelId].tsx)
+- [x] Mostrar 3 estrellas doradas en PerfectScreen
+- [x] Auditoría QA completa post-cambio: TypeScript limpio, edge cases cubiertos
