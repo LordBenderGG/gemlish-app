@@ -491,3 +491,21 @@
 ## v1.36 — Fix UI bugs
 - [x] BUG: Al volver de la lista tras completar el quiz, la pestaña activa ahora arranca en "Aprendidas" cuando dailyCompleted=true
 - [x] BUG: Fondo negro sólido en overlay de nivel desbloqueado — cambiado de rgba(0,0,0,0.85) a rgba(0,0,0,0.45) semitransparente
+
+## v1.37 — Responsive vertical (Android phones + tablets)
+- [ ] Auditar todas las pantallas para detectar alturas fijas, fuentes fijas y layouts rotos
+- [ ] Corregir exercise/[levelId].tsx — pantallas pequeñas (360dp) y tablets (600dp+)
+- [ ] Corregir app/(tabs)/index.tsx — mapa de niveles responsive
+- [ ] Corregir app/(tabs)/daily.tsx — tarea diaria responsive
+- [ ] Corregir app/(tabs)/game.tsx — memory pairs responsive
+- [ ] Corregir app/(tabs)/profile.tsx — perfil responsive
+- [ ] Bloquear orientación landscape en app.config.ts
+
+## v1.37 — Responsive vertical para todos los Android
+
+- [x] game.tsx: CARD_WIDTH ahora usa useWindowDimensions dinámico en GameBoard (responsive en tablets y phones)
+- [x] index.tsx: unlockCard cambiado de width:280 fijo a width:'80%' maxWidth:320
+- [x] exercise/[levelId].tsx: questionText reducido de fontSize:22/marginBottom:24 a fontSize:20/marginBottom:16
+- [x] Verificado: PerfectScreen, result screen, daily.tsx tienen ScrollView — no hay overflow crítico
+- [x] Verificado: modalCard usa width:'100%' maxWidth:400 — responsive en tablets
+- [x] TypeScript: sin errores

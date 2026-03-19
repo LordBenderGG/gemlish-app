@@ -1634,7 +1634,7 @@ const styles = StyleSheet.create({
     fontSize: 12, color: '#64748B', fontWeight: '700',
     marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8,
   },
-  questionText: { fontSize: 22, fontWeight: '700', color: '#1E293B', marginBottom: 24, lineHeight: 30 },
+  questionText: { fontSize: 20, fontWeight: '700', color: '#1E293B', marginBottom: 16, lineHeight: 28 },
   optionsGrid: { gap: 10 },
   optionBtn: {
     flexDirection: 'row', alignItems: 'center',

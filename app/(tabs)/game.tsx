@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert,
-  ScrollView, Animated, Dimensions,
+  ScrollView, Animated, useWindowDimensions,
 } from 'react-native';
 import { useRewardedAd, AD_UNIT_IDS } from '@/hooks/useAdMob';
 import { getVideoWatchStatus, recordVideoWatched } from '@/lib/storage';
@@ -21,10 +21,8 @@ const VIDEO_GEMS = 50; // Gemas por ver video en Memory Pairs
 const VIDEO_MAX_DAILY = 3; // Máximo 3 videos por día
 const VIDEO_COOLDOWN_MS = 20 * 60 * 1000; // 20 minutos entre videos
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-// 6 columnas con padding 10 a cada lado y gap 6 entre cartas
-const CARD_WIDTH = Math.floor((SCREEN_WIDTH - 20 - 5 * 6) / 6);
-const CARD_HEIGHT = Math.floor(CARD_WIDTH * 1.25);
+// CARD_WIDTH se calcula dinámicamente en GameBoard con useWindowDimensions
+// para que sea responsive en tablets y phones de distintos tamaños
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -67,9 +65,11 @@ interface MemCardProps {
   isFlipped: boolean;
   isMatched: boolean;
   onPress: () => void;
+  cardWidth: number;
+  cardHeight: number;
 }
 
-function MemCard({ card, isFlipped, isMatched, onPress }: MemCardProps) {
+function MemCard({ card, isFlipped, isMatched, onPress, cardWidth, cardHeight }: MemCardProps) {
   const anim = useRef(new Animated.Value(isFlipped || isMatched ? 1 : 0)).current;
 
   useEffect(() => {
@@ -85,7 +85,7 @@ function MemCard({ card, isFlipped, isMatched, onPress }: MemCardProps) {
 
   return (
     <TouchableOpacity
-      style={[styles.cardWrapper, { width: CARD_WIDTH, height: CARD_HEIGHT }]}
+      style={[styles.cardWrapper, { width: cardWidth, height: cardHeight }]}
       onPress={onPress}
       disabled={isFlipped || isMatched}
       activeOpacity={0.85}
@@ -95,7 +95,7 @@ function MemCard({ card, isFlipped, isMatched, onPress }: MemCardProps) {
         { transform: [{ rotateY: frontRot }] },
         isMatched && styles.cardMatchedBack,
       ]}>
-        <Text style={{ fontSize: CARD_WIDTH * 0.35 }}>💎</Text>
+        <Text style={{ fontSize: cardWidth * 0.35 }}>💎</Text>
       </Animated.View>
       <Animated.View style={[
         styles.card,
@@ -104,7 +104,7 @@ function MemCard({ card, isFlipped, isMatched, onPress }: MemCardProps) {
         isMatched && styles.cardMatchedFront,
       ]}>
         <Text style={styles.cardLangFlag}>{card.isEnglish ? '🇺🇸' : '🇪🇸'}</Text>
-        <Text style={[styles.cardWord, { fontSize: CARD_WIDTH > 55 ? 11 : 9 }]} numberOfLines={2}>
+        <Text style={[styles.cardWord, { fontSize: cardWidth > 55 ? 11 : 9 }]} numberOfLines={2}>
           {card.text}
         </Text>
       </Animated.View>
@@ -122,6 +122,11 @@ interface GameBoardProps {
 }
 
 function GameBoard({ categoryKey, onWin, onTimeUp, remainingMs }: GameBoardProps) {
+  const { width: screenW } = useWindowDimensions();
+  // 6 columnas con padding 10 a cada lado y gap 6 entre cartas — responsive
+  const cardWidth = Math.floor((screenW - 20 - 5 * 6) / 6);
+  const cardHeight = Math.floor(cardWidth * 1.25);
+
   const words = useMemo(() => {
     if (categoryKey === 'random') return getRandomGameWords(PAIRS_COUNT);
     // Si la categoría tiene menos de 12 palabras, completar con aleatorias de otras
@@ -229,6 +234,8 @@ function GameBoard({ categoryKey, onWin, onTimeUp, remainingMs }: GameBoardProps
             isFlipped={flipped.includes(card.id)}
             isMatched={matched.includes(card.id)}
             onPress={() => handleCardPress(card.id)}
+            cardWidth={cardWidth}
+            cardHeight={cardHeight}
           />
         ))}
       </View>
