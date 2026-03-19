@@ -20,7 +20,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.49",
+  version: "1.0.55",
   // Play Store: versionCode debe incrementarse en cada release
   // Se gestiona automáticamente por EAS Build con autoIncrement: true en eas.json
   // NOTA Android 16: orientation portrait se ignora en tablets/plegables.
