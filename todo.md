@@ -509,3 +509,10 @@
 - [x] Verificado: PerfectScreen, result screen, daily.tsx tienen ScrollView — no hay overflow crítico
 - [x] Verificado: modalCard usa width:'100%' maxWidth:400 — responsive en tablets
 - [x] TypeScript: sin errores
+
+## v1.38 — Fix advertencias Google Play Console (Android 15/16)
+
+- [x] FIX: BOOT_COMPLETED restringido — plugin `plugins/withDisableNotificationsBootActions.js` elimina BOOT_COMPLETED/REBOOT/QUICKBOOT del receiver de expo-notifications en el AndroidManifest.xml generado
+- [x] FIX: API edge-to-edge obsoleta — eliminado `edgeToEdgeEnabled: true` (deprecado); en SDK 54 + Android 16 edge-to-edge es obligatorio y no necesita configuración explícita
+- [x] NOTA: Restricción de orientación en Android 16 — `orientation: "portrait"` se mantiene; Android 16 lo ignorará en tablets/plegables pero la app ya usa SafeAreaView + ScreenContainer que maneja todos los tamaños
+- [x] Versión actualizada a 1.2.0

@@ -1,6 +1,6 @@
 // Load environment variables with proper priority (system > .env)
 import "./scripts/load-env.js";
-import type { ExpoConfig, ConfigContext } from "expo/config";
+import type { ExpoConfig } from "expo/config";
 
 const bundleId = "com.gemlish";
 const schemeFromBundleId = "gemlish";
@@ -20,9 +20,11 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.1.0",
+  version: "1.2.0",
   // Play Store: versionCode debe incrementarse en cada release
   // Se gestiona automáticamente por EAS Build con autoIncrement: true en eas.json
+  // NOTA Android 16: orientation portrait se ignora en tablets/plegables.
+  // La app usa SafeAreaView + ScreenContainer para manejar todos los tamaños.
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
@@ -43,7 +45,7 @@ const config: ExpoConfig = {
       monochromeImage: "./assets/images/android-icon-monochrome.png",
     },
     userInterfaceStyle: "light",
-    edgeToEdgeEnabled: true,
+    // edgeToEdgeEnabled: true, // Deprecado en Android 15 - edge-to-edge es obligatorio en SDK 54 + Android 16
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
     permissions: ["POST_NOTIFICATIONS", "SCHEDULE_EXACT_ALARM", "USE_EXACT_ALARM"],
@@ -69,6 +71,9 @@ const config: ExpoConfig = {
   backgroundColor: "#F8FAFF",
   plugins: [
     "expo-router",
+    // Fix Android 15: elimina BOOT_COMPLETED de expo-notifications para evitar
+    // advertencia de servicios en primer plano restringidos en Play Console
+    "./plugins/withDisableNotificationsBootActions",
     "expo-sqlite",
     "expo-system-ui",
     [
