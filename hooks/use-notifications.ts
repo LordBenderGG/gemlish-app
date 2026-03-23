@@ -136,6 +136,12 @@ export function useNotifications() {
           lightColor: '#8E5AF5',
           sound: 'default',
         });
+        // Verificar si el permiso ya está concedido
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        if (existingStatus === 'granted') {
+          setPermissionGranted(true);
+          return true;
+        }
         // En Android 12 y anteriores los permisos siempre son granted
         // En Android 13+ se necesita POST_NOTIFICATIONS (ya en AndroidManifest)
         const { status } = await Notifications.requestPermissionsAsync();
