@@ -137,8 +137,18 @@ export function useNotifications() {
           sound: 'default',
         });
         // Verificar si el permiso ya está concedido (evitar prompt innecesario)
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        if (existingStatus?.trim().toLowerCase() === 'granted') {
+        const permissionStatus = await Notifications.getPermissionsAsync();
+        // Extraer status de forma segura
+        let existingStatus = '';
+        if (permissionStatus && typeof permissionStatus === 'object' && permissionStatus.status != null) {
+          existingStatus = String(permissionStatus.status);
+        }
+        // Normalizar de forma segura
+        existingStatus = existingStatus.trim().toLowerCase();
+        
+        // En Android, tanto 'granted' como 'undetermined' indican que podemos proceder
+        // 'undetermined' significa que el usuario no ha sido preguntado todavía, pero podemos asumir que está OK para nuestros propósitos
+        if (existingStatus === 'granted' || existingStatus === 'undetermined') {
           setPermissionGranted(true);
           return true;
         }
@@ -147,24 +157,41 @@ export function useNotifications() {
         // En Android 12 y anteriores los permisos siempre son granted
         // En Android 13+ se necesita POST_NOTIFICATIONS (ya en AndroidManifest)
         // Tratamos tanto 'granted' como 'undetermined' como éxito
-        const granted = status === 'granted' || status === 'undetermined';
+        let requestStatus = '';
+        if (status != null) {
+          requestStatus = String(status);
+        }
+        requestStatus = requestStatus.trim().toLowerCase();
+        const granted = requestStatus === 'granted' || requestStatus === 'undetermined';
         setPermissionGranted(granted);
         return granted;
       }
 
       // iOS: solicitar permiso explícito
-      const { status: existingStatus } = await Notifications.getNotificationsAsync();
+      const permissionStatus = await Notifications.getPermissionsAsync();
+      let existingStatus = '';
+      if (permissionStatus && typeof permissionStatus === 'object' && permissionStatus.status != null) {
+        existingStatus = String(permissionStatus.status);
+      }
+      existingStatus = existingStatus.trim().toLowerCase();
+      
       if (existingStatus === 'granted') {
         setPermissionGranted(true);
         return true;
       }
 
       const { status } = await Notifications.requestPermissionsAsync();
-      const granted = status === 'granted';
+      let requestStatus = '';
+      if (status != null) {
+        requestStatus = String(status);
+      }
+      requestStatus = requestStatus.trim().toLowerCase();
+      const granted = requestStatus === 'granted';
       setPermissionGranted(granted);
       return granted;
     } catch (err) {
       console.warn('[useNotifications] Error requesting permission:', err);
+      // En caso de error, retornar false de forma segura (no asumir permiso concedido)
       return false;
     }
   }, []);
