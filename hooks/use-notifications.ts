@@ -171,8 +171,9 @@ export function useNotifications() {
 
   const scheduleDaily = useCallback(async (hour: number, minute: number, nextLevelName?: string): Promise<boolean> => {
     try {
-      // Validar rango de hora y minuto
-      if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      // Validar que hora y minuto sean números enteros válidos
+      if (!Number.isInteger(hour) || hour < 0 || hour > 23 ||
+          !Number.isInteger(minute) || minute < 0 || minute > 59) {
         console.warn('[useNotifications] Invalid time for scheduling:', { hour, minute });
         return false;
       }
