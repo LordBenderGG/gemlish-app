@@ -1,3 +1,5 @@
+import { shuffleArray } from '@/lib/utils';
+
 export interface GameWord {
   word: string;       // inglés
   translation: string; // español
@@ -112,13 +114,11 @@ export const GAME_CATEGORIES: Record<string, { label: string; emoji: string }> =
 
 export function getGameWordsByCategory(category: string, count = 6): GameWord[] {
   const filtered = GAME_WORDS.filter(w => w.category === category);
-  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(count, filtered.length));
+  return shuffleArray(filtered).slice(0, Math.min(count, filtered.length));
 }
 
 export function getRandomGameWords(count = 6): GameWord[] {
-  const shuffled = [...GAME_WORDS].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+  return shuffleArray(GAME_WORDS).slice(0, count);
 }
 
 export function getAllCategories(): string[] {

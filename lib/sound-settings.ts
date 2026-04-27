@@ -15,18 +15,27 @@ function notifyListeners(v: boolean) {
   _listeners.forEach(fn => fn(v));
 }
 
+// Inicializar desde KV en cuanto el módulo se importa.
+// Así isSoundEnabled() devuelve el valor correcto en cuanto
+// el storage responde (típicamente < 5 ms) y se elimina la
+// ventana de race condition que existía si el hook se montaba
+// antes de que terminara la carga asíncrona.
+kvGet(SOUND_ENABLED_KEY).then(val => {
+  const enabled = val !== 'false'; // default: true
+  _soundEnabled = enabled;
+  notifyListeners(enabled);
+}).catch(() => {
+  // Si falla la lectura, mantener el default (true)
+});
+
 export function useSoundSettings() {
   const [soundEnabled, setSoundEnabledState] = useState(_soundEnabled);
 
   useEffect(() => {
-    // Cargar preferencia guardada al montar
-    kvGet(SOUND_ENABLED_KEY).then(val => {
-      const enabled = val !== 'false'; // default: true
-      _soundEnabled = enabled;
-      setSoundEnabledState(enabled);
-    }).catch(() => {});
-
-    // Suscribirse a cambios globales
+    // Suscribirse a cambios globales. Si KV ya terminó de cargar cuando
+    // se monta el hook, el useState ya tendrá el valor correcto gracias a
+    // la carga a nivel de módulo. Si aún no terminó, recibiremos la
+    // notificación en cuanto lo haga.
     _listeners.push(setSoundEnabledState);
     return () => {
       const idx = _listeners.indexOf(setSoundEnabledState);

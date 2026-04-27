@@ -11,21 +11,10 @@ import { LESSONS } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { AdBanner } from '@/components/AdBanner';
+import { shuffleArray, normalizeAnswer } from '@/lib/utils';
 
 const TOTAL = 10;
-
-function normalizeAnswer(str: string): string {
-  return str.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '');
-}
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// shuffleArray y normalizeAnswer importados desde lib/utils.ts (fuente única de verdad)
 
 export default function ListenModeScreen() {
   const insets = useSafeAreaInsets();
@@ -208,7 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 16, textAlign: 'center',
   },
   inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#F0FDF4' },
-  inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#3A1A1A' },
+  inputWrong: { borderColor: '#FF4B4B', backgroundColor: '#FEF2F2' },
   feedback: { fontSize: 15, fontWeight: '600', textAlign: 'center', marginBottom: 12 },
   submitBtn: {
     backgroundColor: '#38BDF8', borderRadius: 14, paddingVertical: 16,

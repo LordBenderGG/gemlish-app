@@ -20,6 +20,10 @@ export interface AchievementStats {
   xp: number;
   totalDaysCompleted: number;
   practiceSessionsCompleted: number;
+  // Campos opcionales para logros de velocidad y desafíos
+  bestLevelTime?: number;
+  dailyChallengesCompleted?: number;
+  challengeStreak?: number;
 }
 
 // ─── Definición de todos los logros ─────────────────────────────────────────
@@ -62,19 +66,22 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'practice_5', emoji: '💪', title: 'Perseverante', description: 'Completa 5 sesiones de práctica', gems: 50, check: s => s.practiceSessionsCompleted >= 5, category: 'practice' },
   { id: 'practice_20', emoji: '🏋️', title: 'Atleta del Vocabulario', description: 'Completa 20 sesiones de práctica', gems: 75, check: s => s.practiceSessionsCompleted >= 20, category: 'practice' },
   // Velocidad
-  { id: 'speed_60', emoji: '⚡', title: 'Rayo', description: 'Completa un nivel en menos de 60 segundos', gems: 50, check: s => (s as any).bestLevelTime !== undefined && (s as any).bestLevelTime <= 60000, category: 'game' },
-  { id: 'speed_120', emoji: '💨', title: 'Veloz', description: 'Completa un nivel en menos de 2 minutos', gems: 25, check: s => (s as any).bestLevelTime !== undefined && (s as any).bestLevelTime <= 120000, category: 'game' },
+  { id: 'speed_60', emoji: '⚡', title: 'Rayo', description: 'Completa un nivel en menos de 60 segundos', gems: 50, check: s => s.bestLevelTime !== undefined && s.bestLevelTime <= 60000, category: 'game' },
+  { id: 'speed_120', emoji: '💨', title: 'Veloz', description: 'Completa un nivel en menos de 2 minutos', gems: 25, check: s => s.bestLevelTime !== undefined && s.bestLevelTime <= 120000, category: 'game' },
   // Desafíos
-  { id: 'challenge_1', emoji: '🏆', title: 'Primer Desafío', description: 'Completa tu primer desafío del día', gems: 25, check: s => (s as any).dailyChallengesCompleted >= 1, category: 'game' },
-  { id: 'challenge_7', emoji: '🔥🏆', title: 'Semana de Desafíos', description: '7 desafíos del día completados', gems: 50, check: s => (s as any).dailyChallengesCompleted >= 7, category: 'game' },
-  { id: 'challenge_streak_7', emoji: '🏆🔥', title: 'Racha de Campeón', description: '7 desafíos del día consecutivos', gems: 75, check: s => (s as any).challengeStreak >= 7, category: 'game' },
-  { id: 'challenge_streak_30', emoji: '🏆🌟', title: 'Leyenda del Desafío', description: '30 desafíos del día consecutivos', gems: 100, check: s => (s as any).challengeStreak >= 30, category: 'game' },
+  { id: 'challenge_1', emoji: '🏆', title: 'Primer Desafío', description: 'Completa tu primer desafío del día', gems: 25, check: s => (s.dailyChallengesCompleted ?? 0) >= 1, category: 'game' },
+  { id: 'challenge_7', emoji: '🔥🏆', title: 'Semana de Desafíos', description: '7 desafíos del día completados', gems: 50, check: s => (s.dailyChallengesCompleted ?? 0) >= 7, category: 'game' },
+  { id: 'challenge_streak_7', emoji: '🏆🔥', title: 'Racha de Campeón', description: '7 desafíos del día consecutivos', gems: 75, check: s => (s.challengeStreak ?? 0) >= 7, category: 'game' },
+  { id: 'challenge_streak_30', emoji: '🏆🌟', title: 'Leyenda del Desafío', description: '30 desafíos del día consecutivos', gems: 100, check: s => (s.challengeStreak ?? 0) >= 30, category: 'game' },
 ];
 
 // ─── Persistencia de logros desbloqueados ────────────────────────────────────
 
 const KEY = (username: string) => `gemlish_achievements_${username}`;
 const DATES_KEY = (username: string) => `gemlish_achievement_dates_${username}`;
+
+// Prevent concurrent execution of checkNewAchievements
+let isCheckingAchievements = false;
 
 export async function getUnlockedAchievements(username: string): Promise<Set<string>> {
   const ids = await kvGetJson<string[]>(KEY(username), []);
@@ -97,28 +104,37 @@ async function saveAchievementDates(username: string, dates: Record<string, stri
 /**
  * Compara el estado actual con los logros ya desbloqueados.
  * Devuelve los logros que se acaban de desbloquear (nuevos).
+ * Previene ejecución concurrente con una bandera de procesamiento.
  */
 export async function checkNewAchievements(
   username: string,
   stats: AchievementStats,
 ): Promise<Achievement[]> {
-  const already = await getUnlockedAchievements(username);
-  const dates = await getAchievementDates(username);
-  const newlyUnlocked: Achievement[] = [];
-  const now = new Date().toISOString();
+  // Prevent concurrent execution
+  if (isCheckingAchievements) return [];
+  isCheckingAchievements = true;
 
-  for (const a of ACHIEVEMENTS) {
-    if (!already.has(a.id) && a.check(stats)) {
-      newlyUnlocked.push(a);
-      already.add(a.id);
-      dates[a.id] = now;
+  try {
+    const already = await getUnlockedAchievements(username);
+    const dates = await getAchievementDates(username);
+    const newlyUnlocked: Achievement[] = [];
+    const now = new Date().toISOString();
+
+    for (const a of ACHIEVEMENTS) {
+      if (!already.has(a.id) && a.check(stats)) {
+        newlyUnlocked.push(a);
+        already.add(a.id);
+        dates[a.id] = now;
+      }
     }
-  }
 
-  if (newlyUnlocked.length > 0) {
-    await saveUnlockedAchievements(username, already);
-    await saveAchievementDates(username, dates);
-  }
+    if (newlyUnlocked.length > 0) {
+      await saveUnlockedAchievements(username, already);
+      await saveAchievementDates(username, dates);
+    }
 
-  return newlyUnlocked;
+    return newlyUnlocked;
+  } finally {
+    isCheckingAchievements = false;
+  }
 }

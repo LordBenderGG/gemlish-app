@@ -31,18 +31,27 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
-  // Enable CORS for all routes - reflect the request origin to support credentials
+  // Orígenes permitidos: localhost (dev) + dominio de producción (configurable via env)
+  const ALLOWED_ORIGINS = new Set<string>([
+    "http://localhost:3000",
+    "http://localhost:8081",
+    "http://localhost:19006",
+    ...(process.env.ALLOWED_ORIGIN ? [process.env.ALLOWED_ORIGIN] : []),
+  ]);
+
+  // CORS con lista de orígenes permitidos explícita.
+  // Solo se refleja el origen si está en la lista — evita CSRF desde dominios no autorizados.
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin) {
+    if (origin && ALLOWED_ORIGINS.has(origin)) {
       res.header("Access-Control-Allow-Origin", origin);
+      res.header("Access-Control-Allow-Credentials", "true");
     }
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept, Authorization",
     );
-    res.header("Access-Control-Allow-Credentials", "true");
 
     // Handle preflight requests
     if (req.method === "OPTIONS") {

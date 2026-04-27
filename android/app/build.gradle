@@ -2,6 +2,24 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+def appVersionProps = new Properties()
+def appVersionPropsFile = rootProject.file("../version.properties")
+if (appVersionPropsFile.exists()) {
+    appVersionProps.load(new FileInputStream(appVersionPropsFile))
+} else {
+    throw new GradleException("Missing version.properties at project root")
+}
+
+def appVersionCodeStr = appVersionProps.getProperty("VERSION_CODE", "1")?.trim()
+def appVersionNameStr = appVersionProps.getProperty("VERSION_NAME", "1.0.0")?.trim()
+if (!appVersionCodeStr) {
+    throw new GradleException("VERSION_CODE is empty in version.properties")
+}
+if (!appVersionNameStr) {
+    throw new GradleException("VERSION_NAME is empty in version.properties")
+}
+def appVersionCode = Integer.parseInt(appVersionCodeStr)
+
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
@@ -92,8 +110,8 @@ android {
         applicationId 'com.gemlish'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 49
-        versionName "1.0.49"
+        versionCode appVersionCode
+        versionName appVersionNameStr
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }

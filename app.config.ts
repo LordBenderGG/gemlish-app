@@ -1,6 +1,31 @@
 // Load environment variables with proper priority (system > .env)
 import "./scripts/load-env.js";
 import type { ExpoConfig } from "expo/config";
+import fs from "node:fs";
+import path from "node:path";
+
+function loadAppVersion() {
+  const versionFile = path.resolve(process.cwd(), "version.properties");
+  const raw = fs.readFileSync(versionFile, "utf8");
+  const lines = raw.split(/\r?\n/);
+  let versionName = "1.0.0";
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const idx = trimmed.indexOf("=");
+    if (idx <= 0) continue;
+    const key = trimmed.slice(0, idx).trim();
+    const value = trimmed.slice(idx + 1).trim();
+    if (key === "VERSION_NAME" && value) {
+      versionName = value;
+    }
+  }
+
+  return { versionName };
+}
+
+const { versionName } = loadAppVersion();
 
 const bundleId = "com.gemlish";
 const schemeFromBundleId = "gemlish";
@@ -13,14 +38,13 @@ const env = {
   // Leave empty to use the default icon from assets/images/icon.png
   logoUrl: "",
   scheme: schemeFromBundleId,
-  iosBundleId: bundleId,
   androidPackage: bundleId,
 };
 
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
-  version: "1.0.49",
+  version: versionName,
   // Play Store: versionCode debe incrementarse en cada release
   // Se gestiona automáticamente por EAS Build con autoIncrement: true en eas.json
   // NOTA Android 16: orientation portrait se ignora en tablets/plegables.
@@ -30,13 +54,6 @@ const config: ExpoConfig = {
   scheme: env.scheme,
   userInterfaceStyle: "light",
   newArchEnabled: true,
-  ios: {
-    supportsTablet: true,
-    bundleIdentifier: env.iosBundleId,
-    "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-  },
   android: {
     adaptiveIcon: {
       backgroundColor: "#1A1A2E",
@@ -79,15 +96,8 @@ const config: ExpoConfig = {
     [
       "react-native-google-mobile-ads",
       {
-        // IDs de PRUEBA de Google. Reemplazar con IDs reales de AdMob antes de publicar.
-        androidAppId: "ca-app-pub-9019813013540172~8482362619",
-        iosAppId: "ca-app-pub-3940256099942544~1458002511",
-        // Cumplimiento GDPR/CCPA: solicitar consentimiento antes de mostrar anuncios personalizados
-        userTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you.",
-        skAdNetworkItems: [
-          { skAdNetworkIdentifier: "cstr6suwn9.skadnetwork" },
-          { skAdNetworkIdentifier: "4fzdc2evr5.skadnetwork" },
-        ],
+        // App ID real de AdMob para Android — usa EXPO_PUBLIC_ADMOB_APP_ID_ANDROID de .env.local
+        androidAppId: process.env.EXPO_PUBLIC_ADMOB_APP_ID_ANDROID ?? 'ca-app-pub-3940256099942544~3347511713',
       },
     ],
     [
@@ -109,7 +119,8 @@ const config: ExpoConfig = {
           minSdkVersion: 24,
           compileSdkVersion: 35,
           targetSdkVersion: 35,
-          buildArchs: ["arm64-v8a", "x86_64"],
+          // x86_64 es sólo para emuladores — excluido del build de producción para reducir tamaño del AAB
+          buildArchs: ["armeabi-v7a", "arm64-v8a"],
         },
       },
     ],

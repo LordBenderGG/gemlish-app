@@ -1,12 +1,8 @@
 /**
- * useAdMob - Hook centralizado para gestionar anuncios de AdMob en Gemlish.
- *
- * IDs de prueba oficiales de Google (funcionan sin cuenta AdMob real).
- * Cuando el usuario tenga su App ID de AdMob, solo hay que cambiar los IDs
- * en la sección AD_UNIT_IDS y en app.config.ts.
+ * useAdMob - Hook centralizado para gestionar anuncios de AdMob en Gemlish (Android).
  *
  * Tipos de anuncios:
- * - Banner: se muestra en pantallas de navegación (Home, Stats)
+ * - Banner: se muestra en pantallas de navegación
  * - Interstitial: pantalla completa al completar nivel o abrir práctica
  * - Rewarded: el usuario elige verlo a cambio de una recompensa
  */
@@ -40,21 +36,29 @@ if (Platform.OS !== 'web') {
 }
 
 // ─── IDs de anuncios ──────────────────────────────────────────────────────────
-// IDs reales de AdMob — Gemlish Android
+// AdMob exige IDs distintos por FORMATO (banner / interstitial / rewarded).
+// Dentro del mismo formato, el mismo ID puede reutilizarse en múltiples
+// pantallas o placements sin violar ninguna política.
+//
+// Unidades creadas en AdMob (ca-app-pub-9019813013540172):
+//   Banner      → 8657131164
+//   Interstitial → 2084951559
+//   Rewarded    → 8161108035
+//
 export const AD_UNIT_IDS = {
-  // Banner
-  BANNER_HOME: 'ca-app-pub-9019813013540172/8657131164',
-  BANNER_STATS: 'ca-app-pub-9019813013540172/8657131164',
+  // ── Banners ────────────────────────────────────────────────────────────────
+  // Un único ID de banner reutilizable en todas las pantallas (política AdMob permite esto)
+  BANNER_HOME:  'ca-app-pub-9019813013540172/8657131164',
 
-  // Interstitial
+  // ── Interstitials ──────────────────────────────────────────────────────────
   INTERSTITIAL_LEVEL_COMPLETE: 'ca-app-pub-9019813013540172/2084951559',
-  INTERSTITIAL_PRACTICE_MODE: 'ca-app-pub-9019813013540172/2084951559',
+  INTERSTITIAL_PRACTICE_MODE:  'ca-app-pub-9019813013540172/2084951559',
 
-  // Rewarded
-  REWARDED_CONTINUE: 'ca-app-pub-9019813013540172/8161108035',
-  REWARDED_DAILY_RETRY: 'ca-app-pub-9019813013540172/8161108035',
-  REWARDED_PRONUNCIATION: 'ca-app-pub-9019813013540172/8161108035',
-  REWARDED_HARD_MODE_HINT: 'ca-app-pub-9019813013540172/8161108035',
+  // ── Rewarded ───────────────────────────────────────────────────────────────
+  REWARDED_CONTINUE:        'ca-app-pub-9019813013540172/8161108035',
+  REWARDED_DAILY_RETRY:     'ca-app-pub-9019813013540172/8161108035',
+  REWARDED_PRONUNCIATION:   'ca-app-pub-9019813013540172/8161108035',
+  REWARDED_HARD_MODE_HINT:  'ca-app-pub-9019813013540172/8161108035',
 };
 
 // ─── Contador para mostrar interstitial cada N niveles ────────────────────────
@@ -65,6 +69,12 @@ const INTERSTITIAL_EVERY_N_LEVELS = 3;
 export function useInterstitialAd(adUnitId: string) {
   const adRef = useRef<any | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const loadAd = useCallback(() => {
     if (Platform.OS === "web" || !InterstitialAd) return;
@@ -73,12 +83,12 @@ export function useInterstitialAd(adUnitId: string) {
     });
     adRef.current = ad;
     const unsubLoad = ad.addAdEventListener(AdEventType.LOADED, () => {
-      setLoaded(true);
+      if (isMountedRef.current) setLoaded(true);
     });
     const unsubClose = ad.addAdEventListener(AdEventType.CLOSED, () => {
-      setLoaded(false);
-      // Precargar el siguiente
-      ad.load();
+      if (isMountedRef.current) setLoaded(false);
+      // Solo precargar el siguiente si el componente sigue montado
+      if (isMountedRef.current) ad.load();
     });
     ad.load();
     return () => {
@@ -130,6 +140,12 @@ export function useRewardedAd(
   const [loaded, setLoaded] = useState(false);
   const onRewardedRef = useRef(onRewarded);
   onRewardedRef.current = onRewarded;
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const loadAd = useCallback(() => {
     if (Platform.OS === "web" || !RewardedAd) return;
@@ -138,17 +154,19 @@ export function useRewardedAd(
     });
     adRef.current = ad;
     const unsubLoad = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
-      setLoaded(true);
+      if (isMountedRef.current) setLoaded(true);
     });
     const unsubEarned = ad.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
       () => {
+        // Invocar siempre: la recompensa es válida aunque el modal cambie de estado
         onRewardedRef.current();
       }
     );
     const unsubClose = ad.addAdEventListener(AdEventType.CLOSED, () => {
-      setLoaded(false);
-      ad.load();
+      if (isMountedRef.current) setLoaded(false);
+      // Solo recargar si el componente sigue vivo para evitar crash en Android
+      if (isMountedRef.current) ad.load();
     });
     ad.load();
     return () => {

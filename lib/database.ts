@@ -32,6 +32,7 @@ type SQLiteDB = {
   runSync: (sql: string, params?: any[]) => void;
   getFirstSync: <T>(sql: string, params?: any[]) => T | null;
   getAllSync: <T>(sql: string, params?: any[]) => T[];
+  withTransactionSync: (task: () => void) => void;
 };
 
 // ─── Shim para web (no-op) ────────────────────────────────────────────────────
@@ -41,6 +42,7 @@ class WebShim implements SQLiteDB {
   runSync(_sql: string, _params?: any[]): void {}
   getFirstSync<T>(_sql: string, _params?: any[]): T | null { return null; }
   getAllSync<T>(_sql: string, _params?: any[]): T[] { return []; }
+  withTransactionSync(task: () => void): void { task(); }
 }
 
 // ─── Instancia singleton ──────────────────────────────────────────────────────
@@ -126,6 +128,14 @@ function runMigrations(db: SQLiteDB, fromVersion: number): void {
             data     TEXT NOT NULL,
             updated_at TEXT NOT NULL DEFAULT (datetime('now'))
           );
+
+          -- Índices para optimizar búsquedas por usuario
+          CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+          CREATE INDEX IF NOT EXISTS idx_game_state_username ON game_state(username);
+          CREATE INDEX IF NOT EXISTS idx_daily_state_username ON daily_state(username);
+          CREATE INDEX IF NOT EXISTS idx_minigame_state_username ON minigame_state(username);
+          CREATE INDEX IF NOT EXISTS idx_session_id ON session(id);
+          CREATE INDEX IF NOT EXISTS idx_db_meta_key ON db_meta(key);
         `);
         break;
 

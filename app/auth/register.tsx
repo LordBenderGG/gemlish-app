@@ -81,23 +81,60 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleRegister = async () => {
-    if (!username.trim() || !password.trim() || !password2.trim()) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+    const trimmedPassword2 = password2.trim();
+
+    // Validate empty fields
+    if (!trimmedUsername || !trimmedPassword || !trimmedPassword2) {
       setError('Por favor completa todos los campos');
       return;
     }
-    if (password !== password2) {
+
+    // Validate username length
+    if (trimmedUsername.length < 3) {
+      setError('El nombre de usuario debe tener al menos 3 caracteres');
+      return;
+    }
+
+    // Validate email format if username contains @ symbol
+    if (trimmedUsername.includes('@') && !validateEmail(trimmedUsername)) {
+      setError('Por favor ingresa un email válido');
+      return;
+    }
+
+    // Validate password minimum length
+    if (trimmedPassword.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    // Validate password match
+    if (trimmedPassword !== trimmedPassword2) {
       setError('Las contraseñas no coinciden');
       return;
     }
+
     setLoading(true);
     setError('');
-    const result = await register(username.trim(), password);
-    setLoading(false);
-    if (result.ok) {
-      router.replace('/(tabs)');
-    } else {
-      setError(result.error || 'Error al registrarse');
+    try {
+      const result = await register(trimmedUsername, trimmedPassword);
+      if (result.ok) {
+        router.replace('/(tabs)');
+      } else {
+        setError(result.error || 'Error al registrarse');
+      }
+    } catch (err) {
+      console.warn('[Register] error:', err);
+      setError('Error inesperado al registrarse');
+    } finally {
+      setLoading(false);
     }
   };
 

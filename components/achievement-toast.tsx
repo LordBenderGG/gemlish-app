@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import type { Achievement } from '@/lib/achievements';
 
@@ -10,21 +10,40 @@ interface AchievementToastProps {
 /**
  * Toast emergente que aparece desde arriba cuando se desbloquea un logro.
  * Se auto-descarta después de 4 segundos.
+ * Soporta múltiples logros simultáneos usando una cola.
  */
 export function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
   const translateY = useRef(new Animated.Value(-120)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queueRef = useRef<Achievement[]>([]);
+  const [currentAchievement, setCurrentAchievement] = useState<Achievement | null>(null);
 
   const dismiss = useCallback(() => {
     Animated.parallel([
       Animated.timing(translateY, { toValue: -120, duration: 300, useNativeDriver: true }),
       Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-    ]).start(() => onDismiss());
+    ]).start(() => {
+      setCurrentAchievement(null);
+      onDismiss();
+      // Mostrar el siguiente de la cola
+      if (queueRef.current.length > 0) {
+        const next = queueRef.current.shift();
+        if (next) setCurrentAchievement(next);
+      }
+    });
   }, [translateY, opacity, onDismiss]);
 
   useEffect(() => {
     if (!achievement) return;
+
+    // Agregar a la cola si ya hay uno visible
+    if (currentAchievement !== null) {
+      queueRef.current.push(achievement);
+      return;
+    }
+
+    setCurrentAchievement(achievement);
 
     // Entrar
     Animated.parallel([
@@ -37,9 +56,9 @@ export function AchievementToast({ achievement, onDismiss }: AchievementToastPro
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [achievement, dismiss, opacity, translateY]);
+  }, [achievement, currentAchievement, dismiss, opacity, translateY]);
 
-  if (!achievement) return null;
+  if (!currentAchievement) return null;
 
   return (
     <Animated.View
@@ -52,7 +71,7 @@ export function AchievementToast({ achievement, onDismiss }: AchievementToastPro
         {/* Icono de trofeo + emoji del logro */}
         <View style={styles.iconWrapper}>
           <View style={styles.iconBg}>
-            <Text style={styles.iconEmoji}>{achievement.emoji}</Text>
+            <Text style={styles.iconEmoji}>{currentAchievement.emoji}</Text>
           </View>
           <View style={styles.unlockBadge}>
             <Text style={styles.unlockBadgeText}>🏆</Text>
@@ -62,12 +81,12 @@ export function AchievementToast({ achievement, onDismiss }: AchievementToastPro
         {/* Texto */}
         <View style={styles.textWrapper}>
           <Text style={styles.label}>¡Logro desbloqueado!</Text>
-          <Text style={styles.title}>{achievement.title}</Text>
-          <Text style={styles.description} numberOfLines={1}>{achievement.description}</Text>
+          <Text style={styles.title}>{currentAchievement.title}</Text>
+          <Text style={styles.description} numberOfLines={1}>{currentAchievement.description}</Text>
         </View>
 
         {/* Botón cerrar */}
-        <TouchableOpacity style={styles.closeBtn} onPress={dismiss}>
+        <TouchableOpacity style={styles.closeBtn} onPress={dismiss} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Text style={styles.closeBtnText}>✕</Text>
         </TouchableOpacity>
       </TouchableOpacity>
@@ -115,12 +134,12 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     borderRadius: 18,
     overflow: 'hidden',
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#FFD70060',
-    shadowColor: '#FFD700',
+    borderColor: '#FCD34D',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 12,
   },
@@ -155,11 +174,11 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#1A1D27',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#FFD70060',
+    borderColor: '#FCD34D',
   },
   unlockBadgeText: {
     fontSize: 11,
@@ -171,14 +190,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#FFD700',
+    color: '#D97706',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   title: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#1E293B',
     lineHeight: 20,
   },
   description: {
@@ -187,9 +206,9 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   closeBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',

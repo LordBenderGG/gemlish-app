@@ -8,7 +8,9 @@ import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { Platform } from 'react-native';
 import { isSoundEnabled } from '@/lib/sound-settings';
 
-// Configurar modo de audio para reproducir en modo silencioso de iOS
+// Configurar modo de audio al iniciar.
+// playsInSilentMode: true es un comportamiento de iOS — en Android no tiene efecto
+// pero tampoco causa error, por lo que se incluye para compatibilidad futura.
 let audioModeConfigured = false;
 async function ensureAudioMode() {
   if (audioModeConfigured) return;
@@ -36,8 +38,10 @@ export function useFeedbackSounds() {
   const playCorrect = useCallback(() => {
     if (!isSoundEnabled()) return;
     try {
-      correctPlayer.seekTo(0);
-      correctPlayer.play();
+      if (correctPlayer?.isLoaded) {
+        correctPlayer.seekTo(0);
+        correctPlayer.play();
+      }
     } catch {
       // Ignorar errores de reproducción
     }
@@ -46,8 +50,10 @@ export function useFeedbackSounds() {
   const playWrong = useCallback(() => {
     if (!isSoundEnabled()) return;
     try {
-      wrongPlayer.seekTo(0);
-      wrongPlayer.play();
+      if (wrongPlayer?.isLoaded) {
+        wrongPlayer.seekTo(0);
+        wrongPlayer.play();
+      }
     } catch {
       // Ignorar errores de reproducción
     }
@@ -56,8 +62,10 @@ export function useFeedbackSounds() {
   const playLevelComplete = useCallback(() => {
     if (!isSoundEnabled()) return;
     try {
-      levelCompletePlayer.seekTo(0);
-      levelCompletePlayer.play();
+      if (levelCompletePlayer?.isLoaded) {
+        levelCompletePlayer.seekTo(0);
+        levelCompletePlayer.play();
+      }
     } catch {
       // Ignorar errores de reproducción
     }
@@ -66,8 +74,10 @@ export function useFeedbackSounds() {
   const playStreak = useCallback(() => {
     if (!isSoundEnabled()) return;
     try {
-      streakPlayer.seekTo(0);
-      streakPlayer.play();
+      if (streakPlayer?.isLoaded) {
+        streakPlayer.seekTo(0);
+        streakPlayer.play();
+      }
     } catch {
       // Ignorar errores de reproducción
     }
@@ -76,8 +86,10 @@ export function useFeedbackSounds() {
   const playUnlock = useCallback(() => {
     if (!isSoundEnabled()) return;
     try {
-      unlockPlayer.seekTo(0);
-      unlockPlayer.play();
+      if (unlockPlayer?.isLoaded) {
+        unlockPlayer.seekTo(0);
+        unlockPlayer.play();
+      }
     } catch {
       // Ignorar errores de reproducción
     }

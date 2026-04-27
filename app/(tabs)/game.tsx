@@ -13,6 +13,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
   GAME_CATEGORIES, getGameWordsByCategory, getRandomGameWords, GameWord,
 } from '@/data/gameWords';
+import { shuffleArray } from '@/lib/utils';
+import { STRINGS } from '@/constants/strings';
 
 const MAX_DAILY_MS = 30 * 60 * 1000; // 30 minutos
 const PAIRS_COUNT = 12; // 12 pares = 24 cartas = tablero 6×4
@@ -35,22 +37,13 @@ interface CardData {
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 function buildCards(words: GameWord[]): CardData[] {
   const cards: CardData[] = [];
   words.forEach((w, idx) => {
     cards.push({ id: `en-${idx}`, text: w.word, pairId: idx, isEnglish: true });
     cards.push({ id: `es-${idx}`, text: w.translation, pairId: idx, isEnglish: false });
   });
-  return shuffle(cards);
+  return shuffleArray(cards);
 }
 
 function formatTime(ms: number) {
@@ -149,10 +142,12 @@ function GameBoard({ categoryKey, onWin, onTimeUp, remainingMs }: GameBoardProps
   const isProcessing = useRef(false);
 
   useEffect(() => {
+    // Solo iniciar el timer cuando el juego arrancó (startMs != null)
+    if (startMs === null) return;
     timerRef.current = setInterval(() => {
-      if (startMs !== null) setElapsed(Date.now() - startMs);
+      setElapsed(Date.now() - startMs);
     }, 500);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
   }, [startMs]);
 
   useEffect(() => {
@@ -167,17 +162,29 @@ function GameBoard({ categoryKey, onWin, onTimeUp, remainingMs }: GameBoardProps
     if (flipped.length >= 2) return;
     if (flipped.includes(cardId) || matched.includes(cardId)) return;
 
+    // Bloquear nuevos toques en cuanto se va a revelar la segunda carta,
+    // ANTES de llamar a setFlipped, para cerrar la ventana de race condition.
+    if (flipped.length === 1) {
+      isProcessing.current = true;
+    }
+
     if (startMs === null) setStartMs(Date.now());
 
     const newFlipped = [...flipped, cardId];
     setFlipped(newFlipped);
 
     if (newFlipped.length === 2) {
-      isProcessing.current = true;
       setMoves(m => m + 1);
       const [id1, id2] = newFlipped;
-      const c1 = cards.find(c => c.id === id1)!;
-      const c2 = cards.find(c => c.id === id2)!;
+      const c1 = cards.find(c => c.id === id1);
+      const c2 = cards.find(c => c.id === id2);
+
+      // Guard: si alguna carta no existe en el array (estado inconsistente), abortar
+      if (!c1 || !c2) {
+        setFlipped([]);
+        isProcessing.current = false;
+        return;
+      }
 
       if (c1.pairId === c2.pairId && c1.isEnglish !== c2.isEnglish) {
         const newMatched = [...matched, id1, id2];
@@ -265,7 +272,6 @@ export default function GameScreen() {
     msUntilAvailable?: number;
     usesToday?: number;
   }>({ canWatch: true });
-  const [videoCountdown, setVideoCountdown] = useState('');
   const videoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const refreshVideoStatus = useCallback(async () => {
@@ -278,19 +284,11 @@ export default function GameScreen() {
     refreshVideoStatus();
   }, [refreshVideoStatus]);
 
-  // Actualizar countdown cada segundo cuando hay cooldown
+  // Refrescar estado del video cada 10s cuando hay cooldown activo
   useEffect(() => {
     if (videoTimerRef.current) clearInterval(videoTimerRef.current);
-    if (videoStatus.canWatch || !videoStatus.msUntilAvailable) {
-      setVideoCountdown('');
-      return;
-    }
-    const updateCountdown = () => {
-      const ms = videoStatus.msUntilAvailable! - (Date.now() - (Date.now() - videoStatus.msUntilAvailable!));
-      // Recalcular desde el estado actual
-      refreshVideoStatus();
-    };
-    videoTimerRef.current = setInterval(refreshVideoStatus, 10000); // refresh cada 10s
+    if (videoStatus.canWatch || !videoStatus.msUntilAvailable) return;
+    videoTimerRef.current = setInterval(refreshVideoStatus, 10000);
     return () => { if (videoTimerRef.current) clearInterval(videoTimerRef.current); };
   }, [videoStatus.canWatch, videoStatus.msUntilAvailable, refreshVideoStatus]);
 
@@ -306,10 +304,20 @@ export default function GameScreen() {
 
   const handleVideoRewarded = useCallback(async () => {
     if (!username) return;
-    await recordVideoWatched(username);
-    await addGems(VIDEO_GEMS);
-    await refreshVideoStatus();
-    Alert.alert('🎉 ¡Recompensa!', `+${VIDEO_GEMS} 💎 añadidas a tu cuenta.`);
+    try {
+      // Registrar el video PRIMERO — si addGems falla después, al menos el contador
+      // queda correcto. No hay rollback necesario porque el límite diario protege
+      // contra usos duplicados.
+      await recordVideoWatched(username);
+      await addGems(VIDEO_GEMS);
+      await refreshVideoStatus();
+      Alert.alert('🎉 ¡Recompensa!', `+${VIDEO_GEMS} 💎 añadidas a tu cuenta.`);
+    } catch (err) {
+      console.warn('[Game] handleVideoRewarded failed:', err);
+      Alert.alert(STRINGS.ERROR, STRINGS.ERROR_PROCESAR_RECOMPENSA);
+      // Refrescar estado para que la UI sea consistente con lo que quedó guardado
+      await refreshVideoStatus().catch(() => {});
+    }
   }, [username, addGems, refreshVideoStatus]);
 
   const { loaded: videoAdLoaded, showAd: showVideoAd } = useRewardedAd(
@@ -353,7 +361,12 @@ export default function GameScreen() {
   const handleClaimReward = useCallback(async () => {
     if (rewardClaimed) return;
     setRewardClaimed(true);
-    await winMiniGame();
+    try {
+      await winMiniGame();
+    } catch (err) {
+      console.warn('[Game] handleClaimReward error:', err);
+      setRewardClaimed(false);
+    }
   }, [rewardClaimed, winMiniGame]);
 
   const handleBackToMenu = useCallback(() => {

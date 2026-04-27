@@ -20,6 +20,7 @@ import { getDb } from './database';
 import { Platform } from 'react-native';
 
 const MIGRATION_FLAG = 'gemlish_sqlite_migrated_v2';
+const MIGRATION_IN_PROGRESS_FLAG = 'gemlish_migration_in_progress';
 
 export async function migrateFromAsyncStorageIfNeeded(): Promise<void> {
   // En web no hay SQLite nativo, omitir
@@ -33,6 +34,22 @@ export async function migrateFromAsyncStorageIfNeeded(): Promise<void> {
       `SELECT value FROM db_meta WHERE key = ?`, [MIGRATION_FLAG]
     );
     if (migrated?.value === '1') return; // Ya migrado, nada que hacer
+
+    // Verificar si hay una migración en curso (caso de fallo anterior)
+    const inProgress = db.getFirstSync<{ value: string }>(
+      `SELECT value FROM db_meta WHERE key = ?`, [MIGRATION_IN_PROGRESS_FLAG]
+    );
+    if (inProgress?.value === '1') {
+      console.warn('[Migration] Migration was interrupted. Retrying...');
+      // Limpiar el flag para intentar de nuevo
+      db.runSync(`DELETE FROM db_meta WHERE key = ?`, [MIGRATION_IN_PROGRESS_FLAG]);
+    }
+
+    // Marcar migración como en progreso (antes de cualquier cambio)
+    db.runSync(
+      `INSERT OR REPLACE INTO db_meta (key, value) VALUES (?, '1')`,
+      [MIGRATION_IN_PROGRESS_FLAG]
+    );
 
     // ── Leer datos de AsyncStorage ────────────────────────────────────────────
     const [
@@ -221,8 +238,16 @@ export async function migrateFromAsyncStorageIfNeeded(): Promise<void> {
       [MIGRATION_FLAG]
     );
 
-  } catch {
-    // Si la migración falla por cualquier razón, no crashear la app
-    // El usuario verá la pantalla de login y podrá volver a entrar
+    // Limpiar el flag de migración en progreso (solo si completó exitosamente)
+    db.runSync(`DELETE FROM db_meta WHERE key = ?`, [MIGRATION_IN_PROGRESS_FLAG]);
+
+    console.log('[Migration] migrateFromAsyncStorageIfNeeded completed successfully');
+
+  } catch (err) {
+    // Si la migración falla por cualquier razón, NO borrar AsyncStorage.
+    // El flag de "en progreso" permanecerá y se reintentará en el próximo arranque.
+    // IMPORTANTE: registrar el error para poder diagnosticar en producción.
+    console.error('[Migration] migrateFromAsyncStorageIfNeeded falló:', err);
+    // No relanzar el error para no crashear la app
   }
 }

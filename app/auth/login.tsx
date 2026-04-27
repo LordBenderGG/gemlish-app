@@ -38,19 +38,47 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    // Validate empty fields
+    if (!trimmedUsername || !trimmedPassword) {
       setError('Por favor completa todos los campos');
       return;
     }
+
+    // Validate email format if username contains @ symbol (optional email login)
+    if (trimmedUsername.includes('@') && !validateEmail(trimmedUsername)) {
+      setError('Por favor ingresa un email válido');
+      return;
+    }
+
+    // Validate password minimum length
+    if (trimmedPassword.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
     setLoading(true);
     setError('');
-    const result = await login(username.trim(), password);
-    setLoading(false);
-    if (result.ok) {
-      router.replace('/(tabs)');
-    } else {
-      setError(result.error || 'Error al iniciar sesión');
+    try {
+      const result = await login(trimmedUsername, trimmedPassword);
+      if (result.ok) {
+        router.replace('/(tabs)');
+      } else {
+        setError(result.error || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      console.warn('[Login] error:', err);
+      setError('Error inesperado al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 

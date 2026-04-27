@@ -9,6 +9,7 @@ import {
 } from '@/lib/storage';
 import { getDailyChallenge, saveDailyChallenge } from '@/lib/daily-challenge';
 import { kvGetJson, kvSetJson } from '@/lib/local-kv';
+import { getLevelData } from '@/data/lessons';
 
 // ─── Tipos del contexto ──────────────────────────────────────────────────────
 
@@ -30,6 +31,8 @@ interface GameContextValue {
   spendGems: (amount: number) => Promise<boolean>;
   addGems: (amount: number) => Promise<void>;
   claimDailyBonus: () => Promise<boolean>; // true si se entregaron gemas
+  hasSaveError: boolean;
+  clearSaveError: () => void;
 
   // Tarea Diaria
   daily: DailyState;
@@ -86,6 +89,7 @@ export function useGame(): GameContextValue {
 export function GameProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasSaveError, setHasSaveError] = useState(false);
   const [game, setGame] = useState<GameState>({
     xp: 0, gems: 0, streak: 0, hearts: 5,
     maxUnlockedLevel: 1, levelProgress: {}, lastHeartRefill: new Date().toISOString(),
@@ -105,37 +109,68 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const dailyRef = useRef(daily);
   const miniGameRef = useRef(miniGame);
   const usernameRef = useRef(username);
+  const isProcessingLevelRef = useRef(false);
 
   useEffect(() => { gameRef.current = game; }, [game]);
   useEffect(() => { dailyRef.current = daily; }, [daily]);
   useEffect(() => { miniGameRef.current = miniGame; }, [miniGame]);
   useEffect(() => { usernameRef.current = username; }, [username]);
 
+  // ─── Helper: saveGameState con retry logic ───────────────────────────────
+
+  const saveGameStateWithRetry = useCallback(async (u: string, state: GameState): Promise<void> => {
+    const MAX_RETRIES = 1;
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        await saveGameState(u, state);
+        setHasSaveError(false);
+        return;
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        if (attempt < MAX_RETRIES) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+    }
+
+    // Si falla después del retry
+    console.error('[GameContext] saveGameState failed after retry:', lastError);
+    setHasSaveError(true);
+  }, []);
+
   // ─── Cargar usuario al iniciar ───────────────────────────────────────────
 
   useEffect(() => {
     (async () => {
-      const user = await getCurrentUser();
-      if (user) {
-        setUsername(user);
-        usernameRef.current = user;
-        const [g, d, mg] = await Promise.all([
-          getGameState(user),
-          getDailyState(user),
-          getMiniGameState(user),
-        ]);
-        const hydrated = applyHeartRefill(g);
-        if (hydrated.hearts !== g.hearts || hydrated.lastHeartRefill !== g.lastHeartRefill) {
-          await saveGameState(user, hydrated);
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          setUsername(user);
+          usernameRef.current = user;
+          const [g, d, mg] = await Promise.all([
+            getGameState(user),
+            getDailyState(user),
+            getMiniGameState(user),
+          ]);
+          const hydrated = applyHeartRefill(g);
+          if (hydrated.hearts !== g.hearts || hydrated.lastHeartRefill !== g.lastHeartRefill) {
+            await saveGameStateWithRetry(user, hydrated);
+          }
+          setGame(hydrated);
+          setDaily(d);
+          setMiniGame(mg);
+          gameRef.current = hydrated;
+          dailyRef.current = d;
+          miniGameRef.current = mg;
         }
-        setGame(hydrated);
-        setDaily(d);
-        setMiniGame(mg);
-        gameRef.current = hydrated;
-        dailyRef.current = d;
-        miniGameRef.current = mg;
+      } catch (err) {
+        console.error('[GameContext] startup load failed:', err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     })();
   }, []);
 
@@ -150,7 +185,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const updated = all.filter(u => u.username !== key);
       updated.push({ username: key, xp: g.xp, streak: g.streak, levelsCompleted });
       await kvSetJson(LEADERBOARD_KEY, updated);
-    } catch { /* silencioso */ }
+    } catch (err) { console.warn('[GameContext] updateLeaderboard failed:', err); }
   };
 
   const login = useCallback(async (u: string, p: string) => {
@@ -159,22 +194,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const key = u.toLowerCase();
       setUsername(key);
       usernameRef.current = key;
-      const [g, d, mg] = await Promise.all([
-        getGameState(key),
-        getDailyState(key),
-        getMiniGameState(key),
-      ]);
-      const hydrated = applyHeartRefill(g);
-      if (hydrated.hearts !== g.hearts || hydrated.lastHeartRefill !== g.lastHeartRefill) {
-        await saveGameState(key, hydrated);
+      try {
+        const [g, d, mg] = await Promise.all([
+          getGameState(key),
+          getDailyState(key),
+          getMiniGameState(key),
+        ]);
+        const hydrated = applyHeartRefill(g);
+        if (hydrated.hearts !== g.hearts || hydrated.lastHeartRefill !== g.lastHeartRefill) {
+          await saveGameStateWithRetry(key, hydrated);
+        }
+        setGame(hydrated);
+        setDaily(d);
+        setMiniGame(mg);
+        gameRef.current = hydrated;
+        dailyRef.current = d;
+        miniGameRef.current = mg;
+        updateLeaderboard(key, hydrated);
+      } catch (err) {
+        console.error('[GameContext] login state load failed:', err);
+        // Login fue exitoso en BD — el usuario queda autenticado con estado por defecto
       }
-      setGame(hydrated);
-      setDaily(d);
-      setMiniGame(mg);
-      gameRef.current = hydrated;
-      dailyRef.current = d;
-      miniGameRef.current = mg;
-      updateLeaderboard(key, hydrated);
     }
     return result;
   }, []);
@@ -193,7 +233,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       // Bono de bienvenida: 100 gemas al registrarse
       const hydrated = applyHeartRefill(g);
       const gWithBonus = { ...hydrated, gems: hydrated.gems + 100 };
-      await saveGameState(key, gWithBonus);
+      await saveGameStateWithRetry(key, gWithBonus);
       setGame(gWithBonus);
       setDaily(d);
       setMiniGame(mg);
@@ -215,16 +255,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!u) return;
       setGame(next);
       gameRef.current = next;
-      saveGameState(u, next).catch(() => {});
+      saveGameStateWithRetry(u, next);
     }, 60_000);
 
     return () => clearInterval(timer);
   }, [username]);
 
   const logout = useCallback(async () => {
-    await logoutUser();
-    setUsername(null);
-    usernameRef.current = null;
+    try {
+      await logoutUser();
+    } catch (err) {
+      console.error('[GameContext] logoutUser failed:', err);
+    } finally {
+      setUsername(null);
+      usernameRef.current = null;
+    }
   }, []);
 
   // ─── Juego ───────────────────────────────────────────────────────────────
@@ -236,8 +281,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const next = { ...current, ...patch };
     setGame(next);
     gameRef.current = next;
-    await saveGameState(u, next);
-  }, []);
+    await saveGameStateWithRetry(u, next);
+  }, [saveGameStateWithRetry]);
 
   const completeLevel = useCallback(async (
     levelId: number,
@@ -246,11 +291,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     elapsedMs?: number,
     score?: number,
   ): Promise<{ wasChallenge: boolean; challengeBonus: { xp: number; gems: number } }> => {
-    const u = usernameRef.current;
-    if (!u) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
+    // Prevent concurrent execution
+    if (isProcessingLevelRef.current) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
+    isProcessingLevelRef.current = true;
 
-    // SIEMPRE leer el estado más reciente desde el ref (no desde el closure)
-    const current = gameRef.current;
+    try {
+      const u = usernameRef.current;
+      if (!u) return { wasChallenge: false, challengeBonus: { xp: 0, gems: 0 } };
+
+      // SIEMPRE leer el estado más reciente desde el ref (no desde el closure)
+      const current = gameRef.current;
 
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date();
@@ -311,39 +361,42 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         newLastChallengeDate = today;
 
-        const { getLevelData } = await import('@/data/lessons');
         newChallengeHistory = [
-          { date: today, levelId: challenge.levelId, levelName: getLevelData(challenge.levelId).name, xpEarned: challenge.xpEarned, gemsEarned: challenge.gemsEarned },
+          { date: today, levelId: challenge.levelId, levelName: getLevelData(challenge.levelId)?.name ?? `Nivel ${challenge.levelId}`, xpEarned: challenge.xpEarned, gemsEarned: challenge.gemsEarned },
           ...newChallengeHistory,
         ].slice(0, 7);
       }
-    } catch {
+    } catch (err) {
       // No interrumpir el flujo si falla la lógica del desafío
+      console.warn('[GameContext] daily challenge logic failed:', err);
     }
 
-    const next: GameState = {
-      ...current,
-      xp: current.xp + xpEarned + bonusXp,
-      gems: current.gems + gemsEarned + bonusGems,
-      streak: newStreak,
-      hearts: Math.min(current.hearts + 1, 5),
-      maxUnlockedLevel: Math.max(current.maxUnlockedLevel, levelId + 1),
-      levelProgress: {
-        ...current.levelProgress,
-        [levelId]: { completed: true, score: score ?? 100 },
-      },
-      levelCompletedDates: updatedDates,
-      levelBestTimes: updatedBestTimes,
-      dailyChallengesCompleted: newDailyChallengesCompleted,
-      challengeStreak: newChallengeStreak,
-      lastChallengeDate: newLastChallengeDate,
-      challengeHistory: newChallengeHistory,
-    };
-    setGame(next);
-    gameRef.current = next;
-    await saveGameState(u, next);
-    return { wasChallenge, challengeBonus: { xp: bonusXp, gems: bonusGems } };
-  }, []);
+      const next: GameState = {
+        ...current,
+        xp: current.xp + xpEarned + bonusXp,
+        gems: current.gems + gemsEarned + bonusGems,
+        streak: newStreak,
+        hearts: Math.min(current.hearts + 1, 5),
+        maxUnlockedLevel: Math.max(current.maxUnlockedLevel, levelId + 1),
+        levelProgress: {
+          ...current.levelProgress,
+          [levelId]: { completed: true, score: score ?? 100 },
+        },
+        levelCompletedDates: updatedDates,
+        levelBestTimes: updatedBestTimes,
+        dailyChallengesCompleted: newDailyChallengesCompleted,
+        challengeStreak: newChallengeStreak,
+        lastChallengeDate: newLastChallengeDate,
+        challengeHistory: newChallengeHistory,
+      };
+      setGame(next);
+      gameRef.current = next;
+      await saveGameStateWithRetry(u, next);
+      return { wasChallenge, challengeBonus: { xp: bonusXp, gems: bonusGems } };
+    } finally {
+      isProcessingLevelRef.current = false;
+    }
+  }, [saveGameStateWithRetry]);
 
   const loseHeart = useCallback(async () => {
     const u = usernameRef.current;
@@ -353,13 +406,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const next = {
       ...current,
       hearts: nextHearts,
+      streak: nextHearts === 0 ? 0 : current.streak, // Reset streak if hearts reach 0 (user fails)
       lastHeartRefill:
         current.hearts >= 5 && nextHearts < 5 ? new Date().toISOString() : current.lastHeartRefill,
     };
     setGame(next);
     gameRef.current = next;
-    await saveGameState(u, next);
-  }, []);
+    await saveGameStateWithRetry(u, next);
+  }, [saveGameStateWithRetry]);
 
   const spendGems = useCallback(async (amount: number): Promise<boolean> => {
     const u = usernameRef.current;
@@ -368,9 +422,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const next = { ...current, gems: current.gems - amount };
     setGame(next);
     gameRef.current = next;
-    await saveGameState(u, next);
+    await saveGameStateWithRetry(u, next);
     return true;
-  }, []);
+  }, [saveGameStateWithRetry]);
 
   const addGems = useCallback(async (amount: number): Promise<void> => {
     const u = usernameRef.current;
@@ -380,8 +434,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const next = { ...current, gems: current.gems + amount };
     setGame(next);
     gameRef.current = next;
-    await saveGameState(u, next);
-  }, []);
+    await saveGameStateWithRetry(u, next);
+  }, [saveGameStateWithRetry]);
 
   const saveLevelErrors = useCallback(async (levelId: number, errorWords: string[]) => {
     const u = usernameRef.current;
@@ -395,8 +449,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
     setGame(next);
     gameRef.current = next;
-    await saveGameState(u, next);
-  }, []);
+    await saveGameStateWithRetry(u, next);
+  }, [saveGameStateWithRetry]);
 
   // ─── Tarea Diaria ────────────────────────────────────────────────────────
 
@@ -475,8 +529,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
     setGame(nextGame);
     gameRef.current = nextGame;
-    await saveGameState(u, nextGame);
-  }, []);
+    await saveGameStateWithRetry(u, nextGame);
+  }, [saveGameStateWithRetry]);
 
   // ─── Minijuego ───────────────────────────────────────────────────────────
 
@@ -497,16 +551,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const nextGame: GameState = { ...current, gems: current.gems + 10 };
     setGame(nextGame);
     gameRef.current = nextGame;
-    await saveGameState(u, nextGame);
-  }, []);
+    await saveGameStateWithRetry(u, nextGame);
+  }, [saveGameStateWithRetry]);
 
   const renameUsername = useCallback(async (newName: string): Promise<{ ok: boolean; error?: string }> => {
     const u = usernameRef.current;
     if (!u) return { ok: false, error: 'No hay sesión activa' };
     const result = await renameUser(u, newName);
     if (result.ok) {
-      setUsername(newName.trim());
-      usernameRef.current = newName.trim();
+      // Usar lowercase para coincidir con la clave de BD que usa renameUser
+      const newKey = newName.trim().toLowerCase();
+      setUsername(newKey);
+      usernameRef.current = newKey;
     }
     return result;
   }, []);
@@ -522,9 +578,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const nextGame: GameState = { ...current, gems: current.gems + 25 };
     setGame(nextGame);
     gameRef.current = nextGame;
-    await saveGameState(u, nextGame);
+    await saveGameStateWithRetry(u, nextGame);
     await markDailyBonusClaimed(u);
     return true;
+  }, [saveGameStateWithRetry]);
+
+  // ─── Utilidades ──────────────────────────────────────────────────────────
+
+  const clearSaveError = useCallback(() => {
+    setHasSaveError(false);
   }, []);
 
   // ─── Render ────────────────────────────────────────────────────────────────────────────────────
@@ -533,7 +595,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     <GameContext.Provider value={{
       username, isLoading,
       login, register, logout, renameUsername,
-      game, updateGame, completeLevel, saveLevelErrors, loseHeart, spendGems, addGems, claimDailyBonus,
+      game, updateGame, completeLevel, saveLevelErrors, loseHeart, spendGems, addGems, claimDailyBonus, hasSaveError, clearSaveError,
       daily, markWordLearned, finishDaily, resetDailyIfNeeded,
       miniGame, addMiniGameTime, winMiniGame,
     }}>

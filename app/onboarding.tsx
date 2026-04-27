@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -224,11 +223,13 @@ export default function OnboardingScreen() {
   useEffect(() => {
     hasExistingUsers().then(hasUsers => {
       setShowWelcomeBack(hasUsers);
+    }).catch(() => {
+      setShowWelcomeBack(false);
     });
   }, []);
 
   const handleWelcomeBackContinue = useCallback(async () => {
-    await markOnboardingDone();
+    try { await markOnboardingDone(); } catch (err) { console.warn('[Onboarding] markOnboardingDone failed:', err); }
     router.replace('/auth/login' as any);
   }, []);
 
@@ -238,13 +239,13 @@ export default function OnboardingScreen() {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
       setCurrentIndex(nextIndex);
     } else {
-      await markOnboardingDone();
+      try { await markOnboardingDone(); } catch (err) { console.warn('[Onboarding] markOnboardingDone failed:', err); }
       router.replace('/auth/login' as any);
     }
   }, [currentIndex]);
 
   const handleSkip = useCallback(async () => {
-    await markOnboardingDone();
+    try { await markOnboardingDone(); } catch (err) { console.warn('[Onboarding] markOnboardingDone failed:', err); }
     router.replace('/auth/login' as any);
   }, []);
 

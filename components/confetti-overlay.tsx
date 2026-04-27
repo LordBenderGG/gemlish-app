@@ -42,8 +42,13 @@ function ConfettiParticle({ particle }: { particle: Particle }) {
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(0);
   const rotate = useSharedValue(0);
+  const animStarted = useRef(false);
 
   useEffect(() => {
+    // Solo iniciar las animaciones una vez al montar
+    if (animStarted.current) return;
+    animStarted.current = true;
+
     opacity.value = withDelay(particle.delay, withTiming(1, { duration: 100 }));
     translateY.value = withDelay(
       particle.delay,
@@ -57,7 +62,7 @@ function ConfettiParticle({ particle }: { particle: Particle }) {
       particle.delay,
       withTiming(particle.rotation, { duration: particle.duration })
     );
-  }, [opacity, particle.delay, particle.duration, particle.drift, particle.rotation, rotate, translateX, translateY]);
+  }, []);
 
   const style = useAnimatedStyle(() => ({
     transform: [
@@ -91,13 +96,27 @@ interface ConfettiOverlayProps {
 }
 
 export function ConfettiOverlay({ visible }: ConfettiOverlayProps) {
-  const particles = useRef(generateParticles()).current;
+  const particles = useRef<Particle[]>([]);
+  const prevVisibleRef = useRef(false);
+
+  // Generar nuevas partículas solo cuando visible cambia de false a true
+  useEffect(() => {
+    if (visible && !prevVisibleRef.current) {
+      particles.current = generateParticles();
+    }
+    prevVisibleRef.current = visible;
+  }, [visible]);
 
   if (!visible) return null;
 
+  // Limitar a máximo 80 partículas para optimización
+  const particlesToRender = particles.current.length > 80
+    ? particles.current.slice(0, 80)
+    : particles.current;
+
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {particles.map(p => (
+      {particlesToRender.map(p => (
         <ConfettiParticle key={p.id} particle={p} />
       ))}
     </View>

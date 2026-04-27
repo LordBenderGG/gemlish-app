@@ -10,7 +10,7 @@
  * borrando datos — el progreso de los usuarios siempre se conserva.
  */
 
-import { getDb } from './database';
+import { getDb, initDatabase } from './database';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -52,6 +52,9 @@ export interface MiniGameState {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/**
+ * Hash de contraseña — función original del proyecto.
+ */
 function simpleHash(str: string): string {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -62,165 +65,216 @@ function simpleHash(str: string): string {
   return hash.toString(36);
 }
 
-// ─── Usuarios ────────────────────────────────────────────────────────────────
-
-export async function getUsers(): Promise<Record<string, UserProfile>> {
-  const db = getDb();
-  const rows = db.getAllSync<{ username: string; password_hash: string; created_at: string }>(
-    `SELECT username, password_hash, created_at FROM users`
-  );
-  const result: Record<string, UserProfile> = {};
-  for (const row of rows) {
-    result[row.username] = {
-      username: row.username,
-      passwordHash: row.password_hash,
-      createdAt: row.created_at,
-    };
-  }
-  return result;
+async function hashPassword(password: string): Promise<string> {
+  return simpleHash(password);
 }
 
+// ─── Usuarios ────────────────────────────────────────────────────────────────
+
 export async function registerUser(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
-  if (!username.trim() || username.length < 3) return { ok: false, error: 'El usuario debe tener al menos 3 caracteres' };
+  const trimmed = username.trim();
+  if (!trimmed || trimmed.length < 3) return { ok: false, error: 'El usuario debe tener al menos 3 caracteres' };
   if (!password || password.length < 4) return { ok: false, error: 'La contraseña debe tener al menos 4 caracteres' };
 
-  const db = getDb();
-  const key = username.toLowerCase().trim();
+  try {
+    // Garantizar que las tablas existan aunque initDatabase() haya fallado al arrancar
+    initDatabase();
 
-  const existing = db.getFirstSync<{ username: string }>(
-    `SELECT username FROM users WHERE username = ?`, [key]
-  );
-  if (existing) return { ok: false, error: 'Ese nombre de usuario ya existe' };
+    const db = getDb();
+    const key = trimmed.toLowerCase();
 
-  db.runSync(
-    `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)`,
-    [key, simpleHash(password), new Date().toISOString()]
-  );
+    const existing = db.getFirstSync<{ username: string }>(
+      `SELECT username FROM users WHERE username = ?`, [key]
+    );
+    if (existing) return { ok: false, error: 'Ese nombre de usuario ya existe' };
 
-  // Guardar sesión activa (id=1 siempre, una sola fila)
-  db.runSync(
-    `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
-    [key, key]
-  );
+    const hash = await hashPassword(password);
+    db.runSync(
+      `INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)`,
+      [key, hash, new Date().toISOString()]
+    );
 
-  return { ok: true };
+    // Guardar sesión activa (id=1 siempre, una sola fila)
+    db.runSync(
+      `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
+      [key, key]
+    );
+
+    return { ok: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[storage] registerUser failed:', msg);
+    return { ok: false, error: msg };
+  }
 }
 
 export async function loginUser(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
-  const db = getDb();
-  const key = username.toLowerCase().trim();
+  try {
+    initDatabase(); // Garantizar que las tablas existan
+    const db = getDb();
+    const key = username.toLowerCase().trim();
 
-  const user = db.getFirstSync<{ password_hash: string }>(
-    `SELECT password_hash FROM users WHERE username = ?`, [key]
-  );
-  if (!user) return { ok: false, error: 'Usuario no encontrado' };
-  if (user.password_hash !== simpleHash(password)) return { ok: false, error: 'Contraseña incorrecta' };
+    const user = db.getFirstSync<{ password_hash: string }>(
+      `SELECT password_hash FROM users WHERE username = ?`, [key]
+    );
+    if (!user) return { ok: false, error: 'Usuario no encontrado' };
 
-  // Guardar sesión activa (principal + respaldo)
-  db.runSync(
-    `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
-    [key, key]
-  );
+    const hash = await hashPassword(password);
+    if (user.password_hash !== hash) return { ok: false, error: 'Contraseña incorrecta' };
 
-  return { ok: true };
+    // Guardar sesión activa (principal + respaldo)
+    db.runSync(
+      `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
+      [key, key]
+    );
+
+    return { ok: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[storage] loginUser failed:', msg);
+    return { ok: false, error: msg };
+  }
 }
 
 export async function getCurrentUser(): Promise<string | null> {
-  const db = getDb();
-  const row = db.getFirstSync<{ username: string; username_bk: string }>(
-    `SELECT username, username_bk FROM session WHERE id = 1`
-  );
-  if (!row) return null;
-  // Si la columna principal está vacía (caso extremo), usar el respaldo
-  return row.username || row.username_bk || null;
+  try {
+    initDatabase();
+    const db = getDb();
+    const row = db.getFirstSync<{ username: string; username_bk: string }>(
+      `SELECT username, username_bk FROM session WHERE id = 1`
+    );
+    if (!row) return null;
+    // Si la columna principal está vacía (caso extremo), usar el respaldo
+    return row.username || row.username_bk || null;
+  } catch (err) {
+    console.error('[storage] getCurrentUser failed:', err);
+    return null;
+  }
 }
 
 export async function logoutUser(): Promise<void> {
-  const db = getDb();
-  // Antes de borrar la sesión, guardar el último username para pre-llenar el login
-  const row = db.getFirstSync<{ username: string }>(`SELECT username FROM session WHERE id = 1`);
-  if (row?.username) {
-    db.runSync(
-      `INSERT OR REPLACE INTO db_meta (key, value) VALUES ('last_username', ?)`,
-      [row.username]
-    );
+  try {
+    initDatabase();
+    const db = getDb();
+    // Antes de borrar la sesión, guardar el último username para pre-llenar el login
+    const row = db.getFirstSync<{ username: string }>(`SELECT username FROM session WHERE id = 1`);
+    if (row?.username) {
+      db.runSync(
+        `INSERT OR REPLACE INTO db_meta (key, value) VALUES ('last_username', ?)`,
+        [row.username]
+      );
+    }
+    // Borrar la sesión activa — el usuario y su progreso permanecen intactos en la BD
+    db.runSync(`DELETE FROM session WHERE id = 1`);
+  } catch (err) {
+    console.error('[storage] logoutUser failed:', err);
   }
-  // Borrar la sesión activa — el usuario y su progreso permanecen intactos en la BD
-  db.runSync(`DELETE FROM session WHERE id = 1`);
 }
 
 /** Devuelve el último username que inició sesión (para pre-llenar el campo de login) */
 export async function getLastUsername(): Promise<string | null> {
-  const db = getDb();
-  const row = db.getFirstSync<{ value: string }>(
-    `SELECT value FROM db_meta WHERE key = 'last_username'`
-  );
-  return row?.value ?? null;
+  try {
+    initDatabase();
+    const db = getDb();
+    const row = db.getFirstSync<{ value: string }>(
+      `SELECT value FROM db_meta WHERE key = 'last_username'`
+    );
+    return row?.value ?? null;
+  } catch (err) {
+    console.error('[storage] getLastUsername failed:', err);
+    return null;
+  }
 }
 
 export async function hasExistingUsers(): Promise<boolean> {
-  const db = getDb();
-  const row = db.getFirstSync<{ count: number }>(
-    `SELECT COUNT(*) as count FROM users`
-  );
-  return (row?.count ?? 0) > 0;
+  try {
+    initDatabase();
+    const db = getDb();
+    const row = db.getFirstSync<{ count: number }>(
+      `SELECT COUNT(*) as count FROM users`
+    );
+    return (row?.count ?? 0) > 0;
+  } catch (err) {
+    console.error('[storage] hasExistingUsers failed:', err);
+    return false;
+  }
 }
+
+// Solo letras (incluyendo acentos y ñ), números, puntos, guiones y guiones bajos.
+// Bloquea emojis, caracteres de control, espacios internos y símbolos raros.
+const VALID_USERNAME_RE = /^[a-zA-ZÀ-ÿ0-9._-]+$/;
 
 export async function renameUser(oldUsername: string, newUsername: string): Promise<{ ok: boolean; error?: string }> {
   const trimmed = newUsername.trim();
   if (!trimmed || trimmed.length < 3) return { ok: false, error: 'El nombre debe tener al menos 3 caracteres' };
   if (trimmed.length > 20) return { ok: false, error: 'El nombre no puede superar 20 caracteres' };
+  if (!VALID_USERNAME_RE.test(trimmed)) return { ok: false, error: 'Solo se permiten letras, números, puntos, guiones y guiones bajos' };
 
   const db = getDb();
   const oldKey = oldUsername.toLowerCase();
   const newKey = trimmed.toLowerCase();
 
+  // Validaciones previas fuera de la transacción (solo lecturas)
   if (newKey !== oldKey) {
     const existing = db.getFirstSync<{ username: string }>(
       `SELECT username FROM users WHERE username = ?`, [newKey]
     );
     if (existing) return { ok: false, error: 'Ese nombre ya está en uso' };
   } else {
-    // Mismo key, solo actualizar display name — verificar si es igual
+    // Mismo key lowercase: el usuario quiere cambiar capitalización (ej. "juan" → "Juan")
+    // Verificar que el display name realmente cambiaría
     const current = db.getFirstSync<{ username: string }>(
       `SELECT username FROM users WHERE username = ?`, [oldKey]
     );
     if (current?.username === trimmed) return { ok: false, error: 'Es el mismo nombre' };
   }
 
-  if (newKey !== oldKey) {
-    // Copiar datos de juego al nuevo username
-    const gameRow = db.getFirstSync<{ data: string }>(`SELECT data FROM game_state WHERE username = ?`, [oldKey]);
-    const dailyRow = db.getFirstSync<{ data: string }>(`SELECT data FROM daily_state WHERE username = ?`, [oldKey]);
-    const miniRow = db.getFirstSync<{ data: string }>(`SELECT data FROM minigame_state WHERE username = ?`, [oldKey]);
+  // Toda la operación de escritura en una transacción atómica.
+  // Si cualquier runSync falla a mitad, SQLite revierte todo y el usuario
+  // no queda con datos inconsistentes (bug C-1 del reporte QA).
+  try {
+    db.withTransactionSync(() => {
+      if (newKey !== oldKey) {
+        // Leer datos existentes dentro de la transacción
+        const gameRow = db.getFirstSync<{ data: string }>(`SELECT data FROM game_state WHERE username = ?`, [oldKey]);
+        const dailyRow = db.getFirstSync<{ data: string }>(`SELECT data FROM daily_state WHERE username = ?`, [oldKey]);
+        const miniRow = db.getFirstSync<{ data: string }>(`SELECT data FROM minigame_state WHERE username = ?`, [oldKey]);
+        const oldUser = db.getFirstSync<{ password_hash: string; created_at: string }>(
+          `SELECT password_hash, created_at FROM users WHERE username = ?`, [oldKey]
+        );
 
-    if (gameRow) db.runSync(`INSERT OR REPLACE INTO game_state (username, data, updated_at) VALUES (?, ?, datetime('now'))`, [newKey, gameRow.data]);
-    if (dailyRow) db.runSync(`INSERT OR REPLACE INTO daily_state (username, data, updated_at) VALUES (?, ?, datetime('now'))`, [newKey, dailyRow.data]);
-    if (miniRow) db.runSync(`INSERT OR REPLACE INTO minigame_state (username, data, updated_at) VALUES (?, ?, datetime('now'))`, [newKey, miniRow.data]);
+        // Copiar datos al nuevo username
+        if (gameRow) db.runSync(`INSERT OR REPLACE INTO game_state (username, data, updated_at) VALUES (?, ?, datetime('now'))`, [newKey, gameRow.data]);
+        if (dailyRow) db.runSync(`INSERT OR REPLACE INTO daily_state (username, data, updated_at) VALUES (?, ?, datetime('now'))`, [newKey, dailyRow.data]);
+        if (miniRow) db.runSync(`INSERT OR REPLACE INTO minigame_state (username, data, updated_at) VALUES (?, ?, datetime('now'))`, [newKey, miniRow.data]);
+        if (oldUser) {
+          db.runSync(
+            `INSERT OR REPLACE INTO users (username, password_hash, created_at) VALUES (?, ?, ?)`,
+            [newKey, oldUser.password_hash, oldUser.created_at]
+          );
+        }
 
-    // Insertar nuevo usuario con los mismos datos
-    const oldUser = db.getFirstSync<{ password_hash: string; created_at: string }>(
-      `SELECT password_hash, created_at FROM users WHERE username = ?`, [oldKey]
-    );
-    if (oldUser) {
+        // Eliminar registros del key anterior
+        db.runSync(`DELETE FROM users WHERE username = ?`, [oldKey]);
+        db.runSync(`DELETE FROM game_state WHERE username = ?`, [oldKey]);
+        db.runSync(`DELETE FROM daily_state WHERE username = ?`, [oldKey]);
+        db.runSync(`DELETE FROM minigame_state WHERE username = ?`, [oldKey]);
+      } else {
+        // Mismo key: solo actualizar el display name en la tabla users (bug C-2 del reporte QA:
+        // antes este bloque no ejecutaba ningún UPDATE y retornaba ok:true sin cambiar nada)
+        db.runSync(`UPDATE users SET username = ? WHERE username = ?`, [trimmed, oldKey]);
+      }
+
+      // Actualizar sesión activa con el nuevo nombre
       db.runSync(
-        `INSERT OR REPLACE INTO users (username, password_hash, created_at) VALUES (?, ?, ?)`,
-        [newKey, oldUser.password_hash, oldUser.created_at]
+        `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
+        [newKey, newKey]
       );
-    }
-
-    // Eliminar datos del key anterior
-    db.runSync(`DELETE FROM users WHERE username = ?`, [oldKey]);
-    db.runSync(`DELETE FROM game_state WHERE username = ?`, [oldKey]);
-    db.runSync(`DELETE FROM daily_state WHERE username = ?`, [oldKey]);
-    db.runSync(`DELETE FROM minigame_state WHERE username = ?`, [oldKey]);
+    });
+  } catch (err) {
+    console.warn('[storage] renameUser transaction failed:', err);
+    return { ok: false, error: 'Error al renombrar. Intenta de nuevo.' };
   }
-
-  // Actualizar sesión activa
-  db.runSync(
-    `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
-    [newKey, newKey]
-  );
 
   return { ok: true };
 }

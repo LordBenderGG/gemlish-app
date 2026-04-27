@@ -12,6 +12,32 @@ buildscript {
   }
 }
 
+// Force AGP 8.11.0 in every subproject's buildscript classpath.
+//
+// Several autlinked React Native libraries (gesture-handler, screens,
+// safe-area-context, svg, …) ship their own buildscript block with an
+// older AGP version (7.x / 8.2 / 8.10).  When Gradle resolves those
+// classpaths in the same daemon that already has AGP 8.11.0 loaded,
+// the old JARs are added to the classloader and the Android plugin can
+// no longer register its variants properly.  AGP 8.11.0 then requires
+// the AgpVersionAttr attribute on every cross-project variant; because
+// the libraries built with the old plugin never emit it, the consumer
+// sees "No variants exist" for every library project.
+//
+// gradle.beforeProject fires before each subproject's build script
+// (including its own buildscript block) is evaluated, so placing the
+// resolutionStrategy here ensures the old AGP coordinates are silently
+// upgraded to 8.11.0 before the classpath is assembled.
+gradle.beforeProject { proj ->
+  if (proj.path != ':') {
+    proj.buildscript.configurations.all {
+      resolutionStrategy {
+        force 'com.android.tools.build:gradle:8.11.0'
+      }
+    }
+  }
+}
+
 allprojects {
   repositories {
     google()

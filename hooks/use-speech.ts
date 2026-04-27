@@ -27,8 +27,8 @@ export function useSpeech() {
       // Stop any current speech first (await is important on Android)
       await Speech.stop();
 
-      // Small delay to ensure Android TTS engine is ready
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Small delay to ensure Android TTS engine is ready (reducido: 50ms suficiente)
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       if (!isMountedRef.current) return;
 

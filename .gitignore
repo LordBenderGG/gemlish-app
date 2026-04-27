@@ -32,6 +32,11 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env.local
+
+# Credenciales de firma Android — contienen contraseñas del keystore en texto plano.
+# NUNCA subir este archivo a version control.
+credentials.json
 
 # typescript
 *.tsbuildinfo

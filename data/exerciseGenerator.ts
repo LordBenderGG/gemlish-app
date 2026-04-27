@@ -1,4 +1,5 @@
 import { getLevelData, getLevelIcon, Word } from './lessons';
+import { shuffleArray } from '@/lib/utils';
 
 export type ExerciseType =
   | 'multiple-choice'
@@ -91,14 +92,12 @@ function removeAccents(str: string): string {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+/** Escapa caracteres especiales de regex para búsqueda literal */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+// shuffleArray importado desde lib/utils.ts (fuente única de verdad)
 
 /**
  * Obtiene 3 palabras incorrectas del MISMO nivel para usar como distractores.
@@ -188,7 +187,7 @@ function buildFillBlankExercise(
     sentenceEs = word.exampleEs;
   }
 
-  const regex = new RegExp(`\\b${word.word}\\b`, 'i');
+  const regex = new RegExp(`\\b${escapeRegExp(word.word)}\\b`, 'i');
   const match = sentence.match(regex);
 
   let sentenceBefore = '';
@@ -198,8 +197,18 @@ function buildFillBlankExercise(
     sentenceBefore = sentence.substring(0, match.index);
     sentenceAfter = sentence.substring(match.index + match[0].length);
   } else {
-    sentenceBefore = sentence + ' ';
-    sentenceAfter = '';
+    // Fallback: búsqueda literal case-insensitive sin word boundaries
+    const lowerSentence = sentence.toLowerCase();
+    const lowerWord = word.word.toLowerCase();
+    const fallbackIdx = lowerSentence.indexOf(lowerWord);
+    if (fallbackIdx !== -1) {
+      sentenceBefore = sentence.substring(0, fallbackIdx);
+      sentenceAfter = sentence.substring(fallbackIdx + word.word.length);
+    } else {
+      // La palabra no aparece en el ejemplo: colocar el hueco al final de forma segura
+      sentenceBefore = sentence;
+      sentenceAfter = '';
+    }
   }
 
   // Opciones incorrectas: SOLO palabras del mismo nivel

@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
@@ -14,6 +13,7 @@ import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { useFocusEffect } from 'expo-router';
 import { kvGetJson, kvSetJson } from '@/lib/local-kv';
+import { shuffleArray } from '@/lib/utils';
 
 // ─── SM-2 Repaso Espaciado ────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ function WordCard({ word, isLearned, onLearn }: WordCardProps) {
       </View>
       <Text style={styles.wordTranslation}>{word.translation}</Text>
       <View style={styles.exampleBox}>
-        <Text style={styles.exampleEn}>&ldquo;{word.example}&rdquo;</Text>
+        <Text style={styles.exampleEn}>“{word.example}”</Text>
         <Text style={styles.exampleEs}>{word.exampleEs}</Text>
       </View>
       <TouchableOpacity
@@ -109,14 +109,7 @@ function WordCard({ word, isLearned, onLearn }: WordCardProps) {
 
 // ─── Mini Quiz ────────────────────────────────────────────────────────────────
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// shuffleArray importado desde lib/utils.ts (fuente única de verdad)
 
 interface QuizQuestion {
   word: Word;
@@ -177,10 +170,15 @@ function MiniQuiz({ words, onComplete }: MiniQuizProps) {
 
   const q = questions[idx];
 
-  // Guard: si no hay preguntas (edge case), completar inmediatamente
+  // Guard: si no hay preguntas desde el principio (words vacío), completar con 0.
+  // Se usa questions.length en lugar de `q` para evitar que el effect se dispare
+  // cuando idx avanza al final de la última pregunta — en ese caso handleSelect
+  // ya llamó onComplete con el score real, y llamarlo de nuevo con 0 sería incorrecto.
   useEffect(() => {
-    if (!q) onComplete(0);
-  }, [q, onComplete]);
+    if (questions.length === 0) onComplete(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intencionalmente solo en mount: questions es estable (useMemo) y onComplete también.
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!q) {
     return null;
@@ -598,7 +596,7 @@ function StudyTabsView({
               autoCapitalize="none"
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear}>
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Text style={{ color: '#94A3B8', fontSize: 16 }}>✕</Text>
               </TouchableOpacity>
             )}
@@ -617,7 +615,7 @@ function StudyTabsView({
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
               <Text style={{ fontSize: 48, marginBottom: 16 }}>🔍</Text>
               <Text style={{ fontSize: 16, color: '#64748B', textAlign: 'center' }}>
-                No se encontró &ldquo;{searchQuery}&rdquo;
+                No se encontró “{searchQuery}”
               </Text>
             </View>
           ) : (
@@ -691,7 +689,7 @@ function SpacedReviewPhase({
             <View>
               <Text style={styles.spacedTranslation}>{word.translation}</Text>
               <View style={styles.exampleBox}>
-                <Text style={styles.exampleEn}>&ldquo;{word.example}&rdquo;</Text>
+                <Text style={styles.exampleEn}>“{word.example}”</Text>
                 <Text style={styles.exampleEs}>{word.exampleEs}</Text>
               </View>
               <Text style={styles.rateLabel}>¿Qué tan bien la sabías?</Text>
@@ -780,6 +778,8 @@ const styles = StyleSheet.create({
   completeBtn: {
     backgroundColor: '#4ADE80', borderRadius: 14, paddingVertical: 16,
     alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   completeBtnDisabled: { backgroundColor: '#E2E8F0' },
   completeBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
@@ -791,6 +791,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'center',
     width: '100%',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   doneBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700', textAlign: 'center' },
   // Done
@@ -826,6 +828,8 @@ const styles = StyleSheet.create({
   revealBtn: {
     backgroundColor: '#EFF6FF', borderRadius: 12, paddingVertical: 14,
     alignItems: 'center', borderWidth: 1, borderColor: '#BFDBFE',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   revealBtnText: { color: '#4F46E5', fontSize: 16, fontWeight: '700' },
   rateLabel: { fontSize: 14, color: '#64748B', textAlign: 'center', marginVertical: 12 },
@@ -833,6 +837,8 @@ const styles = StyleSheet.create({
   rateBtn: {
     flex: 1, borderRadius: 12, paddingVertical: 12,
     alignItems: 'center', borderWidth: 1,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   rateBtnEmoji: { fontSize: 24, marginBottom: 4 },
   rateBtnText: { fontSize: 11, fontWeight: '700', textAlign: 'center' },
@@ -858,5 +864,5 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1, paddingVertical: 12, fontSize: 15, color: '#1E293B',
   },
-  searchClear: { padding: 4 },
+  searchClear: { minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'center' },
 });

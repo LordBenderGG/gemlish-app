@@ -11,6 +11,7 @@ import {
   type Achievement, type AchievementStats,
 } from '@/lib/achievements';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
+import { getPracticeHistory, type PracticeSession } from '@/lib/practice-history';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -83,16 +84,20 @@ export default function AchievementsScreen() {
   const { username, game, daily } = useGame();
   const [dates, setDates] = useState<Record<string, string>>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [practiceHistory, setPracticeHistory] = useState<PracticeSession[]>([]);
 
   useEffect(() => {
     if (username) {
-      getAchievementDates(username).then(setDates);
+      getAchievementDates(username).then(setDates).catch(err => console.warn('[Achievements] getAchievementDates failed:', err));
+      getPracticeHistory(username).then(setPracticeHistory).catch(err => console.warn('[Achievements] getPracticeHistory failed:', err));
     }
   }, [username]);
 
   const stats: AchievementStats = useMemo(() => {
-    const levelsCompleted = Math.max(0, game.maxUnlockedLevel - 1);
-    const totalWordsLearned = Object.values(daily.learnedWords).filter(Boolean).length;
+    // Usar el mismo cálculo que profile.tsx y use-pending-achievements.ts
+    // para que la evaluación de logros sea consistente en toda la app.
+    const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+    const totalWordsLearned = Object.keys(daily.allLearnedWords ?? {}).length;
     return {
       levelsCompleted,
       streak: game.streak,
@@ -100,9 +105,9 @@ export default function AchievementsScreen() {
       gems: game.gems,
       xp: game.xp,
       totalDaysCompleted: daily.totalDaysCompleted ?? 0,
-      practiceSessionsCompleted: 0,
+      practiceSessionsCompleted: practiceHistory.length,
     };
-  }, [game, daily]);
+  }, [game, daily, practiceHistory]);
 
   const unlockedIds = useMemo(
     () => new Set(ACHIEVEMENTS.filter(a => a.check(stats)).map(a => a.id)),

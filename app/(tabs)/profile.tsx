@@ -1,9 +1,8 @@
-'use client';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  StatusBar, Alert, Switch, Modal, FlatList, Platform, Share, TextInput,
+  StatusBar, Alert, Switch, Modal, Platform, Share, TextInput,
 } from 'react-native';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { router } from 'expo-router';
@@ -19,6 +18,7 @@ import {
 } from '@/lib/practice-history';
 import { kvGetJson, kvGet, kvSet, kvSetJson } from '@/lib/local-kv';
 import { AdBanner } from '@/components/AdBanner';
+import { STRINGS } from '@/constants/strings';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
@@ -61,168 +61,62 @@ function AchievementCard({ achievement, unlocked, username }: { achievement: Ach
   );
 }
 
-// ─── Selector de Hora ─────────────────────────────────────────────────────────
-
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const MINUTES = [0, 15, 30, 45];
-
-function TimePickerModal({
-  visible,
-  hour,
-  minute,
-  onConfirm,
-  onClose,
-}: {
-  visible: boolean;
-  hour: number;
-  minute: number;
-  onConfirm: (h: number, m: number) => void;
-  onClose: () => void;
-}) {
-  const [selHour, setSelHour] = useState(hour);
-  const [selMin, setSelMin] = useState(minute);
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalBox}>
-          <Text style={styles.modalTitle}>⏰ Hora del Recordatorio</Text>
-          <Text style={styles.modalSubtitle}>Recibirás una notificación diaria a esta hora</Text>
-
-          <View style={styles.pickerRow}>
-            {/* Horas */}
-            <View style={styles.pickerCol}>
-              <Text style={styles.pickerLabel}>Hora</Text>
-              <FlatList
-                data={HOURS}
-                keyExtractor={String}
-                style={styles.pickerList}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[styles.pickerItem, selHour === item && styles.pickerItemSelected]}
-                    onPress={() => setSelHour(item)}
-                  >
-                    <Text style={[styles.pickerItemText, selHour === item && styles.pickerItemTextSelected]}>
-                      {String(item).padStart(2, '0')}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-
-            <Text style={styles.pickerColon}>:</Text>
-
-            {/* Minutos */}
-            <View style={styles.pickerCol}>
-              <Text style={styles.pickerLabel}>Min</Text>
-              <FlatList
-                data={MINUTES}
-                keyExtractor={String}
-                style={styles.pickerList}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[styles.pickerItem, selMin === item && styles.pickerItemSelected]}
-                    onPress={() => setSelMin(item)}
-                  >
-                    <Text style={[styles.pickerItemText, selMin === item && styles.pickerItemTextSelected]}>
-                      {String(item).padStart(2, '0')}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </View>
-
-          {/* Preview */}
-          <View style={styles.timePreview}>
-            <Text style={styles.timePreviewText}>
-              {String(selHour).padStart(2, '0')}:{String(selMin).padStart(2, '0')} hrs
-            </Text>
-          </View>
-
-          <View style={styles.modalBtns}>
-            <TouchableOpacity style={styles.modalBtnCancel} onPress={onClose}>
-              <Text style={styles.modalBtnCancelText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalBtnConfirm} onPress={() => onConfirm(selHour, selMin)}>
-              <Text style={styles.modalBtnConfirmText}>Guardar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // ─── Sección de Notificaciones ────────────────────────────────────────────────
 
 function NotificationsSection() {
-  const { settings, loading, enableNotifications, disableNotifications, updateTime } = useNotifications();
-  const [showPicker, setShowPicker] = useState(false);
+  const { settings, loading, enableNotifications, disableNotifications } = useNotifications();
   const [saving, setSaving] = useState(false);
-
-  const formatTime = (h: number, m: number) =>
-    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} hrs`;
+  // useRef como guard síncrono para evitar llamadas concurrentes bajo tap rápido
+  const savingRef = useRef(false);
 
   const handleToggle = useCallback(async (value: boolean) => {
-    if (saving) return;
+    if (savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
-    if (value) {
-      const ok = await enableNotifications(settings.hour, settings.minute);
-      if (!ok) {
-        Alert.alert(
-          '🔔 Permisos necesarios',
-          'Para recibir recordatorios de racha, activa las notificaciones en Configuración del sistema.',
-          [{ text: 'Entendido' }]
-        );
+    try {
+      if (value) {
+        const result = await enableNotifications();
+        if (result === 'permission_denied') {
+          Alert.alert(
+            'Permiso de notificaciones',
+            'Para activar el recordatorio, habilita las notificaciones de Gemlish en los Ajustes del sistema.',
+            [
+              { text: 'Abrir Ajustes', onPress: () => { const { Linking } = require('react-native'); Linking.openSettings(); } },
+              { text: STRINGS.CANCELAR, style: 'cancel' },
+            ]
+          );
+        } else if (result === 'schedule_failed') {
+          Alert.alert(
+            'No se pudo activar',
+            'Ocurrió un error al programar el recordatorio. Intenta desinstalar y reinstalar la app.',
+            [{ text: 'OK' }]
+          );
+        }
+      } else {
+        await disableNotifications();
       }
-    } else {
-      await disableNotifications();
+    } catch (err) {
+      console.warn('[Profile] toggle error:', err);
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
-    setSaving(false);
-  }, [saving, settings, enableNotifications, disableNotifications]);
-
-  const handleTimeConfirm = useCallback(async (h: number, m: number) => {
-    setShowPicker(false);
-    setSaving(true);
-    await updateTime(h, m);
-    setSaving(false);
-  }, [updateTime]);
+  }, [enableNotifications, disableNotifications]);
 
   if (loading) return null;
 
   return (
     <View style={styles.notifSection}>
-      <Text style={styles.sectionTitle}>🔔 Recordatorio de Racha</Text>
-
-      {/* Banner informativo */}
-      <View style={[styles.notifBanner, settings.enabled && styles.notifBannerActive]}>
-        <Text style={styles.notifBannerEmoji}>{settings.enabled ? '🔥' : '💤'}</Text>
-        <View style={styles.notifBannerText}>
-          <Text style={[styles.notifBannerTitle, settings.enabled && { color: '#FBBF24' }]}>
-            {settings.enabled
-              ? `Recordatorio activo a las ${formatTime(settings.hour, settings.minute)}`
-              : 'Protégete de perder tu racha'}
-          </Text>
-          <Text style={styles.notifBannerSub}>
-            {settings.enabled
-              ? 'Te avisaremos si no has completado tu tarea diaria'
-              : 'Activa el recordatorio y elige a qué hora quieres que te avisemos'}
-          </Text>
-        </View>
-      </View>
+      <Text style={styles.sectionTitle}>🔔 Recordatorio Diario</Text>
 
       <View style={styles.notifCard}>
-        {/* Toggle principal */}
         <View style={styles.notifRow}>
           <View style={styles.notifRowLeft}>
-            <Text style={styles.notifRowTitle}>Activar recordatorio diario</Text>
+            <Text style={styles.notifRowTitle}>Recordatorio de las 8:00 AM</Text>
             <Text style={styles.notifRowSub}>
               {settings.enabled
-                ? `Aviso a las ${formatTime(settings.hour, settings.minute)}`
-                : 'Sin recordatorio configurado'}
+                ? 'Notificación activa · todos los días a las 8:00 AM'
+                : 'Recibe un aviso cada mañana para no perder tu racha'}
             </Text>
           </View>
           <Switch
@@ -233,33 +127,7 @@ function NotificationsSection() {
             disabled={saving}
           />
         </View>
-
-        {/* Selector de hora — siempre visible */}
-        <TouchableOpacity
-          style={[styles.timeRow, !settings.enabled && styles.timeRowDisabled]}
-          onPress={() => setShowPicker(true)}
-          activeOpacity={0.8}
-        >
-          <View style={styles.timeRowLeft}>
-            <Text style={styles.timeRowEmoji}>⏰</Text>
-            <View>
-              <Text style={styles.timeRowTitle}>Hora del recordatorio</Text>
-              <Text style={[styles.timeRowValue, settings.enabled && { color: '#FBBF24' }]}>
-                {formatTime(settings.hour, settings.minute)}
-              </Text>
-            </View>
-          </View>
-          <Text style={styles.timeRowArrow}>›</Text>
-        </TouchableOpacity>
       </View>
-
-      <TimePickerModal
-        visible={showPicker}
-        hour={settings.hour}
-        minute={settings.minute}
-        onConfirm={handleTimeConfirm}
-        onClose={() => setShowPicker(false)}
-      />
     </View>
   );
 }
@@ -370,7 +238,7 @@ function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[
 const AVATAR_EMOJIS = [
   '🦊', '🐻', '🐸', '🦁', '🐼', '🐯', '🦋', '🐮',
   '🐶', '🐱', '🐧', '🐷', '🐺', '🦍', '🐢', '🦉',
-  '🐬', '🦈', '🐙', '🐮‍💨', '🦖', '🦒', '🦓', '🦚',
+  '🐬', '🦈', '🐙', '🦜', '🦖', '🦒', '🦓', '🦚',
 ];
 const AVATAR_KEY = '@gemlish_avatar';
 
@@ -480,6 +348,8 @@ export default function ProfileScreen() {
   const [newName, setNewName] = useState('');
   const [nameError, setNameError] = useState('');
   const [nameSaving, setNameSaving] = useState(false);
+  // useRef como guard síncrono para evitar doble-submit en handleSaveName
+  const nameSavingRef = useRef(false);
 
   useEffect(() => {
     kvGet(AVATAR_KEY).then(v => { if (v) setAvatar(v); });
@@ -498,7 +368,8 @@ export default function ProfileScreen() {
   }, [username]);
 
   const handleSaveName = useCallback(async () => {
-    if (nameSaving) return;
+    if (nameSavingRef.current) return;
+    nameSavingRef.current = true;
     setNameSaving(true);
     setNameError('');
     const result = await renameUsername(newName);
@@ -507,8 +378,9 @@ export default function ProfileScreen() {
     } else {
       setNameError(result.error || 'Error al guardar');
     }
+    nameSavingRef.current = false;
     setNameSaving(false);
-  }, [nameSaving, newName, renameUsername]);
+  }, [newName, renameUsername]);
 
   useEffect(() => {
     if (username) {
@@ -518,7 +390,7 @@ export default function ProfileScreen() {
 
   const stats: UserStats = useMemo(() => {
     const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
-    const totalWordsLearned = Object.values(daily.learnedWords).filter(Boolean).length;
+    const totalWordsLearned = Object.keys(daily.allLearnedWords ?? {}).length;
     return {
       levelsCompleted,
       streak: game.streak,
@@ -526,9 +398,9 @@ export default function ProfileScreen() {
       gems: game.gems,
       xp: game.xp,
       totalDaysCompleted: daily.totalDaysCompleted,
-      practiceSessionsCompleted: 0,
+      practiceSessionsCompleted: practiceHistory.length,
     };
-  }, [game, daily]);
+  }, [game, daily, practiceHistory]);
 
   const unlockedAchievements = useMemo(
     () => ACHIEVEMENTS.filter(a => a.check(stats)),
@@ -551,7 +423,7 @@ export default function ProfileScreen() {
       'Cerrar Sesión',
       '¿Estás seguro? Tu progreso está guardado en este dispositivo.',
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: STRINGS.CANCELAR, style: 'cancel' },
         { text: 'Cerrar Sesión', style: 'destructive', onPress: logout },
       ],
     );
@@ -875,7 +747,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B' },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   settingsBtn: {
-    width: 36, height: 36, borderRadius: 10,
+    width: 44, height: 44, borderRadius: 12,
     backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center',
     borderWidth: 1, borderColor: '#E2E8F0',
   },
@@ -1007,11 +879,15 @@ const styles = StyleSheet.create({
   modalBtnCancel: {
     flex: 1, paddingVertical: 14, borderRadius: 14,
     backgroundColor: '#E2E8F0', alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   modalBtnCancelText: { color: '#64748B', fontWeight: '700', fontSize: 15 },
   modalBtnConfirm: {
     flex: 1, paddingVertical: 14, borderRadius: 14,
     backgroundColor: '#38BDF8', alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   modalBtnConfirmText: { color: '#1E293B', fontWeight: '800', fontSize: 15 },
   // Logros
@@ -1038,7 +914,7 @@ const styles = StyleSheet.create({
   achieveDescLocked: { color: '#94A3B8' },
   achieveCheck: { fontSize: 18 },
   achieveShareBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: '#38BDF820', justifyContent: 'center', alignItems: 'center',
     borderWidth: 1, borderColor: '#38BDF840',
   },
@@ -1139,13 +1015,15 @@ const styles = StyleSheet.create({
   avatarModalClose: {
     backgroundColor: '#E2E8F0', borderRadius: 14,
     paddingVertical: 14, alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   avatarModalCloseText: { color: '#64748B', fontWeight: '700', fontSize: 15 },
   // Avatar edit button
   avatarEditBtn: {
     position: 'absolute', bottom: -4, right: -4,
     backgroundColor: '#38BDF8', borderRadius: 12,
-    width: 24, height: 24, justifyContent: 'center', alignItems: 'center',
+    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: '#FFFFFF',
   },
   avatarEditIcon: { fontSize: 12 },
@@ -1153,7 +1031,7 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   nameEditBtn: {
     backgroundColor: '#E2E8F0', borderRadius: 12,
-    width: 26, height: 26, justifyContent: 'center', alignItems: 'center',
+    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
   },
   nameEditBtnIcon: { fontSize: 12 },
   nameEditRow: {
@@ -1169,12 +1047,12 @@ const styles = StyleSheet.create({
   },
   nameEditSave: {
     backgroundColor: '#38BDF8', borderRadius: 10,
-    width: 34, height: 34, justifyContent: 'center', alignItems: 'center',
+    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
   },
   nameEditSaveText: { color: '#1E293B', fontSize: 18, fontWeight: '800' },
   nameEditCancel: {
     backgroundColor: '#E2E8F0', borderRadius: 10,
-    width: 34, height: 34, justifyContent: 'center', alignItems: 'center',
+    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
   },
   nameEditCancelText: { color: '#64748B', fontSize: 16, fontWeight: '700' },
   nameError: { fontSize: 12, color: '#EF4444', marginTop: 4, textAlign: 'center' },

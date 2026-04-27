@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
@@ -14,6 +13,7 @@ import { LESSONS } from '@/data/lessons';
 import type { Word } from '@/data/lessons';
 import { AdBanner } from '@/components/AdBanner';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
+import { normalizeAnswer } from '@/lib/utils';
 
 // ─── Algoritmo de Repetición Espaciada ───────────────────────────────────────
 //
@@ -54,10 +54,6 @@ function findWord(wordEn: string): Word | null {
     if (found) return found;
   }
   return null;
-}
-
-function normalizeAnswer(str: string): string {
-  return str.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 // ─── Tarjeta de pregunta ─────────────────────────────────────────────────────
@@ -171,7 +167,7 @@ function QuestionCard({ pw, questionType, onAnswer, questionNumber, total }: Que
             {isCorrect ? '✅ ¡Correcto!' : `❌ Era: "${questionType === 'translate-to-es' ? pw.word.translation : pw.word.word}"`}
           </Text>
           {!isCorrect && pw.word.example && (
-            <Text style={styles.feedbackExample}>&ldquo;{pw.word.example}&rdquo; — {pw.word.exampleEs}</Text>
+            <Text style={styles.feedbackExample}>“{pw.word.example}” — {pw.word.exampleEs}</Text>
           )}
         </View>
       )}
@@ -304,12 +300,13 @@ export default function HardWordsPracticeScreen() {
     } else {
       playWrong();
     }
-    // Actualizar contadores de sesión
-    if (correct) {
-      current.sessionCorrect += 1;
-    } else {
-      current.sessionFails += 1;
-    }
+    // Actualizar contadores de sesión — inmutable para respetar el modelo de React
+    setQueue(prev => prev.map((item, i) => {
+      if (i !== currentIdx) return item;
+      return correct
+        ? { ...item, sessionCorrect: item.sessionCorrect + 1 }
+        : { ...item, sessionFails: item.sessionFails + 1 };
+    }));
 
     const next = currentIdx + 1;
     if (next >= queue.length) {
@@ -348,26 +345,30 @@ export default function HardWordsPracticeScreen() {
   const handleFinish = useCallback(async () => {
     // Guardar historial de sesión
     if (username) {
-      const totalAnswers = queue.reduce((acc, pw) => acc + pw.sessionCorrect + pw.sessionFails, 0);
-      const correctAnswers = queue.reduce((acc, pw) => acc + pw.sessionCorrect, 0);
-      const uniqueWords = new Set(queue.map(pw => pw.word.word)).size;
-      await savePracticeSession(username, {
-        wordsCount: uniqueWords,
-        correct: correctAnswers,
-        total: Math.max(totalAnswers, 1),
-        durationMs: Date.now() - sessionStartRef.current,
-      });
-      // Verificar logros de práctica
-      const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
-      await checkAchievements(username, {
-        levelsCompleted,
-        streak: game.streak,
-        totalWordsLearned: 0,
-        gems: game.gems,
-        xp: game.xp,
-        totalDaysCompleted: 0,
-        practiceSessionsCompleted: 1, // Al menos 1 sesión completada
-      });
+      try {
+        const totalAnswers = queue.reduce((acc, pw) => acc + pw.sessionCorrect + pw.sessionFails, 0);
+        const correctAnswers = queue.reduce((acc, pw) => acc + pw.sessionCorrect, 0);
+        const uniqueWords = new Set(queue.map(pw => pw.word.word)).size;
+        await savePracticeSession(username, {
+          wordsCount: uniqueWords,
+          correct: correctAnswers,
+          total: Math.max(totalAnswers, 1),
+          durationMs: Date.now() - sessionStartRef.current,
+        });
+        // Verificar logros de práctica
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        await checkAchievements(username, {
+          levelsCompleted,
+          streak: game.streak,
+          totalWordsLearned: 0,
+          gems: game.gems,
+          xp: game.xp,
+          totalDaysCompleted: 0,
+          practiceSessionsCompleted: 1, // Al menos 1 sesión completada
+        });
+      } catch (err) {
+        console.warn('[HardWords] handleFinish error:', err);
+      }
     }
     router.back();
   }, [username, game, queue, checkAchievements]);

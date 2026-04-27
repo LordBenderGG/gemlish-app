@@ -1,8 +1,7 @@
-'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Switch, Modal, FlatList, Alert, StatusBar, Linking, Platform,
+  Switch, Alert, StatusBar, Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,133 +11,44 @@ import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useGame } from '@/context/GameContext';
 import { AdBanner } from '@/components/AdBanner';
 
-// ─── Selector de Hora ─────────────────────────────────────────────────────────
-
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const MINUTES = [0, 15, 30, 45];
-
-function TimePickerModal({
-  visible,
-  hour,
-  minute,
-  onConfirm,
-  onClose,
-}: {
-  visible: boolean;
-  hour: number;
-  minute: number;
-  onConfirm: (h: number, m: number) => void;
-  onClose: () => void;
-}) {
-  const [selHour, setSelHour] = useState(hour);
-  const [selMin, setSelMin] = useState(minute);
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalBox}>
-          <Text style={styles.modalTitle}>⏰ Hora del Recordatorio</Text>
-          <Text style={styles.modalSubtitle}>Recibirás una notificación diaria a esta hora</Text>
-
-          <View style={styles.pickerRow}>
-            <View style={styles.pickerCol}>
-              <Text style={styles.pickerLabel}>Hora</Text>
-              <FlatList
-                data={HOURS}
-                keyExtractor={String}
-                style={styles.pickerList}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[styles.pickerItem, selHour === item && styles.pickerItemSelected]}
-                    onPress={() => setSelHour(item)}
-                  >
-                    <Text style={[styles.pickerItemText, selHour === item && styles.pickerItemTextSelected]}>
-                      {String(item).padStart(2, '0')}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-
-            <Text style={styles.pickerColon}>:</Text>
-
-            <View style={styles.pickerCol}>
-              <Text style={styles.pickerLabel}>Min</Text>
-              <FlatList
-                data={MINUTES}
-                keyExtractor={String}
-                style={styles.pickerList}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[styles.pickerItem, selMin === item && styles.pickerItemSelected]}
-                    onPress={() => setSelMin(item)}
-                  >
-                    <Text style={[styles.pickerItemText, selMin === item && styles.pickerItemTextSelected]}>
-                      {String(item).padStart(2, '0')}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          </View>
-
-          <View style={styles.timePreview}>
-            <Text style={styles.timePreviewText}>
-              {String(selHour).padStart(2, '0')}:{String(selMin).padStart(2, '0')} hrs
-            </Text>
-          </View>
-
-          <View style={styles.modalBtns}>
-            <TouchableOpacity style={styles.modalBtnCancel} onPress={onClose}>
-              <Text style={styles.modalBtnCancelText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalBtnConfirm} onPress={() => onConfirm(selHour, selMin)}>
-              <Text style={styles.modalBtnConfirmText}>Guardar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // ─── Pantalla de Configuración ────────────────────────────────────────────────
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const t = useThemeStyles();
-  const { settings, loading, permissionGranted, enableNotifications, disableNotifications, updateTime } = useNotifications();
+  const { settings, loading, enableNotifications, disableNotifications } = useNotifications();
   const { soundEnabled, setSoundEnabled } = useSoundSettings();
   const openSystemSettings = useCallback(() => {
-    if (Platform.OS === 'ios') {
-      Linking.openURL('app-settings:');
-    } else {
-      Linking.openSettings();
-    }
+    Linking.openSettings();
   }, []);
 
-  const [showPicker, setShowPicker] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const formatTime = (h: number, m: number) =>
-    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} hrs`;
+  // useRef en lugar de useState para que el guard sea síncrono.
+  // Con useState, el check `if (saving) return` y el set ocurren en distintos
+  // ciclos de render, dejando una ventana donde un segundo tap pasa el guard.
+  const savingRef = useRef(false);
+  const [saving, setSaving] = React.useState(false);
 
   const handleNotifToggle = useCallback(async (value: boolean) => {
-    if (saving) return;
+    if (savingRef.current) return;  // guard síncrono
+    savingRef.current = true;
     setSaving(true);
     try {
       if (value) {
-        const ok = await enableNotifications(settings.hour, settings.minute);
-        if (!ok) {
+        const result = await enableNotifications();
+        if (result === 'permission_denied') {
           Alert.alert(
-            '🔔 Permisos necesarios',
-            'Para recibir recordatorios, activa las notificaciones en la Configuración del sistema.',
+            'Permiso de notificaciones',
+            'Para activar el recordatorio, habilita las notificaciones de Gemlish en los Ajustes del sistema.',
             [
+              { text: 'Abrir Ajustes', onPress: openSystemSettings },
               { text: 'Cancelar', style: 'cancel' },
-              { text: '⚙️ Abrir Configuración', onPress: openSystemSettings },
             ]
+          );
+        } else if (result === 'schedule_failed') {
+          Alert.alert(
+            'No se pudo activar',
+            'Ocurrió un error al programar el recordatorio. Intenta desinstalar y reinstalar la app.',
+            [{ text: 'OK' }]
           );
         }
       } else {
@@ -147,16 +57,10 @@ export default function SettingsScreen() {
     } catch (err) {
       console.warn('[Settings] toggle error:', err);
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
-  }, [saving, settings.hour, settings.minute, enableNotifications, disableNotifications, openSystemSettings]);
-
-  const handleTimeConfirm = useCallback(async (h: number, m: number) => {
-    setShowPicker(false);
-    setSaving(true);
-    await updateTime(h, m);
-    setSaving(false);
-  }, [updateTime]);
+  }, [enableNotifications, disableNotifications, openSystemSettings]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
@@ -196,33 +100,18 @@ export default function SettingsScreen() {
         {/* Banner AdMob */}
         <AdBanner style={{ marginVertical: 4 }} />
 
-        {/* ── Notificaciones ────────────────────────────────────────────────────────────────────────────────────── */}
-        <Text style={styles.sectionTitle}>🔔 Recordatorio de Racha</Text>  {/* Banner informativo */}
-        <View style={[styles.notifBanner, settings.enabled && styles.notifBannerActive]}>
-          <Text style={styles.notifBannerEmoji}>{settings.enabled ? '🔥' : '💤'}</Text>
-          <View style={styles.notifBannerText}>
-            <Text style={[styles.notifBannerTitle, settings.enabled && { color: '#FBBF24' }]}>
-              {settings.enabled
-                ? `Recordatorio activo a las ${formatTime(settings.hour, settings.minute)}`
-                : 'Protégete de perder tu racha'}
-            </Text>
-            <Text style={styles.notifBannerSub}>
-              {settings.enabled
-                ? 'Te avisaremos si no has completado tu tarea diaria'
-                : 'Activa el recordatorio y elige a qué hora quieres que te avisemos'}
-            </Text>
-          </View>
-        </View>
+        {/* ── Notificaciones ──────────────────────────────────────────────── */}
+        <Text style={styles.sectionTitle}>🔔 Recordatorio Diario</Text>
 
         <View style={styles.card}>
-          {/* Toggle principal */}
           <View style={styles.settingRow}>
+            <Text style={styles.settingEmoji}>{settings.enabled ? '🔥' : '🔔'}</Text>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Activar recordatorio diario</Text>
+              <Text style={styles.settingTitle}>Recordatorio de las 8:00 AM</Text>
               <Text style={styles.settingSub}>
                 {settings.enabled
-                  ? `Aviso a las ${formatTime(settings.hour, settings.minute)}`
-                  : 'Sin recordatorio configurado'}
+                  ? 'Notificación diaria activa a las 8:00 AM'
+                  : 'Recibe un aviso cada mañana para estudiar'}
               </Text>
             </View>
             <Switch
@@ -230,39 +119,13 @@ export default function SettingsScreen() {
               onValueChange={handleNotifToggle}
               trackColor={{ false: '#E2E8F0', true: '#FF960040' }}
               thumbColor={settings.enabled ? '#FBBF24' : '#64748B'}
-              disabled={saving || loading}
+              disabled={saving}
             />
           </View>
-
-          {/* Selector de hora — siempre visible */}
-          <TouchableOpacity
-            style={[styles.timeRow, !settings.enabled && styles.timeRowDisabled]}
-            onPress={() => setShowPicker(true)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.timeRowLeft}>
-              <Text style={styles.settingEmoji}>⏰</Text>
-              <View>
-                <Text style={styles.settingTitle}>Hora del recordatorio</Text>
-                <Text style={[styles.timeValue, settings.enabled && { color: '#FBBF24' }]}>
-                  {formatTime(settings.hour, settings.minute)}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.timeArrow}>›</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
-
-      <TimePickerModal
-        visible={showPicker}
-        hour={settings.hour}
-        minute={settings.minute}
-        onConfirm={handleTimeConfirm}
-        onClose={() => setShowPicker(false)}
-      />
     </View>
   );
 }
@@ -298,70 +161,4 @@ const styles = StyleSheet.create({
   settingInfo: { flex: 1 },
   settingTitle: { fontSize: 15, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
   settingSub: { fontSize: 12, color: '#64748B' },
-  resetBtn: {
-    borderTopWidth: 1, borderTopColor: '#E2E8F0',
-    paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center',
-  },
-  resetBtnText: { fontSize: 13, color: '#38BDF8', fontWeight: '600' },
-  // Notificaciones
-  notifBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
-    borderWidth: 1.5, borderColor: '#E2E8F0',
-  },
-  notifBannerActive: { borderColor: '#FDE68A', backgroundColor: '#FFFBEB' },
-  notifBannerEmoji: { fontSize: 28 },
-  notifBannerText: { flex: 1 },
-  notifBannerTitle: { fontSize: 14, fontWeight: '700', color: '#1E293B', marginBottom: 3 },
-  notifBannerSub: { fontSize: 12, color: '#64748B', lineHeight: 17 },
-  timeRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 14,
-    borderTopWidth: 1, borderTopColor: '#E2E8F0',
-  },
-  timeRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  timeRowDisabled: { opacity: 0.5 },
-  timeValue: { fontSize: 18, fontWeight: '800', color: '#4F46E5', marginTop: 2 },
-  timeArrow: { fontSize: 24, color: '#64748B' },
-  // Modal
-  modalOverlay: {
-    flex: 1, backgroundColor: '#00000088',
-    justifyContent: 'flex-end',
-  },
-  modalBox: {
-    backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    padding: 24, paddingBottom: 40,
-    borderTopWidth: 1, borderTopColor: '#E2E8F0',
-  },
-  modalTitle: { fontSize: 20, fontWeight: '800', color: '#1E293B', textAlign: 'center', marginBottom: 4 },
-  modalSubtitle: { fontSize: 13, color: '#64748B', textAlign: 'center', marginBottom: 20 },
-  pickerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16 },
-  pickerCol: { alignItems: 'center', width: 80 },
-  pickerLabel: { fontSize: 12, color: '#64748B', fontWeight: '700', marginBottom: 8, textTransform: 'uppercase' },
-  pickerList: { height: 180 },
-  pickerItem: {
-    paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10,
-    alignItems: 'center', marginVertical: 2,
-  },
-  pickerItemSelected: { backgroundColor: '#EFF6FF', borderWidth: 1.5, borderColor: '#4F46E5' },
-  pickerItemText: { fontSize: 20, fontWeight: '600', color: '#64748B' },
-  pickerItemTextSelected: { color: '#4F46E5', fontWeight: '800' },
-  pickerColon: { fontSize: 28, fontWeight: '800', color: '#1E293B', marginTop: 20 },
-  timePreview: {
-    alignItems: 'center', backgroundColor: '#EFF6FF',
-    borderRadius: 12, padding: 12, marginBottom: 20,
-    borderWidth: 1, borderColor: '#DBEAFE',
-  },
-  timePreviewText: { fontSize: 32, fontWeight: '900', color: '#4F46E5' },
-  modalBtns: { flexDirection: 'row', gap: 12 },
-  modalBtnCancel: {
-    flex: 1, paddingVertical: 14, borderRadius: 14,
-    alignItems: 'center', backgroundColor: '#E2E8F0',
-  },
-  modalBtnCancelText: { color: '#64748B', fontSize: 15, fontWeight: '700' },
-  modalBtnConfirm: {
-    flex: 1, paddingVertical: 14, borderRadius: 14,
-    alignItems: 'center', backgroundColor: '#4F46E5',
-  },
-  modalBtnConfirmText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
 });

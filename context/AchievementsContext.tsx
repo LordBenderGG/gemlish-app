@@ -59,7 +59,13 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     // addGems siempre lee el estado más reciente desde gameRef en GameContext
     const totalGems = newOnes.reduce((sum, a) => sum + (a.gems ?? 0), 0);
     if (totalGems > 0) {
-      await addGems(totalGems);
+      try {
+        await addGems(totalGems);
+      } catch (err) {
+        // El fallo al añadir gemas no debe bloquear la visualización del logro.
+        // Se loguea para visibilidad pero la animación del toast se muestra igualmente.
+        console.warn('[AchievementsContext] addGems failed:', err);
+      }
     }
 
     // Encolar todos los nuevos logros para mostrar el toast

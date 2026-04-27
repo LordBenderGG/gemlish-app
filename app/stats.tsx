@@ -141,6 +141,9 @@ export default function StatsScreen() {
     getPracticeHistory(username).then(h => {
       setSessions(h);
       setLoading(false);
+    }).catch(err => {
+      console.warn('[Stats] getPracticeHistory error:', err);
+      setLoading(false);
     });
   }, [username]);
 

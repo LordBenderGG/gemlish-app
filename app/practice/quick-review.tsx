@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, TextInput,
@@ -8,13 +7,14 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useAchievements } from '@/context/AchievementsContext';
-import { savePracticeSession } from '@/lib/practice-history';
+import { savePracticeSession, getPracticeHistory } from '@/lib/practice-history';
 import { useSpeech } from '@/hooks/use-speech';
 import { LESSONS } from '@/data/lessons';
 import type { Word } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { AdBanner } from '@/components/AdBanner';
+import { normalizeAnswer } from '@/lib/utils';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -22,10 +22,6 @@ const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutos
 const TOTAL_WORDS = 10;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function normalizeAnswer(str: string): string {
-  return str.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
 
 function formatTime(ms: number): string {
   const totalSec = Math.max(0, Math.ceil(ms / 1000));
@@ -250,23 +246,28 @@ export default function QuickReviewScreen() {
 
   const handleFinish = useCallback(async () => {
     if (username) {
-      const totalAnswered = currentIdx + (showResult && !timedOut ? 1 : 0);
-      await savePracticeSession(username, {
-        wordsCount: words.length,
-        correct,
-        total: Math.max(totalAnswered, 1),
-        durationMs: Date.now() - sessionStartRef.current,
-      });
-      const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
-      await checkAchievements(username, {
-        levelsCompleted,
-        streak: game.streak,
-        totalWordsLearned: 0,
-        gems: game.gems,
-        xp: game.xp,
-        totalDaysCompleted: 0,
-        practiceSessionsCompleted: 1,
-      });
+      try {
+        const totalAnswered = currentIdx + (showResult && !timedOut ? 1 : 0);
+        await savePracticeSession(username, {
+          wordsCount: words.length,
+          correct,
+          total: Math.max(totalAnswered, 1),
+          durationMs: Date.now() - sessionStartRef.current,
+        });
+        const [practiceSessions] = await Promise.all([getPracticeHistory(username)]);
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        await checkAchievements(username, {
+          levelsCompleted,
+          streak: game.streak,
+          totalWordsLearned: 0,
+          gems: game.gems,
+          xp: game.xp,
+          totalDaysCompleted: 0,
+          practiceSessionsCompleted: practiceSessions.length,
+        });
+      } catch (err) {
+        console.warn('[QuickReview] handleFinish error:', err);
+      }
     }
     router.back();
   }, [username, game, words, correct, currentIdx, showResult, timedOut, checkAchievements]);
@@ -383,13 +384,15 @@ export default function QuickReviewScreen() {
 
       {/* Pregunta */}
       <View style={styles.content}>
-        <QuestionCard
-          key={currentIdx}
-          word={words[currentIdx]}
-          onAnswer={handleAnswer}
-          questionNumber={currentIdx + 1}
-          total={words.length}
-        />
+        {currentIdx < words.length && (
+          <QuestionCard
+            key={currentIdx}
+            word={words[currentIdx]}
+            onAnswer={handleAnswer}
+            questionNumber={currentIdx + 1}
+            total={words.length}
+          />
+        )}
       </View>
     </View>
   );

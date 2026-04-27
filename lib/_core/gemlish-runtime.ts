@@ -11,8 +11,8 @@
 import { Platform } from "react-native";
 import type { Metrics } from "react-native-safe-area-context";
 
-// Debug logging with timestamps
-const DEBUG = true;
+// Debug logging with timestamps — solo activo en builds de desarrollo
+const DEBUG = __DEV__;
 const log = (msg: string) => {
   if (!DEBUG) return;
   const ts = new Date().toISOString();

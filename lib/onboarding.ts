@@ -1,6 +1,6 @@
 import { kvGet, kvSet } from './local-kv';
 
-const ONBOARDING_KEY = 'gemlish_onboarding_done';
+const ONBOARDING_KEY = '@gemlish_onboarding_done';
 
 export async function hasSeenOnboarding(): Promise<boolean> {
   const val = await kvGet(ONBOARDING_KEY);

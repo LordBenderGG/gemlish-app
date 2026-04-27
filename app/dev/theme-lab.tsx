@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ScreenContainer } from "@/components/screen-container";
@@ -25,6 +25,14 @@ function ColorSwatch({ name, value }: { name: PaletteName; value: string }) {
 }
 
 export default function ThemeLabScreen() {
+  // Guard: esta pantalla solo es accesible en desarrollo.
+  // En producción redirige inmediatamente a la pantalla principal.
+  useEffect(() => {
+    if (!__DEV__) {
+      const { router } = require('expo-router');
+      router.replace('/(tabs)');
+    }
+  }, []);
   const [pressCount, setPressCount] = useState(0);
   const [lastAction, setLastAction] = useState<string>("None yet");
   const { colorScheme, setColorScheme } = useThemeContext();

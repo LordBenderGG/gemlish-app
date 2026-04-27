@@ -63,7 +63,7 @@ function WordReviewCard({ wordEn, onMastered }: { wordEn: string; onMastered: ()
 
       {flipped && word.example && (
         <View style={styles.exampleBox}>
-          <Text style={styles.exampleEn}>&ldquo;{word.example}&rdquo;</Text>
+          <Text style={styles.exampleEn}>“{word.example}”</Text>
           <Text style={styles.exampleEs}>{word.exampleEs}</Text>
         </View>
       )}
@@ -189,7 +189,7 @@ export default function ReviewScreen() {
         )}
         ListHeaderComponent={
           <Text style={styles.listHeader}>
-            Palabras que necesitas repasar — toca &ldquo;Ya lo sé&rdquo; cuando las domines
+            Palabras que necesitas repasar — toca “Ya lo sé” cuando las domines
           </Text>
         }
         ListEmptyComponent={

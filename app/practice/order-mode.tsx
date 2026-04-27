@@ -9,21 +9,10 @@ import { LESSONS } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { AdBanner } from '@/components/AdBanner';
+import { shuffleArray, normalizeAnswer } from '@/lib/utils';
 
 const TOTAL = 10;
-
-function normalizeAnswer(str: string): string {
-  return str.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '');
-}
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// shuffleArray y normalizeAnswer importados desde lib/utils.ts (fuente única de verdad)
 
 // Plantillas de oraciones simples por nivel de dificultad
 function buildSentence(word: string, translation: string, levelIdx: number): { sentence: string; sentenceEs: string } {
@@ -269,7 +258,7 @@ const styles = StyleSheet.create({
   },
   chipSelected: { backgroundColor: '#3D2A6A', borderColor: '#38BDF8' },
   chipCorrect: { borderColor: '#4ADE80', backgroundColor: '#F0FDF4' },
-  chipWrong: { borderColor: '#FF4B4B', backgroundColor: '#3A1A1A' },
+  chipWrong: { borderColor: '#FF4B4B', backgroundColor: '#FEF2F2' },
   chipText: { color: '#1E293B', fontSize: 15, fontWeight: '600' },
   divider: { height: 1, backgroundColor: '#E2E8F0', marginVertical: 14 },
   feedback: { fontSize: 14, fontWeight: '600', textAlign: 'center' },

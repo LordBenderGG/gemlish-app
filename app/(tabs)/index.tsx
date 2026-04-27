@@ -1,4 +1,3 @@
-'use client';
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import {
@@ -17,9 +16,7 @@ import { getLevelData, getLevelIcon } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { ConfettiOverlay } from '@/components/confetti-overlay';
-import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
-import { AD_UNIT_IDS } from '@/hooks/useAdMob';
-import { Platform } from 'react-native';
+import { AdBanner } from '@/components/AdBanner';
 
 const TOTAL_LEVELS = 500;
 
@@ -110,7 +107,7 @@ function FireAnimation({ streak }: { streak: number }) {
 
   return (
     <Reanimated.Text style={[styles.statEmoji, animStyle]}>
-      {streak > 3 ? '🔥' : '🔥'}
+      {'🔥'}
     </Reanimated.Text>
   );
 }
@@ -184,7 +181,7 @@ function LevelPreviewModal({
               <Text style={styles.modalTitle}>Nivel {levelNum}</Text>
               <Text style={[styles.modalSubtitle, { color: levelData.color }]}>{levelData.name}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.modalClose}>
+            <TouchableOpacity onPress={onClose} style={styles.modalClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Text style={styles.modalCloseText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -595,7 +592,7 @@ export default function LevelsScreen() {
           clearButtonMode="while-editing"
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear}>
+          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={styles.searchClearText}>✕</Text>
           </TouchableOpacity>
         )}
@@ -648,9 +645,10 @@ export default function LevelsScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        initialNumToRender={15}
-        maxToRenderPerBatch={20}
-        windowSize={10}
+        initialNumToRender={20}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
         getItemLayout={(_, index) => ({ length: 76, offset: 76 * index, index })}
       />
 
@@ -664,13 +662,7 @@ export default function LevelsScreen() {
       )}
 
       {/* Banner AdMob — parte inferior */}
-      {Platform.OS !== 'web' && (
-        <BannerAd
-          unitId={AD_UNIT_IDS.BANNER_HOME}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{ requestNonPersonalizedAdsOnly: false }}
-        />
-      )}
+      <AdBanner />
 
       {/* Confeti de desbloqueo */}
       <ConfettiOverlay visible={showConfetti} />
@@ -996,7 +988,7 @@ const styles = StyleSheet.create({
     flex: 1, color: '#1E293B', fontSize: 14,
     paddingVertical: 0,
   },
-  searchClear: { padding: 4 },
+  searchClear: { minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'center' },
   searchClearText: { color: '#64748B', fontSize: 14 },
   // ─── Modal de vista previa ─────────────────────────────────────────
   modalOverlay: {
@@ -1031,7 +1023,7 @@ const styles = StyleSheet.create({
   modalIcon: { fontSize: 26 },
   modalTitle: { fontSize: 16, fontWeight: '800', color: '#1E293B' },
   modalSubtitle: { fontSize: 13, fontWeight: '600', marginTop: 2 },
-  modalClose: { padding: 6 },
+  modalClose: { minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'center' },
   modalCloseText: { fontSize: 16, color: '#64748B', fontWeight: '700' },
   modalDesc: {
     fontSize: 13,

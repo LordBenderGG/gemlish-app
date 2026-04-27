@@ -22,6 +22,8 @@ const Notifications =
         SchedulableTriggerInputTypes: {
           DAILY: 'daily',
           CALENDAR: 'calendar',
+          DATE: 'date',
+          WEEKLY: 'weekly',
         },
       }
     : // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -33,16 +35,22 @@ const NOTIFICATION_ENABLED_KEY = '@gemlish_notification_enabled';
 const NOTIFICATION_ID_KEY = '@gemlish_notification_id';
 const WEEKLY_NOTIFICATION_ID_KEY = '@gemlish_weekly_notification_id';
 
-// Configurar cómo se muestran las notificaciones en foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Configurar cómo se muestran las notificaciones en foreground.
+// El guard evita registrar el handler más de una vez si el módulo
+// se re-evalúa durante hot-reload en desarrollo.
+let _notificationHandlerInitialized = false;
+if (!_notificationHandlerInitialized) {
+  _notificationHandlerInitialized = true;
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+}
 
 export interface NotificationSettings {
   enabled: boolean;
@@ -53,7 +61,7 @@ export interface NotificationSettings {
 export function useNotifications() {
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: false,
-    hour: 20,
+    hour: 8,   // 8:00 AM — valor por defecto consistente con la UI
     minute: 0,
   });
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -115,7 +123,7 @@ export function useNotifications() {
 
       setSettings({
         enabled: effectiveEnabled,
-        hour: hour ? parseInt(hour, 10) : 20,
+        hour: hour ? parseInt(hour, 10) : 8,
         minute: minute ? parseInt(minute, 10) : 0,
       });
     } catch (err) {
@@ -145,24 +153,23 @@ export function useNotifications() {
         }
         // Normalizar de forma segura
         existingStatus = existingStatus.trim().toLowerCase();
-        
-        // En Android, tanto 'granted' como 'undetermined' indican que podemos proceder
-        // 'undetermined' significa que el usuario no ha sido preguntado todavía, pero podemos asumir que está OK para nuestros propósitos
-        if (existingStatus === 'granted' || existingStatus === 'undetermined') {
+
+        // Si ya está concedido, retornar true directamente sin molestar al usuario
+        if (existingStatus === 'granted') {
           setPermissionGranted(true);
           return true;
         }
-        // Si no estamos seguros o está denegado, solicitar permiso
+        // 'undetermined' = nunca fue preguntado, 'denied' = denegado
+        // En ambos casos solicitar permiso explícitamente
         const { status } = await Notifications.requestPermissionsAsync();
-        // En Android 12 y anteriores los permisos siempre son granted
-        // En Android 13+ se necesita POST_NOTIFICATIONS (ya en AndroidManifest)
-        // Tratamos tanto 'granted' como 'undetermined' como éxito
+        // En Android 12 y anteriores los permisos de notificaciones siempre son granted
+        // En Android 13+ (API 33+) se necesita solicitar POST_NOTIFICATIONS en runtime
         let requestStatus = '';
         if (status != null) {
           requestStatus = String(status);
         }
         requestStatus = requestStatus.trim().toLowerCase();
-        const granted = requestStatus === 'granted' || requestStatus === 'undetermined';
+        const granted = requestStatus === 'granted';
         setPermissionGranted(granted);
         return granted;
       }
@@ -196,22 +203,15 @@ export function useNotifications() {
     }
   }, []);
 
-  const scheduleDaily = useCallback(async (hour: number, minute: number, nextLevelName?: string): Promise<boolean> => {
+  const scheduleDaily = useCallback(async (nextLevelName?: string): Promise<boolean> => {
     try {
-      // Validar que hora y minuto sean números enteros válidos
-      if (!Number.isInteger(hour) || hour < 0 || hour > 23 ||
-          !Number.isInteger(minute) || minute < 0 || minute > 59) {
-        console.warn('[useNotifications] Invalid time for scheduling:', { hour, minute });
-        return false;
-      }
-
-      // Cancelar notificación anterior
+      // Cancelar notificación anterior si existe
       const prevId = await kvGet(NOTIFICATION_ID_KEY);
       if (prevId) {
         await Notifications.cancelScheduledNotificationAsync(prevId).catch(() => {});
       }
 
-      // Asegurarnos de que el canal de notificaciones exista y esté configurado correctamente
+      // Crear canal en Android (obligatorio para que suene)
       if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('gemlish-daily', {
           name: 'Recordatorio Diario',
@@ -222,36 +222,34 @@ export function useNotifications() {
         });
       }
 
-      // Verificar que la hora de programación no haya pasado ya
-      const now = new Date();
-      const targetToday = new Date();
-      targetToday.setHours(hour, minute, 0, 0);
-      if (now >= targetToday) {
-        // Ya pasó la hora de hoy, no programar (se programará para mañana automáticamente por la lógica de expo-notifications)
-        // Pero para evitar confusiones, dejamos que expo-notifications maneje la programación para el próximo día
-        // Sin embargo, registramos esto para depuración
-        console.log('[useNotifications] Attempting to schedule for past time, will schedule for next day:', { hour, minute });
-      }
+      const messages = nextLevelName
+        ? [
+            { title: '🔥 ¡No rompas tu racha!', body: `Hoy aprende ${nextLevelName} en Gemlish. ¡Solo 20 ejercicios!` },
+            { title: `🌟 ¡${nextLevelName} te espera!`, body: 'Completa tu tarea diaria y gana XP y gemas.' },
+            { title: '🚀 ¡Sigue avanzando!', body: `Hoy toca ${nextLevelName}. ¡Puedes hacerlo!` },
+          ]
+        : [
+            { title: '📚 Hora de estudiar', body: 'Completa tu tarea diaria de inglés en Gemlish.' },
+            { title: '🔥 ¡No rompas tu racha!', body: '30 palabras nuevas te esperan hoy en Gemlish.' },
+            { title: '💎 ¡Gana diamantes hoy!', body: 'Aprende 30 palabras nuevas y gana recompensas.' },
+          ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
 
-      // Programar nueva notificación diaria personalizada
-      let msg: { title: string; body: string };
-      if (nextLevelName) {
-        // Notificación personalizada con el nombre del siguiente nivel
-        const personalizedMessages = [
-          { title: '🔥 ¡No rompas tu racha!', body: `Hoy aprende ${nextLevelName} en Gemlish. ¡Sólo 20 ejercicios!` },
-          { title: `🌟 ¡${nextLevelName} te espera!`, body: 'Completa tu tarea diaria y gana XP y gemas.' },
-          { title: '🚀 ¡Sigue avanzando!', body: `Hoy toca ${nextLevelName}. ¡Puedes hacerlo!` },
-          { title: '📅 Tarea Diaria lista', body: `Aprende ${nextLevelName} hoy y mantén tu racha.` },
-        ];
-        msg = personalizedMessages[Math.floor(Math.random() * personalizedMessages.length)];
-      } else {
-        const genericMessages = [
-          { title: '🔥 ¡No rompas tu racha!', body: 'Completa tu tarea diaria de inglés en Gemlish.' },
-          { title: '💎 ¡Gana diamantes hoy!', body: 'Aprende 30 palabras nuevas y gana recompensas.' },
-          { title: '🚀 ¡Sigue avanzando!', body: 'Tu próximo nivel te espera en Gemlish.' },
-          { title: '📅 Tarea Diaria lista', body: '30 palabras nuevas te esperan hoy en Gemlish.' },
-        ];
-        msg = genericMessages[Math.floor(Math.random() * genericMessages.length)];
+      // ── CORRECCIÓN CRÍTICA ────────────────────────────────────────────────────
+      // El trigger DAILY de expo-notifications falla en Android con:
+      //   "Trigger of type: calendar is not supported on Android"
+      // (GitHub issue #30577, afecta expo-notifications 0.32.x en Android)
+      //
+      // Solución: calcular la próxima ocurrencia de la hora configurada y usar
+      // trigger DATE (funciona correctamente en Android). Como DATE es one-time,
+      // la notificación se re-programa cada vez que el usuario abre la app
+      // (ver AuthGuard en app/_layout.tsx → rescheduleDaily).
+      const now = new Date();
+      const target = new Date();
+      target.setHours(settings.hour, settings.minute, 0, 0);
+      if (target <= now) {
+        // La hora de hoy ya pasó → programar para mañana a la misma hora
+        target.setDate(target.getDate() + 1);
       }
 
       const id = await Notifications.scheduleNotificationAsync({
@@ -263,36 +261,37 @@ export function useNotifications() {
           ...(Platform.OS === 'android' && { channelId: 'gemlish-daily' }),
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour,
-          minute,
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          timestamp: target.getTime(),
         } as any,
       });
 
-      await kvSet(NOTIFICATION_ID_KEY, id);
+      await kvSet(NOTIFICATION_ID_KEY, id).catch(() => {});
       return true;
     } catch (err) {
-      console.warn('[useNotifications] Error scheduling notification:', err);
+      console.warn('[useNotifications] scheduleDaily error:', err);
       return false;
     }
-  }, []);
+  }, [settings.hour, settings.minute]);
 
-  const enableNotifications = useCallback(async (hour: number, minute: number, nextLevelName?: string): Promise<boolean> => {
+  const enableNotifications = useCallback(async (nextLevelName?: string): Promise<'ok' | 'permission_denied' | 'schedule_failed'> => {
     const granted = await requestPermission();
-    if (!granted) return false;
+    if (!granted) return 'permission_denied';
 
-    const scheduled = await scheduleDaily(hour, minute, nextLevelName);
-    if (!scheduled) return false;
+    const scheduled = await scheduleDaily(nextLevelName);
+    if (!scheduled) return 'schedule_failed';
 
+    // Preservar la hora/minuto ya configurados — no sobrescribir con valores fijos.
+    // Si no hay valor guardado, scheduleDaily ya usó settings.hour/settings.minute.
     await Promise.all([
       kvSet(NOTIFICATION_ENABLED_KEY, 'true'),
-      kvSet(NOTIFICATION_HOUR_KEY, String(hour)),
-      kvSet(NOTIFICATION_MINUTE_KEY, String(minute)),
-    ]);
+      kvSet(NOTIFICATION_HOUR_KEY, String(settings.hour)),
+      kvSet(NOTIFICATION_MINUTE_KEY, String(settings.minute)),
+    ]).catch(() => {});
 
-    setSettings({ enabled: true, hour, minute });
-    return true;
-  }, [requestPermission, scheduleDaily]);
+    setSettings(prev => ({ ...prev, enabled: true }));
+    return 'ok';
+  }, [requestPermission, scheduleDaily, settings.hour, settings.minute]);
 
   const disableNotifications = useCallback(async () => {
     try {
@@ -308,17 +307,23 @@ export function useNotifications() {
     }
   }, []);
 
-  const updateTime = useCallback(async (hour: number, minute: number) => {
-    if (settings.enabled) {
-      await enableNotifications(hour, minute);
-    } else {
-      await Promise.all([
-        kvSet(NOTIFICATION_HOUR_KEY, String(hour)),
-        kvSet(NOTIFICATION_MINUTE_KEY, String(minute)),
-      ]);
-      setSettings(prev => ({ ...prev, hour, minute }));
+  /**
+   * Re-programa el recordatorio diario si las notificaciones están habilitadas.
+   * Debe llamarse cada vez que el usuario abre la app porque el trigger DATE
+   * es one-time: se consume al dispararse y no se repite automáticamente.
+   * Sin esta llamada, el recordatorio solo sonaría el primer día tras activarlo.
+   */
+  const rescheduleDaily = useCallback(async (): Promise<void> => {
+    try {
+      const enabled = await kvGet(NOTIFICATION_ENABLED_KEY);
+      if (enabled !== 'true') return;
+      await scheduleDaily();
+    } catch (err) {
+      console.warn('[useNotifications] rescheduleDaily error:', err);
     }
-  }, [settings.enabled, enableNotifications]);
+  }, [scheduleDaily]);
+
+  // updateTime eliminado: la hora es fija (8:00 AM) y no configurable por el usuario
 
   /**
    * Programa una notificación de resumen semanal los lunes a las 9:00 AM.
@@ -386,10 +391,8 @@ export function useNotifications() {
           ...(Platform.OS === 'android' && { channelId: 'gemlish-daily-challenge' }),
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-          hour: 8,
-          minute: 0,
-          repeats: false,
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          timestamp: target.getTime(),
         } as any,
       });
 
@@ -468,10 +471,8 @@ export function useNotifications() {
           ...(Platform.OS === 'android' && { channelId: 'gemlish-streak-risk' }),
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-          hour: 20,
-          minute: 0,
-          repeats: false, // Solo una vez, no repetir
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          timestamp: targetToday.getTime(),
         } as any,
       });
 
@@ -513,7 +514,19 @@ export function useNotifications() {
         wordsLearned > 0 ? `📚 ${wordsLearned} palabras aprendidas en total` : '',
       ].filter(Boolean).join(' · ');
 
-      // Programar para el próximo lunes a las 9:00 AM
+      // ── CORRECCIÓN: WEEKLY trigger también falla en Android (mismo bug que DAILY)
+      // Calculamos el próximo lunes a las 9:00 AM como timestamp y usamos DATE.
+      const nowW = new Date();
+      const targetW = new Date();
+      targetW.setHours(9, 0, 0, 0);
+      const dayOfWeek = nowW.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
+      let daysUntilMonday = (1 - dayOfWeek + 7) % 7; // días hasta el próximo lunes
+      if (daysUntilMonday === 0 && targetW <= nowW) {
+        // Hoy es lunes pero ya pasaron las 9:00 → programar para el lunes siguiente
+        daysUntilMonday = 7;
+      }
+      targetW.setDate(targetW.getDate() + daysUntilMonday);
+
       const id = await Notifications.scheduleNotificationAsync({
         content: {
           title,
@@ -523,11 +536,8 @@ export function useNotifications() {
           ...(Platform.OS === 'android' && { channelId: 'gemlish-weekly' }),
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-          weekday: 2, // Lunes (1=Domingo, 2=Lunes)
-          hour: 9,
-          minute: 0,
-          repeats: true,
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          timestamp: targetW.getTime(),
         } as any,
       });
 
@@ -543,8 +553,9 @@ export function useNotifications() {
     loading,
     enableNotifications,
     disableNotifications,
-    updateTime,
     requestPermission,
+    scheduleDaily,
+    rescheduleDaily,
     scheduleWeeklySummary,
     scheduleStreakRiskReminder,
     scheduleDailyChallengeNotification,

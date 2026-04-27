@@ -29,7 +29,7 @@ export function usePendingAchievements() {
         ]);
 
         const totalLevels = Object.values(game.levelProgress).filter(p => p.completed).length;
-        const totalWordsLearned = Object.keys(daily.learnedWords ?? {}).length;
+        const totalWordsLearned = Object.keys(daily.allLearnedWords ?? {}).length;
 
         await checkAchievements(username, {
           levelsCompleted: totalLevels,
@@ -40,8 +40,9 @@ export function usePendingAchievements() {
           totalDaysCompleted: daily.totalDaysCompleted,
           practiceSessionsCompleted: sessions.length,
         });
-      } catch {
+      } catch (err) {
         // Silenciar errores para no interrumpir el inicio de la app
+        console.warn('[usePendingAchievements] error al verificar logros:', err);
       }
     }, 1500);
 
