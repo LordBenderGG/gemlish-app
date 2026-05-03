@@ -205,42 +205,21 @@ pnpm qr              # Generar QR para Expo Go
 
 ---
 
-## 🐛 Estado actual
+## 🎉 ESTADO ACTUAL: ¡EN PRODUCCIÓN! 🚀
 
-**Última actualización:** 8 de abril de 2026
+**Última actualización:** 27 de abril de 2026
 
-### Estado QA Final Pre-Producción:
-- ✅ **APROBADO PARA PRODUCCIÓN**
-- Documentos QA:
-  - `QA_Final_PreProduccion.docx` - Reporte ejecutivo completo
-  - `Analisis_Detallado_Codigo_QA.docx` - Análisis técnico profundo
+### ✅ APROBADO PARA PRODUCCIÓN Y SUBIDO A PLAY STORE
 
-### Hallazgos principales:
-- **Seguridad:** ⚠️ Hash de contraseña manual (aceptable para offline, crítico si hay servidor)
-- **Estabilidad:** ✅ Transacciones ACID, manejo robusto de errores
-- **Rendimiento:** ✅ Animaciones optimizadas, SQLite eficiente
-- **Datos:** ✅ Persistencia confiable con fallbacks
+**Fecha de lanzamiento:** 17 de abril de 2026 (Play Store)
 
-### Build activo:
-- Versión: 1.0.0 (ver version.properties)
-- Estado: **READY FOR PRODUCTION**
-- Recomendación: Ejecutar checklist pre-launch antes de subir a Play Store
+**Commits finales:**
+- `63fb1e4` - feat: major refactoring and improvements (Mar 23 - Apr 27, 2026)
+- `5b34b7f` - Merge remote/main into main - resolved conflicts
+- `97264dc` - chore: remove large APK file from repo
+- `44dcbd3` - chore: remove QA documentation files (offline docs)
 
----
-
-## 🎯 ESTADO ACTUAL: LISTO PARA PRODUCCIÓN
-
-### ✓ QA COMPLETADO (8 de abril de 2026)
-
-**VEREDICTO:** APROBADO PARA PRODUCCIÓN
-
-**Documentos generados:**
-1. `QA_Final_PreProduccion.docx` - Reporte QA ejecutivo
-2. `Analisis_Detallado_Codigo_QA.docx` - Análisis técnico
-3. `GUIA_Compilar_Probar_Telefono.docx` - Paso a paso para build
-4. `RESUMEN_FINAL.docx` - Resumen ejecutivo
-
-### ✓ VALIDACIONES COMPLETADAS
+### 🏆 LOGROS COMPLETADOS
 
 **Seguridad:**
 - ✓ 100% offline (solo AdMob conecta a internet)
@@ -259,13 +238,12 @@ pnpm qr              # Generar QR para Expo Go
 - ✓ Bundle size eficiente
 - ✓ Startup rápido
 
-### 🚀 PRÓXIMOS PASOS
-
-1. `pnpm check && pnpm lint` — validar compilación
-2. `pnpm android` — compilar y probar en teléfono
-3. Ejecutar checklist de testing
-4. `eas build --platform android --auto-submit` — build de producción
-5. Subir a Google Play Console
+**Refactorings importantes:**
+- ✓ Exercise screen refactorizada (componentes separados)
+- ✓ Notificaciones simplificadas (8:00 AM fijo)
+- ✓ Auth movido a GameContext + storage.ts
+- ✓ Eliminados archivos obsoletos (COMPILAR*.BAT, design*.md)
+- ✓ Nuevos utilitarios: lib/utils.ts, lib/practice-history.ts
 
 ---
 
@@ -285,5 +263,5 @@ Este archivo se **actualiza automáticamente** después de cada tarea completada
 
 **Mantenido por:** Claude en Cowork  
 **Formato:** Markdown  
-**Última actualización:** 8 de abril de 2026  
-**Estado:** QA COMPLETADO - READY FOR PRODUCTION ✓
+**Última actualización:** 27 de abril de 2026  
+**Estado:** 🚀 ¡EN PRODUCCIÓN EN PLAY STORE! 🎉
