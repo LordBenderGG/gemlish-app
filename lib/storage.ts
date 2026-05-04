@@ -111,9 +111,19 @@ export async function registerUser(username: string, password: string): Promise<
 export async function loginUser(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
   try {
     initDatabase(); // Garantizar que las tablas existan
-    const db = getDb();
     const key = username.toLowerCase().trim();
 
+    // ── Usuario de prueba para Google Play Store ──
+    if (key === 'pruebas' && password === '1234567890') {
+      const db = getDb();
+      db.runSync(
+        `INSERT OR REPLACE INTO session (id, username, username_bk) VALUES (1, ?, ?)`,
+        [key, key]
+      );
+      return { ok: true };
+    }
+
+    const db = getDb();
     const user = db.getFirstSync<{ password_hash: string }>(
       `SELECT password_hash FROM users WHERE username = ?`, [key]
     );
