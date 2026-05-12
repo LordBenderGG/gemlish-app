@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react'
 import { useFocusEffect } from 'expo-router';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  StatusBar, Animated, ScrollView, TextInput, Modal,
+  StatusBar, Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Reanimated, {
@@ -19,36 +19,6 @@ import { ConfettiOverlay } from '@/components/confetti-overlay';
 import { AdBanner } from '@/components/AdBanner';
 
 const TOTAL_LEVELS = 500;
-
-// Categorías de temas para el filtro
-const CATEGORIES = [
-  { id: 'all', label: '🌍 Todos', levels: null },
-  { id: 'saludos', label: '👋 Saludos', levels: [1] },
-  { id: 'numeros', label: '🔢 Números', levels: [2, 18] },
-  { id: 'colores', label: '🎨 Colores', levels: [3] },
-  { id: 'animales', label: '🐾 Animales', levels: [4] },
-  { id: 'familia', label: '👨‍👩‍👧 Familia', levels: [5] },
-  { id: 'cuerpo', label: '💪 Cuerpo', levels: [6, 23] },
-  { id: 'comida', label: '🍎 Comida', levels: [7, 21, 36] },
-  { id: 'casa', label: '🏠 Casa', levels: [8] },
-  { id: 'ropa', label: '👗 Ropa', levels: [9] },
-  { id: 'tiempo', label: '⛅ Tiempo', levels: [10] },
-  { id: 'transporte', label: '🚗 Transporte', levels: [11] },
-  { id: 'profesiones', label: '💼 Profesiones', levels: [12, 29] },
-  { id: 'deportes', label: '⚽ Deportes', levels: [13] },
-  { id: 'tecnologia', label: '💻 Tecnología', levels: [14, 35] },
-  { id: 'naturaleza', label: '🌿 Naturaleza', levels: [15] },
-  { id: 'emociones', label: '😊 Emociones', levels: [16] },
-  { id: 'verbos', label: '🏃 Verbos', levels: [17, 27] },
-  { id: 'tiempo2', label: '📅 Días/Meses', levels: [19] },
-  { id: 'adjetivos', label: '✨ Adjetivos', levels: [20] },
-  { id: 'viajes', label: '✈️ Viajes', levels: [28, 32, 33] },
-  { id: 'frases', label: '💬 Frases', levels: [26, 30, 34] },
-  { id: 'negocios', label: '🏢 Negocios', levels: [31, 38] },
-  { id: 'phrasal', label: '🔗 Phrasal Verbs', levels: [39, 40] },
-];
-
-
 
 function FireAnimation({ streak }: { streak: number }) {
   // Animación de llama cuando la racha es > 3 días
@@ -370,8 +340,6 @@ export default function LevelsScreen() {
   const { username, game, claimDailyBonus } = useGame();
   const { xp, gems, streak, maxUnlockedLevel, levelProgress } = game;
   const [dailyBonusGems, setDailyBonusGems] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [previewLevel, setPreviewLevel] = useState<number | null>(null);
   const [unlockAnim, setUnlockAnim] = useState<{ levelNum: number; levelData: ReturnType<typeof getLevelData> } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -421,36 +389,10 @@ export default function LevelsScreen() {
     opacity: unlockOpacity.value,
   }));
 
-  const allLevels = useMemo(() =>
+  const levels = useMemo(() =>
     Array.from({ length: TOTAL_LEVELS }, (_, i) => i + 1),
     []
   );
-
-  const levels = useMemo(() => {
-    let filtered = allLevels;
-    // Filtro por categoría
-    if (selectedCategory !== 'all') {
-      const cat = CATEGORIES.find(c => c.id === selectedCategory);
-      if (cat && cat.levels) {
-        filtered = filtered.filter(levelNum => {
-          const lessonId = ((levelNum - 1) % 40) + 1;
-          return cat.levels!.includes(lessonId);
-        });
-      }
-    }
-    // Filtro por búsqueda
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      filtered = filtered.filter(levelNum => {
-        const data = getLevelData(levelNum);
-        return (
-          String(levelNum).includes(q) ||
-          data.name.toLowerCase().includes(q)
-        );
-      });
-    }
-    return filtered;
-  }, [selectedCategory, searchQuery, allLevels]);
 
   const handleLevelPress = useCallback((levelNum: number) => {
     const isCompleted = !!game.levelProgress[levelNum]?.completed;
@@ -552,81 +494,7 @@ export default function LevelsScreen() {
         );
       })()}
 
-      {/* Filtro de categorías */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryScroll}
-        contentContainerStyle={styles.categoryScrollContent}
-      >
-        {CATEGORIES.map(cat => (
-          <TouchableOpacity
-            key={cat.id}
-            style={[
-              styles.categoryChip,
-              selectedCategory === cat.id && styles.categoryChipActive,
-            ]}
-            onPress={() => setSelectedCategory(cat.id)}
-            activeOpacity={0.75}
-          >
-            <Text style={[
-              styles.categoryChipText,
-              selectedCategory === cat.id && styles.categoryChipTextActive,
-            ]}>
-              {cat.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
 
-      {/* Barra de búsqueda */}
-      <View style={styles.searchContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Buscar nivel o tema..."
-          placeholderTextColor="#4B5563"
-          returnKeyType="search"
-          clearButtonMode="while-editing"
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={styles.searchClearText}>✕</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Modos de práctica — fila horizontal compacta */}
-      <View style={styles.practiceSection}>
-        <Text style={styles.practiceSectionLabel}>MODOS DE PRÁCTICA</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.practiceRow}>
-          {[
-            { emoji: '⚡', title: 'Repaso', colors: ['#EFF6FF', '#DBEAFE'] as [string,string], accent: '#3B82F6', route: '/practice/quick-review' },
-            { emoji: '🎧', title: 'Escucha', colors: ['#F0FDF4', '#DCFCE7'] as [string,string], accent: '#16A34A', route: '/practice/listen-mode' },
-            { emoji: '📝', title: 'Ordenar', colors: ['#FFFBEB', '#FEF3C7'] as [string,string], accent: '#D97706', route: '/practice/order-mode' },
-            { emoji: '🔥', title: 'Difíciles', colors: ['#FFF1F2', '#FFE4E6'] as [string,string], accent: '#E11D48', route: '/practice/hard-words' },
-          ].map((mode) => (
-            <TouchableOpacity
-              key={mode.title}
-              onPress={() => router.push(mode.route as any)}
-              activeOpacity={0.75}
-              style={[styles.practiceChipWrapper, { borderColor: mode.accent + '50' }]}
-            >
-              <LinearGradient
-                colors={mode.colors}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[styles.practiceChip, { borderWidth: 1, borderColor: mode.accent + '40' }]}
-              >
-                <Text style={styles.practiceChipEmoji}>{mode.emoji}</Text>
-                <Text style={[styles.practiceChipTitle, { color: mode.accent }]}>{mode.title}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
 
       {/* Barra de progreso global */}
       <View style={styles.globalProgress}>
@@ -869,127 +737,6 @@ const styles = StyleSheet.create({
   streakLabel: { fontSize: 9, color: '#FF9500', fontWeight: '600', marginLeft: 2 },
   streakHot: { fontSize: 10, marginLeft: 1 },
 
-  // Sección de modos de práctica
-  practiceSection: {
-    flexShrink: 0,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  practiceSectionLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 1.2,
-    marginBottom: 6,
-  },
-  practiceRow: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 2,
-  },
-  practiceTileNew: {
-    width: 80,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  practiceTileEmojiNew: { fontSize: 18, marginBottom: 4 },
-  practiceTileTitleNew: { fontSize: 11, fontWeight: '800', letterSpacing: -0.2, textAlign: 'center' },
-  practiceTileSubNew: { fontSize: 10, color: '#64748B', marginTop: 2, fontWeight: '500' },
-  practiceRowContent: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    gap: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  practiceChipWrapper: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  practiceChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    gap: 6,
-    borderRadius: 20,
-  },
-  practiceChipEmoji: { fontSize: 16 },
-  practiceChipTitle: { fontSize: 13, fontWeight: '800', letterSpacing: -0.1 },
-  // Legacy grid styles (kept for compat)
-  practiceSectionTitle: { fontSize: 12, fontWeight: '700', color: '#6B7280', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
-  practiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  practiceTile: { width: '47.5%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'flex-start' },
-  practiceTileWrapper: { width: '47.5%', borderRadius: 18, overflow: 'hidden' },
-  practiceTileGradient: { padding: 18, alignItems: 'flex-start', minHeight: 110, justifyContent: 'space-between' },
-  practiceTileEmojiLg: { fontSize: 32, marginBottom: 8 },
-  practiceTileEmoji: { fontSize: 26, marginBottom: 8 },
-  practiceTileTitle: { fontSize: 14, fontWeight: '900', color: '#FFFFFF', marginBottom: 3, letterSpacing: -0.2 },
-  practiceTileSub: { fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
-  // Filtro de categorías
-  categoryScroll: {
-    flexShrink: 0,
-    flexGrow: 0,
-    height: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  categoryScrollContent: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    flexShrink: 0,
-  },
-  categoryChipActive: {
-    backgroundColor: '#38BDF8',
-    borderColor: '#38BDF8',
-  },
-  categoryChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#475569',
-  },
-  categoryChipTextActive: {
-    color: '#F8FAFF',
-    fontWeight: '800',
-  },
-  searchContainer: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#FFFFFF', borderRadius: 14,
-    marginHorizontal: 16, marginVertical: 6,
-    paddingHorizontal: 14, paddingVertical: 10,
-    borderWidth: 1.5, borderColor: '#E2E8F0',
-  },
-  searchIcon: { fontSize: 14, marginRight: 8 },
-  searchInput: {
-    flex: 1, color: '#1E293B', fontSize: 14,
-    paddingVertical: 0,
-  },
-  searchClear: { minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'center' },
-  searchClearText: { color: '#64748B', fontSize: 14 },
   // ─── Modal de vista previa ─────────────────────────────────────────
   modalOverlay: {
     flex: 1,
