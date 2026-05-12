@@ -17,6 +17,9 @@ import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { ConfettiOverlay } from '@/components/confetti-overlay';
 import { AdBanner } from '@/components/AdBanner';
+import { kvGet } from '@/lib/local-kv';
+
+const AVATAR_KEY = '@gemlish_avatar';
 
 const TOTAL_LEVELS = 500;
 
@@ -82,8 +85,8 @@ function FireAnimation({ streak }: { streak: number }) {
   );
 }
 
-function StatsHeader({ username, gems, xp, streak }: {
-  username: string; gems: number; xp: number; streak: number;
+function StatsHeader({ username, gems, xp, streak, avatar }: {
+  username: string; gems: number; xp: number; streak: number; avatar: string;
 }) {
   const hour = new Date().getHours();
   const timeGreeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
@@ -91,16 +94,21 @@ function StatsHeader({ username, gems, xp, streak }: {
   return (
     <View style={styles.headerWrapper}>
       <View style={styles.header}>
-        {/* Izquierda: saludo + nombre + XP */}
+        {/* Izquierda: avatar + saludo + nombre + XP */}
         <View style={styles.headerLeft}>
-          <Text style={styles.greetingTime}>{timeGreeting} 👋</Text>
-          <Text style={styles.greetingName}>{username}</Text>
+          <View style={styles.headerLeftTop}>
+            <Text style={styles.avatarEmoji}>{avatar}</Text>
+            <View style={styles.headerGreetingBlock}>
+              <Text style={styles.greetingTime}>{timeGreeting} 👋</Text>
+              <Text style={styles.greetingName}>{username}</Text>
+            </View>
+          </View>
           <View style={styles.xpRow}>
             <Text style={styles.xpStar}>⭐</Text>
             <Text style={styles.xpAmount}>{xp.toLocaleString()} XP</Text>
           </View>
         </View>
-        {/* Derecha: gemas y racha */}
+        {/* Derecha: gemas, racha y ajustes */}
         <View style={styles.headerRight}>
           <View style={[styles.statPillGradient, { backgroundColor: '#EFF6FF', borderWidth: 1, borderColor: '#BFDBFE' }]}>
             <Text style={styles.statPillEmoji}>💎</Text>
@@ -110,6 +118,9 @@ function StatsHeader({ username, gems, xp, streak }: {
             <FireAnimation streak={streak} />
             <Text style={[styles.statPillValue, { color: streak >= 3 ? '#D97706' : '#64748B' }]}>{streak}</Text>
           </View>
+          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/(tabs)/profile' as any)} activeOpacity={0.7}>
+            <Text style={styles.settingsBtnEmoji}>⚙️</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -340,9 +351,14 @@ export default function LevelsScreen() {
   const { username, game, claimDailyBonus } = useGame();
   const { xp, gems, streak, maxUnlockedLevel, levelProgress } = game;
   const [dailyBonusGems, setDailyBonusGems] = useState<number | null>(null);
+  const [avatar, setAvatar] = useState('🐼');
   const [previewLevel, setPreviewLevel] = useState<number | null>(null);
   const [unlockAnim, setUnlockAnim] = useState<{ levelNum: number; levelData: ReturnType<typeof getLevelData> } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  useEffect(() => {
+    kvGet(AVATAR_KEY).then(v => { if (v) setAvatar(v); });
+  }, []);
   const unlockScale = useSharedValue(0);
   const unlockOpacity = useSharedValue(0);
   const { playUnlock } = useFeedbackSounds();
@@ -430,6 +446,7 @@ export default function LevelsScreen() {
         gems={gems}
         xp={xp}
         streak={streak}
+        avatar={avatar}
       />
 
       {/* ─── Widget de Progreso del Curso ─── */}
@@ -574,18 +591,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: 12,
+    paddingTop: 10,
     paddingBottom: 10,
   },
   headerLeft: { flex: 1 },
+  headerLeftTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatarEmoji: { fontSize: 28 },
+  headerGreetingBlock: { flex: 1 },
   greetingTime: { fontSize: 12, fontWeight: '500', color: '#64748B', letterSpacing: 0.2 },
-  greetingName: { fontSize: 20, fontWeight: '900', color: '#1E293B', marginTop: 1, letterSpacing: -0.4, flexShrink: 1 },
+  greetingName: { fontSize: 18, fontWeight: '900', color: '#1E293B', marginTop: 1, letterSpacing: -0.4, flexShrink: 1 },
   xpRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
   xpStar: { fontSize: 12 },
   xpAmount: { fontSize: 13, fontWeight: '700', color: '#4ADE80', marginLeft: 4 },
   xpLabel: { fontSize: 11, fontWeight: '600', color: '#A3E63580' },
-  headerRight: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  headerRight: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  settingsBtn: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: '#E2E8F0',
+  },
+  settingsBtnEmoji: { fontSize: 16 },
   statPill: {
     flexDirection: 'row',
     alignItems: 'center',
