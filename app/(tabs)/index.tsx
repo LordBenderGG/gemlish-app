@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react'
 import { useFocusEffect } from 'expo-router';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  StatusBar, Modal,
+  StatusBar, Modal, ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Reanimated, {
@@ -16,7 +16,6 @@ import { getLevelData, getLevelIcon } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
 import { ConfettiOverlay } from '@/components/confetti-overlay';
-import { AdBanner } from '@/components/AdBanner';
 import { kvGet } from '@/lib/local-kv';
 
 const AVATAR_KEY = '@gemlish_avatar';
@@ -94,18 +93,18 @@ function StatsHeader({ username, gems, xp, streak, avatar }: {
   return (
     <View style={styles.headerWrapper}>
       <View style={styles.header}>
-        {/* Izquierda: avatar + saludo + nombre + XP */}
+        {/* Izquierda: avatar solo + saludo + nombre + XP debajo */}
         <View style={styles.headerLeft}>
           <View style={styles.headerLeftTop}>
             <Text style={styles.avatarEmoji}>{avatar}</Text>
             <View style={styles.headerGreetingBlock}>
               <Text style={styles.greetingTime}>{timeGreeting} 👋</Text>
               <Text style={styles.greetingName}>{username}</Text>
+              <View style={styles.xpRow}>
+                <Text style={styles.xpStar}>⭐</Text>
+                <Text style={styles.xpAmount}>{xp.toLocaleString()} XP</Text>
+              </View>
             </View>
-          </View>
-          <View style={styles.xpRow}>
-            <Text style={styles.xpStar}>⭐</Text>
-            <Text style={styles.xpAmount}>{xp.toLocaleString()} XP</Text>
           </View>
         </View>
         {/* Derecha: gemas, racha y ajustes */}
@@ -356,9 +355,6 @@ export default function LevelsScreen() {
   const [unlockAnim, setUnlockAnim] = useState<{ levelNum: number; levelData: ReturnType<typeof getLevelData> } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  useEffect(() => {
-    kvGet(AVATAR_KEY).then(v => { if (v) setAvatar(v); });
-  }, []);
   const unlockScale = useSharedValue(0);
   const unlockOpacity = useSharedValue(0);
   const { playUnlock } = useFeedbackSounds();
@@ -385,6 +381,7 @@ export default function LevelsScreen() {
   const prevMaxUnlockedRef = useRef(maxUnlockedLevel);
   useFocusEffect(
     useCallback(() => {
+      kvGet(AVATAR_KEY).then(v => { if (v) setAvatar(v); });
       const prev = prevMaxUnlockedRef.current;
       if (maxUnlockedLevel > prev && maxUnlockedLevel > 1) {
         showUnlockAnimation(maxUnlockedLevel);
@@ -524,6 +521,36 @@ export default function LevelsScreen() {
         </View>
       </View>
 
+      {/* ─── Modos de Práctica ─── */}
+      <View style={styles.practiceSection}>
+        <Text style={styles.practiceSectionLabel}>MODOS DE PRÁCTICA</Text>
+        <View style={styles.practiceGrid}>
+          {[
+            { emoji: '⚡', title: 'Repaso', colors: ['#EFF6FF', '#DBEAFE'] as [string,string], accent: '#3B82F6', route: '/practice/quick-review' },
+            { emoji: '🎧', title: 'Escucha', colors: ['#F0FDF4', '#DCFCE7'] as [string,string], accent: '#16A34A', route: '/practice/listen-mode' },
+            { emoji: '📝', title: 'Ordenar', colors: ['#FFFBEB', '#FEF3C7'] as [string,string], accent: '#D97706', route: '/practice/order-mode' },
+            { emoji: '🔥', title: 'Difíciles', colors: ['#FFF1F2', '#FFE4E6'] as [string,string], accent: '#E11D48', route: '/practice/hard-words' },
+          ].map(mode => (
+            <TouchableOpacity
+              key={mode.title}
+              onPress={() => router.push(mode.route as any)}
+              activeOpacity={0.75}
+              style={[styles.practiceChipWrapper, { borderColor: mode.accent + '50' }]}
+            >
+              <LinearGradient
+                colors={mode.colors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.practiceChip, { borderWidth: 1, borderColor: mode.accent + '40' }]}
+              >
+                <Text style={styles.practiceChipEmoji}>{mode.emoji}</Text>
+                <Text style={[styles.practiceChipTitle, { color: mode.accent }]}>{mode.title}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       <FlatList
         data={levels}
         keyExtractor={(item) => String(item)}
@@ -545,9 +572,6 @@ export default function LevelsScreen() {
           onClose={() => setPreviewLevel(null)}
         />
       )}
-
-      {/* Banner AdMob — parte inferior */}
-      <AdBanner />
 
       {/* Confeti de desbloqueo */}
       <ConfettiOverlay visible={showConfetti} />
@@ -597,7 +621,7 @@ const styles = StyleSheet.create({
   },
   headerLeft: { flex: 1 },
   headerLeftTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  avatarEmoji: { fontSize: 28 },
+  avatarEmoji: { fontSize: 40 },
   headerGreetingBlock: { flex: 1 },
   greetingTime: { fontSize: 12, fontWeight: '500', color: '#64748B', letterSpacing: 0.2 },
   greetingName: { fontSize: 18, fontWeight: '900', color: '#1E293B', marginTop: 1, letterSpacing: -0.4, flexShrink: 1 },
@@ -1031,5 +1055,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  // Modos de práctica
+  practiceSection: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  practiceSectionLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 1.2,
+    marginBottom: 8,
+  },
+  practiceGrid: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  practiceChipWrapper: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  practiceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    gap: 5,
+    borderRadius: 12,
+  },
+  practiceChipEmoji: { fontSize: 18 },
+  practiceChipTitle: { fontSize: 14, fontWeight: '800', letterSpacing: -0.1 },
 });
 

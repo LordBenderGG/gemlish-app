@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useSoundSettings } from '@/lib/sound-settings';
 import { LESSONS } from '@/data/lessons';
 import { ACHIEVEMENTS } from '@/lib/achievements';
 import type { Achievement, AchievementStats } from '@/lib/achievements';
@@ -17,7 +18,6 @@ import {
   type PracticeSession,
 } from '@/lib/practice-history';
 import { kvGetJson, kvGet, kvSet, kvSetJson } from '@/lib/local-kv';
-import { AdBanner } from '@/components/AdBanner';
 import { STRINGS } from '@/constants/strings';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
@@ -63,11 +63,18 @@ function AchievementCard({ achievement, unlocked, username }: { achievement: Ach
 
 // ─── Sección de Notificaciones ────────────────────────────────────────────────
 
+function formatTime12h(hour: number, minute: number): string {
+  const h = hour % 12 || 12;
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  return `${h}:${String(minute).padStart(2, '0')} ${ampm}`;
+}
+
 function NotificationsSection() {
   const { settings, loading, enableNotifications, disableNotifications } = useNotifications();
   const [saving, setSaving] = useState(false);
   // useRef como guard síncrono para evitar llamadas concurrentes bajo tap rápido
   const savingRef = useRef(false);
+  const timeStr = formatTime12h(settings.hour, settings.minute);
 
   const handleToggle = useCallback(async (value: boolean) => {
     if (savingRef.current) return;
@@ -112,10 +119,10 @@ function NotificationsSection() {
       <View style={styles.notifCard}>
         <View style={styles.notifRow}>
           <View style={styles.notifRowLeft}>
-            <Text style={styles.notifRowTitle}>Recordatorio de las 8:00 AM</Text>
+            <Text style={styles.notifRowTitle}>Recordatorio de las {timeStr}</Text>
             <Text style={styles.notifRowSub}>
               {settings.enabled
-                ? 'Notificación activa · todos los días a las 8:00 AM'
+                ? `Notificación activa · todos los días a las ${timeStr}`
                 : 'Recibe un aviso cada mañana para no perder tu racha'}
             </Text>
           </View>
@@ -125,6 +132,36 @@ function NotificationsSection() {
             trackColor={{ false: '#E2E8F0', true: '#FDE68A' }}
             thumbColor={settings.enabled ? '#FBBF24' : '#64748B'}
             disabled={saving}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ─── Sección de Sonidos ─────────────────────────────────────────────────────
+
+function SoundsSection() {
+  const { soundEnabled, setSoundEnabled } = useSoundSettings();
+
+  return (
+    <View style={styles.notifSection}>
+      <Text style={styles.sectionTitle}>🔊 Sonidos</Text>
+      <View style={styles.notifCard}>
+        <View style={styles.notifRow}>
+          <View style={styles.notifRowLeft}>
+            <Text style={styles.notifRowTitle}>Efectos de sonido</Text>
+            <Text style={styles.notifRowSub}>
+              {soundEnabled
+                ? 'Sonidos al responder y completar niveles'
+                : 'Sin efectos de sonido'}
+            </Text>
+          </View>
+          <Switch
+            value={soundEnabled}
+            onValueChange={setSoundEnabled}
+            trackColor={{ false: '#E2E8F0', true: '#58CC0240' }}
+            thumbColor={soundEnabled ? '#4ADE80' : '#64748B'}
           />
         </View>
       </View>
@@ -436,12 +473,6 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>👤 Perfil</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/stats' as any)} activeOpacity={0.7}>
-            <Text style={styles.settingsBtnText}>📊</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/settings' as any)} activeOpacity={0.7}>
-            <Text style={styles.settingsBtnText}>⚙️</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
             <Text style={styles.logoutBtnText}>Salir</Text>
           </TouchableOpacity>
@@ -466,7 +497,7 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             <View style={styles.avatarCircle}>
-              <Text style={{ fontSize: 32 }}>{avatar}</Text>
+              <Text style={{ fontSize: 40 }}>{avatar}</Text>
             </View>
             <View style={styles.avatarEditBtn}>
               <Text style={styles.avatarEditIcon}>✏️</Text>
@@ -518,115 +549,6 @@ export default function ProfileScreen() {
           </View>
           </View>
         </View>
-
-        {/* Banner AdMob — debajo del perfil del usuario */}
-        <AdBanner style={{ marginBottom: 8 }} />
-
-        {/* Estadísticas */}
-        <Text style={styles.sectionTitle}>📊 Estadísticas</Text>
-        <View style={styles.statsGrid}>
-          {[
-            { label: 'Niveles', value: stats.levelsCompleted, emoji: '🎯', color: '#38BDF8' },
-            { label: 'Racha', value: `${stats.streak} días`, emoji: '🔥', color: '#FBBF24' },
-            { label: 'Palabras', value: stats.totalWordsLearned, emoji: '📖', color: '#4ADE80' },
-            { label: 'Diamantes', value: stats.gems, emoji: '💎', color: '#38BDF8' },
-            { label: 'XP Total', value: stats.xp.toLocaleString(), emoji: '⭐', color: '#38BDF8' },
-            { label: 'Días Tarea', value: stats.totalDaysCompleted, emoji: '📅', color: '#EF4444' },
-            { label: 'Desafíos', value: game.dailyChallengesCompleted ?? 0, emoji: '🏆', color: '#F59E0B' },
-          ].map(stat => (
-            <View key={stat.label} style={styles.statCard}>
-              <Text style={styles.statEmoji}>{stat.emoji}</Text>
-              <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Nivel de inglés estimado A1-B2 */}
-        <View style={styles.englishLevelCard}>
-          <Text style={styles.englishLevelTitle}>Nivel de Inglés Estimado</Text>
-          {(() => {
-            const lvls = stats.levelsCompleted;
-            let cefr = 'A1', cefrColor = '#64748B', cefrDesc = 'Principiante absoluto', cefrPct = 0;
-            if (lvls >= 400) { cefr = 'B2'; cefrColor = '#38BDF8'; cefrDesc = 'Independiente avanzado'; cefrPct = 95; }
-            else if (lvls >= 250) { cefr = 'B1'; cefrColor = '#38BDF8'; cefrDesc = 'Independiente intermedio'; cefrPct = 70; }
-            else if (lvls >= 100) { cefr = 'A2'; cefrColor = '#4ADE80'; cefrDesc = 'Usuario básico'; cefrPct = 40; }
-            else if (lvls >= 10) { cefr = 'A1+'; cefrColor = '#FBBF24'; cefrDesc = 'Principiante avanzado'; cefrPct = 15; }
-            else { cefrPct = Math.round((lvls / 10) * 15); }
-            return (
-              <View>
-                <View style={styles.englishLevelRow}>
-                  <View style={[styles.englishLevelBadge, { backgroundColor: cefrColor + '22', borderColor: cefrColor }]}>
-                    <Text style={[styles.englishLevelBadgeText, { color: cefrColor }]}>{cefr}</Text>
-                  </View>
-                  <View style={styles.englishLevelInfo}>
-                    <Text style={styles.englishLevelName}>{cefrDesc}</Text>
-                    <Text style={styles.englishLevelSub}>{lvls} niveles completados</Text>
-                  </View>
-                </View>
-                <View style={styles.englishLevelBarBg}>
-                  <View style={[styles.englishLevelBarFill, { width: `${cefrPct}%` as any, backgroundColor: cefrColor }]} />
-                </View>
-                <View style={styles.englishLevelScale}>
-                  {['A1', 'A2', 'B1', 'B2'].map(l => (
-                    <Text key={l} style={[styles.englishLevelScaleLabel, l === cefr.replace('+','') && { color: cefrColor, fontWeight: '700' }]}>{l}</Text>
-                  ))}
-                </View>
-              </View>
-            );
-          })()}
-        </View>
-
-        {/* Mapa de calor de actividad */}
-        {(() => {
-          const today = new Date();
-          const days: { date: string; active: boolean }[] = [];
-          // Usar levelCompletedDates para marcar días con actividad real
-          const completedDates = game.levelCompletedDates ?? {};
-          // También incluir días con tarea diaria completada
-          const todayStr = today.toISOString().split('T')[0];
-          for (let i = 89; i >= 0; i--) {
-            const d = new Date(today);
-            d.setDate(d.getDate() - i);
-            const key = d.toISOString().split('T')[0];
-            // Activo si completó al menos un nivel ese día, o si completó la tarea diaria hoy
-            const hasLevelActivity = (completedDates[key] ?? 0) > 0;
-            const hasDailyToday = key === todayStr && daily.dailyCompleted;
-            days.push({ date: key, active: hasLevelActivity || hasDailyToday });
-          }
-          const weeks: typeof days[] = [];
-          for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
-          return (
-            <View style={styles.heatmapContainer}>
-              <Text style={styles.sectionTitle}>🗓 Actividad (90 días)</Text>
-              <View style={styles.heatmapGrid}>
-                {weeks.map((week, wi) => (
-                  <View key={wi} style={styles.heatmapWeek}>
-                    {week.map((day, di) => (
-                      <View
-                        key={di}
-                        style={[styles.heatmapCell, day.active && styles.heatmapCellActive]}
-                      />
-                    ))}
-                  </View>
-                ))}
-              </View>
-              <Text style={styles.heatmapLegend}>
-                {days.filter(d => d.active).length} días activos de los últimos 90
-              </Text>
-            </View>
-          );
-        })()}
-
-        {/* Acceso rápido a Configuración */}
-        <TouchableOpacity style={styles.settingsLink} onPress={() => router.push('/settings' as any)} activeOpacity={0.8}>
-          <Text style={styles.settingsLinkEmoji}>⚙️</Text>
-          <View style={styles.settingsLinkInfo}>
-            <Text style={styles.settingsLinkTitle}>Configuración</Text>
-            <Text style={styles.settingsLinkSub}>Apariencia, sonidos y notificaciones</Text>
-          </View>
-          <Text style={styles.settingsLinkArrow}>›</Text>
-        </TouchableOpacity>
 
         {/* Palabras Difíciles */}
         <HardWordsSection levelErrors={game.levelErrors} />
@@ -725,6 +647,10 @@ export default function ProfileScreen() {
           <Text style={styles.viewAllArrow}>›</Text>
         </TouchableOpacity>
 
+        {/* Sonidos y Recordatorio — sin navegar a Configuración */}
+        <SoundsSection />
+        <NotificationsSection />
+
         <View style={{ height: 32 }} />
       </ScrollView>
     </View>
@@ -782,7 +708,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   avatarCircle: {
-    width: 64, height: 64, borderRadius: 32,
+    width: 80, height: 80, borderRadius: 40,
     justifyContent: 'center', alignItems: 'center',
     backgroundColor: '#EFF6FF',
     borderWidth: 2,
@@ -1021,19 +947,19 @@ const styles = StyleSheet.create({
   avatarModalCloseText: { color: '#64748B', fontWeight: '700', fontSize: 15 },
   // Avatar edit button
   avatarEditBtn: {
-    position: 'absolute', bottom: -4, right: -4,
-    backgroundColor: '#38BDF8', borderRadius: 12,
-    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
+    position: 'absolute', bottom: -2, right: -2,
+    backgroundColor: '#38BDF8', borderRadius: 14,
+    width: 28, height: 28, justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: '#FFFFFF',
   },
-  avatarEditIcon: { fontSize: 12 },
+  avatarEditIcon: { fontSize: 10 },
   // Edición de nombre
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   nameEditBtn: {
-    backgroundColor: '#E2E8F0', borderRadius: 12,
-    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#E2E8F0', borderRadius: 8,
+    width: 28, height: 28, justifyContent: 'center', alignItems: 'center',
   },
-  nameEditBtnIcon: { fontSize: 12 },
+  nameEditBtnIcon: { fontSize: 10 },
   nameEditRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4,
     paddingHorizontal: 8,
