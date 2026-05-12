@@ -27,29 +27,9 @@ export default function StatsScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <View style={[styles.scroll, { paddingBottom: insets.bottom }]}>
         {/* Header */}
         <Text style={styles.pageTitle}>📊 Estadísticas</Text>
-
-        {/* Estadísticas */}
-        <Text style={styles.sectionTitle}>📊 Resumen</Text>
-        <View style={styles.statsGrid}>
-          {[
-            { label: 'Niveles', value: stats.levelsCompleted, emoji: '🎯', color: '#38BDF8' },
-            { label: 'Racha', value: `${stats.streak} días`, emoji: '🔥', color: '#FBBF24' },
-            { label: 'Palabras', value: stats.totalWordsLearned, emoji: '📖', color: '#4ADE80' },
-            { label: 'Diamantes', value: stats.gems, emoji: '💎', color: '#38BDF8' },
-            { label: 'XP Total', value: stats.xp.toLocaleString(), emoji: '⭐', color: '#38BDF8' },
-            { label: 'Días Tarea', value: stats.totalDaysCompleted, emoji: '📅', color: '#EF4444' },
-            { label: 'Desafíos', value: game.dailyChallengesCompleted ?? 0, emoji: '🏆', color: '#F59E0B' },
-          ].map(stat => (
-            <View key={stat.label} style={styles.statCard}>
-              <Text style={styles.statEmoji}>{stat.emoji}</Text>
-              <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
-        </View>
 
         {/* Nivel de inglés estimado A1-B2 */}
         <View style={styles.englishLevelCard}>
@@ -84,6 +64,28 @@ export default function StatsScreen() {
               </View>
             );
           })()}
+        </View>
+
+        {/* Estadísticas - Grid con ancho y alto fijo */}
+        <View>
+          <Text style={styles.sectionTitle}>📊 Resumen</Text>
+          <View style={styles.statsGrid}>
+            {[
+              { label: 'Niveles', value: stats.levelsCompleted, emoji: '🎯', color: '#38BDF8' },
+              { label: 'Racha', value: `${stats.streak} días`, emoji: '🔥', color: '#FBBF24' },
+              { label: 'Palabras', value: stats.totalWordsLearned, emoji: '📖', color: '#4ADE80' },
+              { label: 'Diamantes', value: stats.gems, emoji: '💎', color: '#38BDF8' },
+              { label: 'XP Total', value: stats.xp.toLocaleString(), emoji: '⭐', color: '#38BDF8' },
+              { label: 'Días Tarea', value: stats.totalDaysCompleted, emoji: '📅', color: '#EF4444' },
+              { label: 'Desafíos', value: game.dailyChallengesCompleted ?? 0, emoji: '🏆', color: '#F59E0B' },
+            ].map(stat => (
+              <View key={stat.label} style={styles.statCard}>
+                <Text style={styles.statEmoji}>{stat.emoji}</Text>
+                <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         {/* Mapa de calor de actividad */}
@@ -123,52 +125,52 @@ export default function StatsScreen() {
             </View>
           );
         })()}
-
-        <View style={{ height: 32 }} />
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scroll: { padding: 16, gap: 16 },
-  pageTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B' },
-  sectionTitle: { fontSize: 17, fontWeight: '800', color: '#1E293B' },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  scroll: { flex: 1, padding: 16, gap: 12 },
+  pageTitle: { fontSize: 22, fontWeight: '800', color: '#1E293B', marginBottom: 4 },
+  sectionTitle: { fontSize: 14, fontWeight: '800', color: '#1E293B', marginBottom: 6 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' },
   statCard: {
-    width: '30%', flex: 1, minWidth: 90,
-    backgroundColor: '#EFF6FF', borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1.5, borderColor: '#DBEAFE',
+    width: '23%',
+    backgroundColor: '#EFF6FF', borderRadius: 12, padding: 8,
+    alignItems: 'center', borderWidth: 1, borderColor: '#DBEAFE',
+    aspectRatio: 1,
+    justifyContent: 'center',
   },
-  statEmoji: { fontSize: 24, marginBottom: 6 },
-  statValue: { fontSize: 18, fontWeight: '800', marginBottom: 2 },
-  statLabel: { fontSize: 11, color: '#64748B', fontWeight: '600', textAlign: 'center' },
+  statEmoji: { fontSize: 18, marginBottom: 4 },
+  statValue: { fontSize: 14, fontWeight: '800', marginBottom: 2 },
+  statLabel: { fontSize: 9, color: '#64748B', fontWeight: '600', textAlign: 'center' },
   englishLevelCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 12,
     borderWidth: 1, borderColor: '#E2E8F0',
   },
-  englishLevelTitle: { fontSize: 13, color: '#64748B', fontWeight: '700', marginBottom: 12, textTransform: 'uppercase' },
-  englishLevelRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  englishLevelTitle: { fontSize: 11, color: '#64748B', fontWeight: '700', marginBottom: 8, textTransform: 'uppercase' },
+  englishLevelRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
   englishLevelBadge: {
-    width: 56, height: 56, borderRadius: 12, borderWidth: 2,
+    width: 48, height: 48, borderRadius: 10, borderWidth: 2,
     justifyContent: 'center', alignItems: 'center',
   },
-  englishLevelBadgeText: { fontSize: 20, fontWeight: '900' },
+  englishLevelBadgeText: { fontSize: 18, fontWeight: '900' },
   englishLevelInfo: { flex: 1 },
-  englishLevelName: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
-  englishLevelSub: { fontSize: 12, color: '#64748B' },
-  englishLevelBarBg: { height: 8, backgroundColor: '#E2E8F0', borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
-  englishLevelBarFill: { height: 8, borderRadius: 4 },
+  englishLevelName: { fontSize: 14, fontWeight: '700', color: '#1E293B', marginBottom: 1 },
+  englishLevelSub: { fontSize: 11, color: '#64748B' },
+  englishLevelBarBg: { height: 6, backgroundColor: '#E2E8F0', borderRadius: 3, overflow: 'hidden', marginBottom: 6 },
+  englishLevelBarFill: { height: 6, borderRadius: 3 },
   englishLevelScale: { flexDirection: 'row', justifyContent: 'space-between' },
-  englishLevelScaleLabel: { fontSize: 11, color: '#94A3B8', fontWeight: '600' },
-  heatmapContainer: { marginVertical: 8 },
-  heatmapGrid: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 2 },
-  heatmapWeek: { flexDirection: 'column', gap: 3, flex: 1 },
+  englishLevelScaleLabel: { fontSize: 10, color: '#94A3B8', fontWeight: '600' },
+  heatmapContainer: { marginVertical: 4 },
+  heatmapGrid: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 1, gap: 2 },
+  heatmapWeek: { flexDirection: 'column', gap: 2, flex: 1 },
   heatmapCell: {
-    aspectRatio: 1, borderRadius: 2, marginHorizontal: 1.5,
+    aspectRatio: 1, borderRadius: 1,
     backgroundColor: '#E2E8F0',
   },
   heatmapCellActive: { backgroundColor: '#4ADE80' },
-  heatmapLegend: { fontSize: 11, color: '#64748B', marginTop: 8, textAlign: 'center' },
+  heatmapLegend: { fontSize: 10, color: '#64748B', marginTop: 6, textAlign: 'center' },
 });
