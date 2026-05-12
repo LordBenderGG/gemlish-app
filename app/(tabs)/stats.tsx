@@ -1,23 +1,62 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, StatusBar, TouchableOpacity,
+  View, Text, FlatList, StyleSheet, StatusBar, TouchableOpacity, Alert, Share, Modal, Platform, Switch,
 } from 'react-native';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { LESSONS } from '@/data/lessons';
 import { router } from 'expo-router';
+import { ACHIEVEMENTS } from '@/lib/achievements';
+import type { Achievement, AchievementStats } from '@/lib/achievements';
+import {
+  getPracticeHistory, formatDuration, formatSessionDate,
+  type PracticeSession,
+} from '@/lib/practice-history';
+import { kvGetJson } from '@/lib/local-kv';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
 
-interface HardWord {
-  word: string;
-  translation: string;
-  pronunciation?: string;
-  failCount: number;
+type UserStats = AchievementStats;
+const LEADERBOARD_KEY = '@gemlish_all_users';
+
+// ─── Componente de Logro ──────────────────────────────────────────────────────
+
+function AchievementCard({ achievement, unlocked, username }: { achievement: Achievement; unlocked: boolean; username: string }) {
+  const handleShare = useCallback(async () => {
+    try {
+      const msg = `🏆 Desbloquee el logro "${achievement.title}" en Gemlish!\n${achievement.emoji} ${achievement.description}\n\n📱 Aprende inglés jugando con Gemlish`;
+      await Share.share({ message: msg, title: `Logro desbloqueado: ${achievement.title}` });
+    } catch {
+      // usuario canceló
+    }
+  }, [achievement]);
+
+  return (
+    <View style={[styles.achieveCard, !unlocked && styles.achieveCardLocked]}>
+      <Text style={[styles.achieveEmoji, !unlocked && styles.achieveEmojiLocked]}>
+        {unlocked ? achievement.emoji : '🔒'}
+      </Text>
+      <View style={styles.achieveInfo}>
+        <Text style={[styles.achieveTitle, !unlocked && styles.achieveTitleLocked]}>
+          {achievement.title}
+        </Text>
+        <Text style={[styles.achieveDesc, !unlocked && styles.achieveDescLocked]}>
+          {achievement.description}
+        </Text>
+      </View>
+      {unlocked ? (
+        <TouchableOpacity style={styles.achieveShareBtn} onPress={handleShare} activeOpacity={0.7}>
+          <Text style={styles.achieveShareIcon}>📤</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.achieveCheck}>🔒</Text>
+      )}
+    </View>
+  );
 }
 
-// ─── Función auxiliar ─────────────────────────────────────────────────────────
+// ─── Función auxiliar para palabras difíciles ─────────────────────────────────
 
 function findWordTranslation(word: string): { translation: string; pronunciation?: string } {
   for (const lesson of LESSONS) {
@@ -27,7 +66,74 @@ function findWordTranslation(word: string): { translation: string; pronunciation
   return { translation: 'No encontrado', pronunciation: undefined };
 }
 
+// ─── Tipo HardWord ────────────────────────────────────────────────────────────
+
+interface HardWord {
+  word: string;
+  translation: string;
+  pronunciation?: string;
+  failCount: number;
+}
+
 // ─── Sección Palabras Difíciles ────────────────────────────────────────────────
+
+
+function LeaderboardSection() {
+  const { game, username } = useGame();
+  const t = useThemeStyles();
+  const [entries, setEntries] = useState<Array<{ username: string; xp: number; streak: number; levelsCompleted: number }>>([]);
+
+  useEffect(() => {
+    kvGetJson<Array<{ username: string; xp: number; streak: number; levelsCompleted: number }>>(LEADERBOARD_KEY, []).then(all => {
+      if (!all.length) {
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        setEntries([{ username: username ?? 'Tú', xp: game.xp, streak: game.streak, levelsCompleted }]);
+        return;
+      }
+      try {
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        const updated = all.map(u => u.username === username ? { ...u, xp: game.xp, streak: game.streak, levelsCompleted } : u);
+        if (!updated.find(u => u.username === username)) {
+          updated.push({ username: username ?? 'Tú', xp: game.xp, streak: game.streak, levelsCompleted });
+        }
+        kvGetJson(LEADERBOARD_KEY, updated);
+        setEntries(updated.sort((a, b) => b.xp - a.xp).slice(0, 10));
+      } catch {
+        const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
+        setEntries([{ username: username ?? 'Tú', xp: game.xp, streak: game.streak, levelsCompleted }]);
+      }
+    });
+  }, [game, username]);
+
+  if (entries.length < 2) return null;
+
+  const medals = ['🥇', '🥈', '🥉'];
+
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>🏅 Clasificación Local</Text>
+      {entries.map((entry, i) => {
+        const isMe = entry.username === username;
+        return (
+          <View key={entry.username} style={[
+            { flexDirection: 'row', alignItems: 'center', borderRadius: 12, padding: 12, marginBottom: 6, gap: 10 },
+            { backgroundColor: isMe ? '#e8f5e9' : '#F5F5F5' },
+            isMe && { borderWidth: 1.5, borderColor: '#4ADE80' },
+          ]}>
+            <Text style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{medals[i] ?? `${i + 1}`}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: isMe ? '#4ADE80' : '#1E293B', fontWeight: isMe ? '800' : '600', fontSize: 14 }}>
+                {isMe ? `${entry.username} (Tú)` : entry.username}
+              </Text>
+              <Text style={{ color: '#64748B', fontSize: 11, marginTop: 2 }}>{entry.levelsCompleted} niveles · 🔥 {entry.streak} días</Text>
+            </View>
+            <Text style={{ color: '#38BDF8', fontWeight: '800', fontSize: 14 }}>{entry.xp.toLocaleString()} XP</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
 
 function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[]> }) {
   const hardWords = useMemo((): HardWord[] => {
@@ -115,9 +221,16 @@ function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
   const t = useThemeStyles();
-  const { game, daily } = useGame();
+  const { game, daily, username } = useGame();
+  const [practiceHistory, setPracticeHistory] = useState<PracticeSession[]>([]);
 
-  const stats = useMemo(() => {
+  useEffect(() => {
+    if (username) {
+      getPracticeHistory(username).then(setPracticeHistory);
+    }
+  }, [username]);
+
+  const stats: UserStats = useMemo(() => {
     const levelsCompleted = Object.values(game.levelProgress).filter(p => p.completed).length;
     const totalWordsLearned = Object.keys(daily.allLearnedWords ?? {}).length;
     return {
@@ -127,13 +240,22 @@ export default function StatsScreen() {
       gems: game.gems,
       xp: game.xp,
       totalDaysCompleted: daily.totalDaysCompleted,
+      practiceSessionsCompleted: practiceHistory.length,
     };
-  }, [game, daily]);
+  }, [game, daily, practiceHistory]);
+
+  const unlockedAchievements = useMemo(
+    () => ACHIEVEMENTS.filter(a => a.check(stats)),
+    [stats],
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: t.bg }]}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom }]} showsVerticalScrollIndicator={false}>
+      <FlatList
+        data={[{ key: 'content' }]}
+        renderItem={() => (
+          <View style={[styles.scroll, { paddingBottom: insets.bottom }]}>
         {/* Header */}
         <Text style={styles.pageTitle}>📊 Estadísticas</Text>
 
@@ -234,7 +356,105 @@ export default function StatsScreen() {
 
         {/* Palabras Difíciles */}
         <HardWordsSection levelErrors={game.levelErrors} />
-      </ScrollView>
+
+        {/* Historial de Sesiones de Práctica */}
+        {practiceHistory.length > 0 && (
+          <View style={styles.practiceHistorySection}>
+            <Text style={styles.sectionTitle}>📊 Últimas Sesiones de Práctica</Text>
+            {practiceHistory.slice(0, 5).map(session => {
+              const accuracy = Math.round((session.correct / session.total) * 100);
+              const accuracyColor = accuracy >= 80 ? '#4ADE80' : accuracy >= 60 ? '#FBBF24' : '#EF4444';
+              return (
+                <View key={session.id} style={styles.practiceHistoryCard}>
+                  <View style={styles.practiceHistoryLeft}>
+                    <Text style={styles.practiceHistoryDate}>{formatSessionDate(session.date)}</Text>
+                    <Text style={styles.practiceHistoryWords}>{session.wordsCount} palabras · {formatDuration(session.durationMs)}</Text>
+                  </View>
+                  <View style={[styles.practiceHistoryAccuracy, { borderColor: accuracyColor + '40' }]}>
+                    <Text style={[styles.practiceHistoryAccuracyNum, { color: accuracyColor }]}>{accuracy}%</Text>
+                    <Text style={styles.practiceHistoryAccuracyLabel}>acierto</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Historial de desafíos */}
+        {(game.challengeHistory ?? []).length > 0 && (
+          <View style={{ marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <Text style={styles.sectionTitle}>🏆 Últimos Desafíos</Text>
+              {(game.challengeStreak ?? 0) > 0 && (
+                <View style={{ backgroundColor: '#FEF3C7', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: '#F59E0B' }}>
+                  <Text style={{ color: '#F59E0B', fontSize: 12, fontWeight: '700' }}>🔥 Racha: {game.challengeStreak}</Text>
+                </View>
+              )}
+            </View>
+            {(game.challengeHistory ?? []).map((entry, i) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5F5F5', borderRadius: 12, padding: 12, marginBottom: 6, gap: 10 }}>
+                <Text style={{ fontSize: 22 }}>🏆</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#1E293B', fontWeight: '700', fontSize: 13 }}>Nivel {entry.levelId}: {entry.levelName}</Text>
+                  <Text style={{ color: '#64748B', fontSize: 11, marginTop: 2 }}>{entry.date}</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                  <Text style={{ color: '#F59E0B', fontSize: 12, fontWeight: '700' }}>+{entry.xpEarned} XP</Text>
+                  <Text style={{ color: '#38BDF8', fontSize: 12 }}>+{entry.gemsEarned} 💎</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Tabla de clasificación local */}
+        <LeaderboardSection />
+
+        {/* Logros */}
+        <View style={styles.achieveHeader}>
+          <Text style={styles.sectionTitle}>🏆 Logros</Text>
+          <Text style={styles.achieveCount}>
+            {unlockedAchievements.length}/{ACHIEVEMENTS.length}
+          </Text>
+        </View>
+
+        <View style={styles.achieveProgressBar}>
+          <View style={[styles.achieveProgressFill,
+            { width: `${Math.round((unlockedAchievements.length / ACHIEVEMENTS.length) * 100)}%` as any },
+          ]} />
+        </View>
+
+        <View style={styles.achieveList}>
+          {unlockedAchievements.slice(0, 3).map(achievement => (
+            <AchievementCard
+              key={achievement.id}
+              achievement={achievement}
+              unlocked={true}
+              username={username ?? ''}
+            />
+          ))}
+          {unlockedAchievements.length === 0 && (
+            <Text style={{ color: '#64748B', fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
+              Completa niveles para desbloquear logros 🌟
+            </Text>
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={styles.viewAllBtn}
+          onPress={() => router.push('/achievements' as any)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.viewAllText}>🏆 Ver todos los logros ({ACHIEVEMENTS.length})</Text>
+          <Text style={styles.viewAllArrow}>›</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 32 }} />
+            </View>
+        )}
+        scrollEnabled={true}
+        showsVerticalScrollIndicator={true}
+      />
     </View>
   );
 }
@@ -307,4 +527,47 @@ const styles = StyleSheet.create({
   hardWordsEmptySubtext: { fontSize: 12, color: '#64748B', textAlign: 'center', paddingHorizontal: 16 },
   practiceBtn: { paddingVertical: 12, paddingHorizontal: 16, backgroundColor: '#3B82F6', borderRadius: 12, alignItems: 'center', marginTop: 8 },
   practiceBtnText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+  // Practice History Section
+  practiceHistorySection: { gap: 8 },
+  practiceHistoryCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
+    borderWidth: 1, borderColor: '#E2E8F0',
+  },
+  practiceHistoryLeft: { flex: 1, gap: 3 },
+  practiceHistoryDate: { fontSize: 13, fontWeight: '700', color: '#1E293B' },
+  practiceHistoryWords: { fontSize: 12, color: '#64748B' },
+  practiceHistoryAccuracy: { alignItems: 'center', borderWidth: 2, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  practiceHistoryAccuracyNum: { fontSize: 14, fontWeight: '800' },
+  practiceHistoryAccuracyLabel: { fontSize: 9, color: '#64748B', marginTop: 1 },
+  // Achievements Section
+  achieveHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  achieveCount: { fontSize: 12, color: '#64748B', fontWeight: '700' },
+  achieveProgressBar: { height: 8, backgroundColor: '#E2E8F0', borderRadius: 4, overflow: 'hidden', marginBottom: 12 },
+  achieveProgressFill: { height: 8, backgroundColor: '#4ADE80', borderRadius: 4 },
+  achieveList: { gap: 8, marginBottom: 12 },
+  achieveCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 12, padding: 12,
+    borderWidth: 1, borderColor: '#E2E8F0',
+  },
+  achieveCardLocked: { opacity: 0.5 },
+  achieveEmoji: { fontSize: 28 },
+  achieveEmojiLocked: { fontSize: 24 },
+  achieveInfo: { flex: 1 },
+  achieveTitle: { fontSize: 13, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
+  achieveTitleLocked: { color: '#94A3B8' },
+  achieveDesc: { fontSize: 11, color: '#64748B' },
+  achieveDescLocked: { color: '#CBD5E1' },
+  achieveShareBtn: { width: 32, height: 32, justifyContent: 'center', alignItems: 'center', borderRadius: 8, backgroundColor: '#EFF6FF' },
+  achieveShareIcon: { fontSize: 16 },
+  achieveCheck: { fontSize: 16 },
+  viewAllBtn: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 12, paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF', borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0',
+    marginBottom: 16,
+  },
+  viewAllText: { fontSize: 14, fontWeight: '700', color: '#1E293B' },
+  viewAllArrow: { fontSize: 18, color: '#38BDF8', fontWeight: '700' },
 });
