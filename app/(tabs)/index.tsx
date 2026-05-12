@@ -525,12 +525,12 @@ export default function LevelsScreen() {
       <View style={styles.practiceSection}>
         <Text style={styles.practiceSectionLabel}>MODOS DE PRÁCTICA</Text>
         <View style={styles.practiceGrid}>
-          {[
-            { emoji: '⚡', title: 'Repaso', colors: ['#EFF6FF', '#DBEAFE'] as [string,string], accent: '#3B82F6', route: '/practice/quick-review' },
-            { emoji: '🎧', title: 'Escucha', colors: ['#F0FDF4', '#DCFCE7'] as [string,string], accent: '#16A34A', route: '/practice/listen-mode' },
-            { emoji: '📝', title: 'Ordenar', colors: ['#FFFBEB', '#FEF3C7'] as [string,string], accent: '#D97706', route: '/practice/order-mode' },
-            { emoji: '🔥', title: 'Difíciles', colors: ['#FFF1F2', '#FFE4E6'] as [string,string], accent: '#E11D48', route: '/practice/hard-words' },
-          ].map(mode => (
+           {[
+             { emoji: '⚡', title: 'Repaso', colors: ['#FEF3C7', '#FDE68A'] as [string,string], accent: '#F59E0B', route: '/practice/quick-review' },
+             { emoji: '🎧', title: 'Escucha', colors: ['#F0FDF4', '#DCFCE7'] as [string,string], accent: '#22C55E', route: '/practice/listen-mode' },
+             { emoji: '📝', title: 'Ordenar', colors: ['#FFFBEB', '#FEF3C7'] as [string,string], accent: '#D97706', route: '/practice/order-mode' },
+             { emoji: '🔥', title: 'Difíciles', colors: ['#FEF2F2', '#FECACA'] as [string,string], accent: '#DC2626', route: '/practice/hard-words' },
+           ].map(mode => (
             <TouchableOpacity
               key={mode.title}
               onPress={() => router.push(mode.route as any)}

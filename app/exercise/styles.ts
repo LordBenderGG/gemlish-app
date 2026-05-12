@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
   inputCorrect: { borderColor: '#4ADE80', backgroundColor: '#F0FDF4' },
   inputWrong: { borderColor: '#EF4444', backgroundColor: '#FEF2F2' },
   feedbackText: { fontSize: 16, fontWeight: '700', textAlign: 'center', marginBottom: 16 },
-  submitBtn: { backgroundColor: '#4ADE80', borderRadius: 12, padding: 16, alignItems: 'center' },
+  submitBtn: { backgroundColor: '#F59E0B', borderRadius: 12, padding: 16, alignItems: 'center' },
   submitBtnDisabled: { backgroundColor: '#E2E8F0' },
   submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   // Match pairs
@@ -92,12 +92,12 @@ export const styles = StyleSheet.create({
   // Listen & Write
   listenBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
-    backgroundColor: '#1CB0F620', borderRadius: 16, padding: 20, marginBottom: 24,
-    borderWidth: 2, borderColor: '#1CB0F640',
+    backgroundColor: '#F59E0B20', borderRadius: 16, padding: 20, marginBottom: 24,
+    borderWidth: 2, borderColor: '#F59E0B40',
   },
-  listenBtnActive: { backgroundColor: '#1CB0F640', borderColor: '#4F46E5' },
+  listenBtnActive: { backgroundColor: '#F59E0B40', borderColor: '#F59E0B' },
   listenBtnEmoji: { fontSize: 32 },
-  listenBtnText: { fontSize: 16, fontWeight: '700', color: '#4F46E5' },
+  listenBtnText: { fontSize: 16, fontWeight: '700', color: '#F59E0B' },
   // Pronunciación
   pronunciationWord: {
     fontSize: 36, fontWeight: '800', color: '#FFFFFF',
@@ -157,7 +157,7 @@ export const styles = StyleSheet.create({
   // Ordenar oración
   sentenceBuilderArea: {
     minHeight: 80, backgroundColor: '#FFFFFF', borderRadius: 12,
-    borderWidth: 2, borderColor: '#E2E8F0', padding: 12,
+    borderWidth: 3, borderColor: '#E2E8F0', padding: 12,
     marginBottom: 16, justifyContent: 'center',
   },
   sentencePlaceholder: {
@@ -167,14 +167,14 @@ export const styles = StyleSheet.create({
     flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12,
   },
   sentenceChip: {
-    backgroundColor: '#F1F5F9', borderRadius: 10, paddingHorizontal: 14,
-    paddingVertical: 10, borderWidth: 2, borderColor: '#CBD5E1',
+    backgroundColor: '#F0F4F8', borderRadius: 10, paddingHorizontal: 14,
+    paddingVertical: 10, borderWidth: 2, borderColor: '#D0D8E8',
   },
   sentenceChipSelected: {
-    backgroundColor: '#EFF6FF', borderColor: '#4F46E5',
+    backgroundColor: '#FEF3C7', borderColor: '#F59E0B',
   },
   sentenceChipCorrect: {
-    backgroundColor: '#F0FDF4', borderColor: '#4ADE80',
+    backgroundColor: '#F0FDF4', borderColor: '#22C55E',
   },
   sentenceChipWrong: {
     backgroundColor: '#FEF2F2', borderColor: '#EF4444',
@@ -201,7 +201,7 @@ export const styles = StyleSheet.create({
     fontSize: 18, color: '#1E293B', lineHeight: 28, fontWeight: '500',
   },
   fillBlank: {
-    color: '#4F46E5', fontWeight: '800', textDecorationLine: 'underline',
+    color: '#F59E0B', fontWeight: '800', textDecorationLine: 'underline',
   },
   fillSentenceTranslation: {
     fontSize: 13, color: '#64748B', marginTop: 10,
@@ -217,7 +217,7 @@ export const styles = StyleSheet.create({
     borderLeftColor: '#38BDF8',
   },
   sentenceTranslationText: {
-    fontSize: 13, color: '#C4A8FF', fontStyle: 'italic', lineHeight: 18,
+    fontSize: 13, color: '#64748B', fontStyle: 'italic', lineHeight: 18,
   },
   timerText: {
     fontSize: 12, color: '#64748B', fontVariant: ['tabular-nums'],
@@ -296,8 +296,8 @@ export const styles = StyleSheet.create({
   rewardEmoji: { fontSize: 30, marginBottom: 6 },
   rewardValue: { color: '#1E293B', fontSize: 14, fontWeight: '800' },
   continueBtn: {
-    backgroundColor: '#38BDF8', borderRadius: 18, paddingHorizontal: 48, paddingVertical: 18,
-    shadowColor: '#38BDF8', shadowOffset: { width: 0, height: 6 },
+    backgroundColor: '#F59E0B', borderRadius: 18, paddingHorizontal: 48, paddingVertical: 18,
+    shadowColor: '#F59E0B', shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5, shadowRadius: 16, elevation: 8,
   },
   continueBtnText: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', letterSpacing: 0.3 },

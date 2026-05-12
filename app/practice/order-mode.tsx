@@ -5,6 +5,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
+import { useSpeech } from '@/hooks/use-speech';
 import { LESSONS } from '@/data/lessons';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
 import { useFeedbackSounds } from '@/hooks/use-feedback-sounds';
@@ -31,6 +32,7 @@ export default function OrderModeScreen() {
   const insets = useSafeAreaInsets();
   const t = useThemeStyles();
   const { game } = useGame();
+  const { speak } = useSpeech();
   const { playCorrect, playWrong, playLevelComplete } = useFeedbackSounds();
 
   const exercises = useMemo(() => {
@@ -60,6 +62,7 @@ export default function OrderModeScreen() {
 
   const handleSelectWord = (word: string, idx: number) => {
     if (submitted) return;
+    speak(word);
     const newAvail = [...availableWords];
     newAvail.splice(idx, 1);
     setAvailableWords(newAvail);
@@ -68,6 +71,7 @@ export default function OrderModeScreen() {
 
   const handleRemoveWord = (word: string, idx: number) => {
     if (submitted) return;
+    speak(word);
     const newSel = [...selectedWords];
     newSel.splice(idx, 1);
     setSelectedWords(newSel);
@@ -168,6 +172,7 @@ export default function OrderModeScreen() {
                   >
                     <Text style={[
                       styles.chipText,
+                      styles.chipSelectedText,
                       submitted && (isCorrect ? { color: '#4ADE80' } : { color: '#FF4B4B' }),
                     ]}>{word}</Text>
                   </TouchableOpacity>
@@ -256,7 +261,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2E8F0', borderRadius: 10, paddingHorizontal: 14,
     paddingVertical: 10, borderWidth: 1, borderColor: '#3D4168',
   },
-  chipSelected: { backgroundColor: '#3D2A6A', borderColor: '#38BDF8' },
+   chipSelected: { backgroundColor: '#FFFBEB', borderColor: '#D97706' },
+   chipSelectedText: { color: '#1E293B' },
   chipCorrect: { borderColor: '#4ADE80', backgroundColor: '#F0FDF4' },
   chipWrong: { borderColor: '#FF4B4B', backgroundColor: '#FEF2F2' },
   chipText: { color: '#1E293B', fontSize: 15, fontWeight: '600' },
