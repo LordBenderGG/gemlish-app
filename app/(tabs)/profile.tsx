@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useSoundSettings } from '@/lib/sound-settings';
 import { LESSONS } from '@/data/lessons';
 import { ACHIEVEMENTS } from '@/lib/achievements';
 import type { Achievement, AchievementStats } from '@/lib/achievements';
@@ -17,7 +18,6 @@ import {
   type PracticeSession,
 } from '@/lib/practice-history';
 import { kvGetJson, kvGet, kvSet, kvSetJson } from '@/lib/local-kv';
-import { AdBanner } from '@/components/AdBanner';
 import { STRINGS } from '@/constants/strings';
 
 // ─── Tipos locales ────────────────────────────────────────────────────────────
@@ -63,11 +63,18 @@ function AchievementCard({ achievement, unlocked, username }: { achievement: Ach
 
 // ─── Sección de Notificaciones ────────────────────────────────────────────────
 
+function formatTime12h(hour: number, minute: number): string {
+  const h = hour % 12 || 12;
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  return `${h}:${String(minute).padStart(2, '0')} ${ampm}`;
+}
+
 function NotificationsSection() {
   const { settings, loading, enableNotifications, disableNotifications } = useNotifications();
   const [saving, setSaving] = useState(false);
   // useRef como guard síncrono para evitar llamadas concurrentes bajo tap rápido
   const savingRef = useRef(false);
+  const timeStr = formatTime12h(settings.hour, settings.minute);
 
   const handleToggle = useCallback(async (value: boolean) => {
     if (savingRef.current) return;
@@ -112,10 +119,10 @@ function NotificationsSection() {
       <View style={styles.notifCard}>
         <View style={styles.notifRow}>
           <View style={styles.notifRowLeft}>
-            <Text style={styles.notifRowTitle}>Recordatorio de las 8:00 AM</Text>
+            <Text style={styles.notifRowTitle}>Recordatorio de las {timeStr}</Text>
             <Text style={styles.notifRowSub}>
               {settings.enabled
-                ? 'Notificación activa · todos los días a las 8:00 AM'
+                ? `Notificación activa · todos los días a las ${timeStr}`
                 : 'Recibe un aviso cada mañana para no perder tu racha'}
             </Text>
           </View>
@@ -132,108 +139,40 @@ function NotificationsSection() {
   );
 }
 
-// ─── Ranking de Palabras Difíciles ───────────────────────────────────────────
+// ─── Sección de Sonidos ─────────────────────────────────────────────────────
 
-interface HardWord {
-  word: string;
-  translation: string;
-  pronunciation: string;
-  failCount: number;
-}
-
-function findWordTranslation(wordEn: string): { translation: string; pronunciation: string } {
-  for (const lesson of LESSONS) {
-    const found = lesson.words.find(w => w.word.toLowerCase() === wordEn.toLowerCase());
-    if (found) return { translation: found.translation, pronunciation: found.pronunciation };
-  }
-  return { translation: '—', pronunciation: '' };
-}
-
-function HardWordsSection({ levelErrors }: { levelErrors: Record<number, string[]> }) {
-  const hardWords = useMemo((): HardWord[] => {
-    // Contar cuántas veces falla cada palabra en todos los niveles
-    const counts: Record<string, number> = {};
-    Object.values(levelErrors).forEach(words => {
-      words.forEach(word => {
-        const key = word.toLowerCase();
-        counts[key] = (counts[key] || 0) + 1;
-      });
-    });
-    // Ordenar por frecuencia y tomar top 5
-    return Object.entries(counts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([word, failCount]) => {
-        const { translation, pronunciation } = findWordTranslation(word);
-        return {
-          word: word.charAt(0).toUpperCase() + word.slice(1),
-          translation,
-          pronunciation,
-          failCount,
-        };
-      });
-  }, [levelErrors]);
-
-  const handlePractice = useCallback(() => {
-    router.push('/practice/hard-words' as any);
-  }, []);
-
-  if (hardWords.length === 0) {
-    return (
-      <View style={styles.hardWordsSection}>
-        <Text style={styles.sectionTitle}>🎯 Palabras Difíciles</Text>
-        <View style={styles.hardWordsEmpty}>
-          <Text style={styles.hardWordsEmptyEmoji}>🌟</Text>
-          <Text style={styles.hardWordsEmptyText}>¡Sin errores registrados!</Text>
-          <Text style={styles.hardWordsEmptySubtext}>Completa niveles para ver las palabras que más te cuestan.</Text>
-        </View>
-      </View>
-    );
-  }
+function SoundsSection() {
+  const { soundEnabled, setSoundEnabled } = useSoundSettings();
 
   return (
-    <View style={styles.hardWordsSection}>
-      <View style={styles.hardWordsHeader}>
-        <Text style={styles.sectionTitle}>🎯 Palabras Difíciles</Text>
-        <Text style={styles.hardWordsSubtitle}>Top 5 más falladas</Text>
-      </View>
-
-      <View style={styles.hardWordsList}>
-        {hardWords.map((item, idx) => (
-          <View key={item.word} style={styles.hardWordRow}>
-            <View style={[
-              styles.hardWordRank,
-              idx === 0 && styles.hardWordRank1,
-              idx === 1 && styles.hardWordRank2,
-              idx === 2 && styles.hardWordRank3,
-            ]}>
-              <Text style={styles.hardWordRankText}>{idx + 1}</Text>
-            </View>
-            <View style={styles.hardWordInfo}>
-              <View style={styles.hardWordNameRow}>
-                <Text style={styles.hardWordEn}>{item.word}</Text>
-                {item.pronunciation ? (
-                  <Text style={styles.hardWordPhonetic}>{item.pronunciation}</Text>
-                ) : null}
-              </View>
-              <Text style={styles.hardWordEs}>{item.translation}</Text>
-            </View>
-            <View style={styles.hardWordFails}>
-              <Text style={styles.hardWordFailCount}>{item.failCount}</Text>
-              <Text style={styles.hardWordFailLabel}>{item.failCount === 1 ? 'error' : 'errores'}</Text>
-            </View>
+    <View style={styles.notifSection}>
+      <Text style={styles.sectionTitle}>🔊 Sonidos</Text>
+      <View style={styles.notifCard}>
+        <View style={styles.notifRow}>
+          <View style={styles.notifRowLeft}>
+            <Text style={styles.notifRowTitle}>Efectos de sonido</Text>
+            <Text style={styles.notifRowSub}>
+              {soundEnabled
+                ? 'Sonidos al responder y completar niveles'
+                : 'Sin efectos de sonido'}
+            </Text>
           </View>
-        ))}
+          <Switch
+            value={soundEnabled}
+            onValueChange={setSoundEnabled}
+            trackColor={{ false: '#E2E8F0', true: '#58CC0240' }}
+            thumbColor={soundEnabled ? '#4ADE80' : '#64748B'}
+          />
+        </View>
       </View>
-
-      <TouchableOpacity style={styles.practiceBtn} onPress={handlePractice} activeOpacity={0.8}>
-        <Text style={styles.practiceBtnText}>📚 Practicar palabras difíciles</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
-// ─── Pantalla de Perfil ───────────────────────────────────────────────────────
+// ─── Tabla de Clasificación Local ──────────────────────────────────────────────
+
+
+
 
 const AVATAR_EMOJIS = [
   '🦊', '🐻', '🐸', '🦁', '🐼', '🐯', '🦋', '🐮',
@@ -436,12 +375,6 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>👤 Perfil</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/stats' as any)} activeOpacity={0.7}>
-            <Text style={styles.settingsBtnText}>📊</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push('/settings' as any)} activeOpacity={0.7}>
-            <Text style={styles.settingsBtnText}>⚙️</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
             <Text style={styles.logoutBtnText}>Salir</Text>
           </TouchableOpacity>
@@ -466,7 +399,7 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             <View style={styles.avatarCircle}>
-              <Text style={{ fontSize: 32 }}>{avatar}</Text>
+              <Text style={{ fontSize: 40 }}>{avatar}</Text>
             </View>
             <View style={styles.avatarEditBtn}>
               <Text style={styles.avatarEditIcon}>✏️</Text>
@@ -519,211 +452,9 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Banner AdMob — debajo del perfil del usuario */}
-        <AdBanner style={{ marginBottom: 8 }} />
-
-        {/* Estadísticas */}
-        <Text style={styles.sectionTitle}>📊 Estadísticas</Text>
-        <View style={styles.statsGrid}>
-          {[
-            { label: 'Niveles', value: stats.levelsCompleted, emoji: '🎯', color: '#38BDF8' },
-            { label: 'Racha', value: `${stats.streak} días`, emoji: '🔥', color: '#FBBF24' },
-            { label: 'Palabras', value: stats.totalWordsLearned, emoji: '📖', color: '#4ADE80' },
-            { label: 'Diamantes', value: stats.gems, emoji: '💎', color: '#38BDF8' },
-            { label: 'XP Total', value: stats.xp.toLocaleString(), emoji: '⭐', color: '#38BDF8' },
-            { label: 'Días Tarea', value: stats.totalDaysCompleted, emoji: '📅', color: '#EF4444' },
-            { label: 'Desafíos', value: game.dailyChallengesCompleted ?? 0, emoji: '🏆', color: '#F59E0B' },
-          ].map(stat => (
-            <View key={stat.label} style={styles.statCard}>
-              <Text style={styles.statEmoji}>{stat.emoji}</Text>
-              <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Nivel de inglés estimado A1-B2 */}
-        <View style={styles.englishLevelCard}>
-          <Text style={styles.englishLevelTitle}>Nivel de Inglés Estimado</Text>
-          {(() => {
-            const lvls = stats.levelsCompleted;
-            let cefr = 'A1', cefrColor = '#64748B', cefrDesc = 'Principiante absoluto', cefrPct = 0;
-            if (lvls >= 400) { cefr = 'B2'; cefrColor = '#38BDF8'; cefrDesc = 'Independiente avanzado'; cefrPct = 95; }
-            else if (lvls >= 250) { cefr = 'B1'; cefrColor = '#38BDF8'; cefrDesc = 'Independiente intermedio'; cefrPct = 70; }
-            else if (lvls >= 100) { cefr = 'A2'; cefrColor = '#4ADE80'; cefrDesc = 'Usuario básico'; cefrPct = 40; }
-            else if (lvls >= 10) { cefr = 'A1+'; cefrColor = '#FBBF24'; cefrDesc = 'Principiante avanzado'; cefrPct = 15; }
-            else { cefrPct = Math.round((lvls / 10) * 15); }
-            return (
-              <View>
-                <View style={styles.englishLevelRow}>
-                  <View style={[styles.englishLevelBadge, { backgroundColor: cefrColor + '22', borderColor: cefrColor }]}>
-                    <Text style={[styles.englishLevelBadgeText, { color: cefrColor }]}>{cefr}</Text>
-                  </View>
-                  <View style={styles.englishLevelInfo}>
-                    <Text style={styles.englishLevelName}>{cefrDesc}</Text>
-                    <Text style={styles.englishLevelSub}>{lvls} niveles completados</Text>
-                  </View>
-                </View>
-                <View style={styles.englishLevelBarBg}>
-                  <View style={[styles.englishLevelBarFill, { width: `${cefrPct}%` as any, backgroundColor: cefrColor }]} />
-                </View>
-                <View style={styles.englishLevelScale}>
-                  {['A1', 'A2', 'B1', 'B2'].map(l => (
-                    <Text key={l} style={[styles.englishLevelScaleLabel, l === cefr.replace('+','') && { color: cefrColor, fontWeight: '700' }]}>{l}</Text>
-                  ))}
-                </View>
-              </View>
-            );
-          })()}
-        </View>
-
-        {/* Mapa de calor de actividad */}
-        {(() => {
-          const today = new Date();
-          const days: { date: string; active: boolean }[] = [];
-          // Usar levelCompletedDates para marcar días con actividad real
-          const completedDates = game.levelCompletedDates ?? {};
-          // También incluir días con tarea diaria completada
-          const todayStr = today.toISOString().split('T')[0];
-          for (let i = 89; i >= 0; i--) {
-            const d = new Date(today);
-            d.setDate(d.getDate() - i);
-            const key = d.toISOString().split('T')[0];
-            // Activo si completó al menos un nivel ese día, o si completó la tarea diaria hoy
-            const hasLevelActivity = (completedDates[key] ?? 0) > 0;
-            const hasDailyToday = key === todayStr && daily.dailyCompleted;
-            days.push({ date: key, active: hasLevelActivity || hasDailyToday });
-          }
-          const weeks: typeof days[] = [];
-          for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
-          return (
-            <View style={styles.heatmapContainer}>
-              <Text style={styles.sectionTitle}>🗓 Actividad (90 días)</Text>
-              <View style={styles.heatmapGrid}>
-                {weeks.map((week, wi) => (
-                  <View key={wi} style={styles.heatmapWeek}>
-                    {week.map((day, di) => (
-                      <View
-                        key={di}
-                        style={[styles.heatmapCell, day.active && styles.heatmapCellActive]}
-                      />
-                    ))}
-                  </View>
-                ))}
-              </View>
-              <Text style={styles.heatmapLegend}>
-                {days.filter(d => d.active).length} días activos de los últimos 90
-              </Text>
-            </View>
-          );
-        })()}
-
-        {/* Acceso rápido a Configuración */}
-        <TouchableOpacity style={styles.settingsLink} onPress={() => router.push('/settings' as any)} activeOpacity={0.8}>
-          <Text style={styles.settingsLinkEmoji}>⚙️</Text>
-          <View style={styles.settingsLinkInfo}>
-            <Text style={styles.settingsLinkTitle}>Configuración</Text>
-            <Text style={styles.settingsLinkSub}>Apariencia, sonidos y notificaciones</Text>
-          </View>
-          <Text style={styles.settingsLinkArrow}>›</Text>
-        </TouchableOpacity>
-
-        {/* Palabras Difíciles */}
-        <HardWordsSection levelErrors={game.levelErrors} />
-
-        {/* Historial de Sesiones de Práctica */}
-        {practiceHistory.length > 0 && (
-          <View style={styles.practiceHistorySection}>
-            <Text style={styles.sectionTitle}>📊 Últimas Sesiones de Práctica</Text>
-            {practiceHistory.slice(0, 5).map(session => {
-              const accuracy = Math.round((session.correct / session.total) * 100);
-              const accuracyColor = accuracy >= 80 ? '#4ADE80' : accuracy >= 60 ? '#FBBF24' : '#EF4444';
-              return (
-                <View key={session.id} style={styles.practiceHistoryCard}>
-                  <View style={styles.practiceHistoryLeft}>
-                    <Text style={styles.practiceHistoryDate}>{formatSessionDate(session.date)}</Text>
-                    <Text style={styles.practiceHistoryWords}>{session.wordsCount} palabras · {formatDuration(session.durationMs)}</Text>
-                  </View>
-                  <View style={[styles.practiceHistoryAccuracy, { borderColor: accuracyColor + '40' }]}>
-                    <Text style={[styles.practiceHistoryAccuracyNum, { color: accuracyColor }]}>{accuracy}%</Text>
-                    <Text style={styles.practiceHistoryAccuracyLabel}>acierto</Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
-
-        {/* Historial de desafíos del día */}
-        {(game.challengeHistory ?? []).length > 0 && (
-          <View style={{ marginBottom: 8 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Text style={styles.sectionTitle}>🏆 Últimos Desafíos</Text>
-              {(game.challengeStreak ?? 0) > 0 && (
-                <View style={{ backgroundColor: '#FEF3C7', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: '#F59E0B' }}>
-                  <Text style={{ color: '#F59E0B', fontSize: 12, fontWeight: '700' }}>🔥 Racha: {game.challengeStreak}</Text>
-                </View>
-              )}
-            </View>
-            {(game.challengeHistory ?? []).map((entry, i) => (
-              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5F5F5', borderRadius: 12, padding: 12, marginBottom: 6, gap: 10 }}>
-                <Text style={{ fontSize: 22 }}>🏆</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#1E293B', fontWeight: '700', fontSize: 13 }}>Nivel {entry.levelId}: {entry.levelName}</Text>
-                  <Text style={{ color: '#64748B', fontSize: 11, marginTop: 2 }}>{entry.date}</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                  <Text style={{ color: '#F59E0B', fontSize: 12, fontWeight: '700' }}>+{entry.xpEarned} XP</Text>
-                  <Text style={{ color: '#38BDF8', fontSize: 12 }}>+{entry.gemsEarned} 💎</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Tabla de clasificación local */}
-        <LeaderboardSection />
-
-        {/* Logros */}
-               <View style={styles.achieveHeader}>
-          <Text style={styles.sectionTitle}>🏆 Logros</Text>
-          <Text style={styles.achieveCount}>
-            {unlockedAchievements.length}/{ACHIEVEMENTS.length}
-          </Text>
-        </View>
-
-        <View style={styles.achieveProgressBar}>
-          <View style={[styles.achieveProgressFill,
-            { width: `${Math.round((unlockedAchievements.length / ACHIEVEMENTS.length) * 100)}%` as any },
-          ]} />
-        </View>
-
-        {/* Preview: primeros 3 logros desbloqueados */}
-        <View style={styles.achieveList}>
-          {unlockedAchievements.slice(0, 3).map(achievement => (
-            <AchievementCard
-              key={achievement.id}
-              achievement={achievement}
-              unlocked={true}
-              username={username ?? ''}
-            />
-          ))}
-          {unlockedAchievements.length === 0 && (
-            <Text style={{ color: '#64748B', fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>
-              Completa niveles para desbloquear logros 🌟
-            </Text>
-          )}
-        </View>
-
-        {/* Botón Ver todos */}
-        <TouchableOpacity
-          style={styles.viewAllBtn}
-          onPress={() => router.push('/achievements' as any)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.viewAllText}>🏆 Ver todos los logros ({ACHIEVEMENTS.length})</Text>
-          <Text style={styles.viewAllArrow}>›</Text>
-        </TouchableOpacity>
+        {/* Sonidos y Recordatorio — sin navegar a Configuración */}
+        <SoundsSection />
+        <NotificationsSection />
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -782,7 +513,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   avatarCircle: {
-    width: 64, height: 64, borderRadius: 32,
+    width: 80, height: 80, borderRadius: 40,
     justifyContent: 'center', alignItems: 'center',
     backgroundColor: '#EFF6FF',
     borderWidth: 2,
@@ -936,45 +667,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center',
   },
   resetThemeBtnText: { fontSize: 13, color: '#38BDF8', fontWeight: '600' },
-  // Palabras Difíciles
-  hardWordsSection: { gap: 10 },
-  hardWordsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  hardWordsSubtitle: { fontSize: 12, color: '#EF4444', fontWeight: '700' },
-  hardWordsList: { gap: 8 },
-  hardWordRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 12,
-    borderWidth: 1, borderColor: '#FEE2E2',
-  },
-  hardWordRank: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: '#E2E8F0', justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1.5, borderColor: '#94A3B8',
-  },
-  hardWordRank1: { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' },
-  hardWordRank2: { backgroundColor: '#F1F5F9', borderColor: '#94A3B8' },
-  hardWordRank3: { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' },
-  hardWordRankText: { fontSize: 14, fontWeight: '800', color: '#1E293B' },
-  hardWordInfo: { flex: 1 },
-  hardWordNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  hardWordEn: { fontSize: 16, fontWeight: '800', color: '#1E293B' },
-  hardWordPhonetic: { fontSize: 11, color: '#64748B', fontStyle: 'italic' },
-  hardWordEs: { fontSize: 12, color: '#64748B', marginTop: 2 },
-  hardWordFails: { alignItems: 'center' },
-  hardWordFailCount: { fontSize: 20, fontWeight: '800', color: '#EF4444' },
-  hardWordFailLabel: { fontSize: 10, color: '#64748B', fontWeight: '600' },
-  hardWordsEmpty: {
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 20,
-    alignItems: 'center', borderWidth: 1, borderColor: '#E2E8F0',
-  },
-  hardWordsEmptyEmoji: { fontSize: 36, marginBottom: 8 },
-  hardWordsEmptyText: { fontSize: 15, fontWeight: '700', color: '#1E293B', marginBottom: 4 },
-  hardWordsEmptySubtext: { fontSize: 12, color: '#64748B', textAlign: 'center', lineHeight: 18 },
-  practiceBtn: {
-    backgroundColor: '#FEE2E2', borderRadius: 14, paddingVertical: 14,
-    alignItems: 'center', borderWidth: 1.5, borderColor: '#FF4B4B60',
-  },
-  practiceBtnText: { color: '#EF4444', fontSize: 14, fontWeight: '800' },
   // Historial de sesiones de práctica
   practiceHistorySection: { gap: 8 },
   practiceHistoryCard: {
@@ -1021,19 +713,19 @@ const styles = StyleSheet.create({
   avatarModalCloseText: { color: '#64748B', fontWeight: '700', fontSize: 15 },
   // Avatar edit button
   avatarEditBtn: {
-    position: 'absolute', bottom: -4, right: -4,
-    backgroundColor: '#38BDF8', borderRadius: 12,
-    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
+    position: 'absolute', bottom: -2, right: -2,
+    backgroundColor: '#38BDF8', borderRadius: 14,
+    width: 28, height: 28, justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: '#FFFFFF',
   },
-  avatarEditIcon: { fontSize: 12 },
+  avatarEditIcon: { fontSize: 10 },
   // Edición de nombre
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   nameEditBtn: {
-    backgroundColor: '#E2E8F0', borderRadius: 12,
-    width: 44, height: 44, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#E2E8F0', borderRadius: 8,
+    width: 28, height: 28, justifyContent: 'center', alignItems: 'center',
   },
-  nameEditBtnIcon: { fontSize: 12 },
+  nameEditBtnIcon: { fontSize: 10 },
   nameEditRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4,
     paddingHorizontal: 8,

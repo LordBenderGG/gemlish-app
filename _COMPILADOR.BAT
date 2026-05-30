@@ -55,6 +55,12 @@ cls
 echo ==============================================================
 echo Compilando APK de release (pruebas locales)
 echo ==============================================================
+echo Limpiando cache de Gradle y AdMob...
+if exist "%ANDROID_DIR%\.gradle" rmdir /s /q "%ANDROID_DIR%\.gradle" >nul 2>&1
+if exist "%ANDROID_DIR%\build" rmdir /s /q "%ANDROID_DIR%\build" >nul 2>&1
+if exist "%ANDROID_DIR%\app\build\generated" rmdir /s /q "%ANDROID_DIR%\app\build\generated" >nul 2>&1
+if exist "%PROJECT_ROOT%\node_modules\react-native-google-mobile-ads\android\build" rmdir /s /q "%PROJECT_ROOT%\node_modules\react-native-google-mobile-ads\android\build" >nul 2>&1
+echo.
 echo Comando: gradlew.bat assembleRelease --no-daemon --max-workers=2
 echo.
 pushd "%ANDROID_DIR%"
@@ -148,6 +154,12 @@ cls
 echo ==============================================================
 echo Compilando AAB de release (Play Store)
 echo ==============================================================
+echo Limpiando cache de Gradle y AdMob...
+if exist "%ANDROID_DIR%\.gradle" rmdir /s /q "%ANDROID_DIR%\.gradle" >nul 2>&1
+if exist "%ANDROID_DIR%\build" rmdir /s /q "%ANDROID_DIR%\build" >nul 2>&1
+if exist "%ANDROID_DIR%\app\build\generated" rmdir /s /q "%ANDROID_DIR%\app\build\generated" >nul 2>&1
+if exist "%PROJECT_ROOT%\node_modules\react-native-google-mobile-ads\android\build" rmdir /s /q "%PROJECT_ROOT%\node_modules\react-native-google-mobile-ads\android\build" >nul 2>&1
+echo.
 echo Comando: gradlew.bat bundleRelease --no-daemon --max-workers=2
 echo.
 pushd "%ANDROID_DIR%"

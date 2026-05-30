@@ -96,11 +96,11 @@ function SentenceOrderView({
                 activeOpacity={0.7}
               >
                 <Text style={[
-                  styles.sentenceChipText,
-                  submitted && (isCorrect ? { color: '#4ADE80' } : { color: '#EF4444' }),
-                ]}>
-                  {word}
-                </Text>
+                   styles.sentenceChipText,
+                   submitted && (isCorrect ? { color: '#22C55E' } : { color: '#DC2626' }),
+                 ]}>
+                   {word}
+                 </Text>
               </TouchableOpacity>
             ))}
           </View>

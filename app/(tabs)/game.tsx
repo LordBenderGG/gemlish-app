@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { useRewardedAd, AD_UNIT_IDS } from '@/hooks/useAdMob';
 import { getVideoWatchStatus, recordVideoWatched } from '@/lib/storage';
-import { AdBanner } from '@/components/AdBanner';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '@/context/GameContext';
 import { useThemeStyles } from '@/hooks/use-theme-styles';
@@ -446,8 +445,6 @@ export default function GameScreen() {
           onTimeUp={handleTimeUp}
           remainingMs={remainingMs}
         />
-        {/* Banner AdMob dentro del tablero de juego */}
-        <AdBanner style={{ marginHorizontal: 0 }} />
         <View style={styles.rewardHint}>
           <Text style={styles.rewardHintText}>
             💡 Completa el juego para ganar <Text style={{ color: '#4F46E5', fontWeight: '700' }}>+{GEMS_REWARD} 💎</Text>
@@ -490,9 +487,6 @@ export default function GameScreen() {
           {remainingMs <= 0 ? 'Agotado (vuelve mañana)' : formatTime(remainingMs)}
         </Text>
       </View>
-
-      {/* Banner AdMob — inicio del Minijuego */}
-      <AdBanner style={{ marginBottom: 4 }} />
 
       <ScrollView contentContainerStyle={styles.gameList} showsVerticalScrollIndicator={false}>
         <View style={styles.gameCard}>

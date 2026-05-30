@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   Switch, Alert, StatusBar, Linking,
@@ -21,6 +21,12 @@ export default function SettingsScreen() {
   const openSystemSettings = useCallback(() => {
     Linking.openSettings();
   }, []);
+
+  const timeStr = useMemo(() => {
+    const h = settings.hour % 12 || 12;
+    const ampm = settings.hour >= 12 ? 'PM' : 'AM';
+    return `${h}:${String(settings.minute).padStart(2, '0')} ${ampm}`;
+  }, [settings.hour, settings.minute]);
 
   // useRef en lugar de useState para que el guard sea síncrono.
   // Con useState, el check `if (saving) return` y el set ocurren en distintos
@@ -107,10 +113,10 @@ export default function SettingsScreen() {
           <View style={styles.settingRow}>
             <Text style={styles.settingEmoji}>{settings.enabled ? '🔥' : '🔔'}</Text>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Recordatorio de las 8:00 AM</Text>
+              <Text style={styles.settingTitle}>Recordatorio de las {timeStr}</Text>
               <Text style={styles.settingSub}>
                 {settings.enabled
-                  ? 'Notificación diaria activa a las 8:00 AM'
+                  ? `Notificación diaria activa a las ${timeStr}`
                   : 'Recibe un aviso cada mañana para estudiar'}
               </Text>
             </View>

@@ -17,9 +17,9 @@ let RewardedAd: any = null;
 let AdEventType: any = {};
 let RewardedAdEventType: any = {};
 let TestIds: any = {
-  ADAPTIVE_BANNER: 'ca-app-pub-3940256099942544/6300978111',
-  INTERSTITIAL: 'ca-app-pub-3940256099942544/1033173712',
-  REWARDED: 'ca-app-pub-3940256099942544/5224354917',
+  ADAPTIVE_BANNER: 'ca-app-pub-6926294559691397/1826698506',
+  INTERSTITIAL: 'ca-app-pub-6926294559691397/5438640450',
+  REWARDED: 'ca-app-pub-6926294559691397/1126340448',
 };
 
 if (Platform.OS !== 'web') {
@@ -40,7 +40,7 @@ if (Platform.OS !== 'web') {
 // Dentro del mismo formato, el mismo ID puede reutilizarse en múltiples
 // pantallas o placements sin violar ninguna política.
 //
-// Unidades creadas en AdMob (ca-app-pub-9019813013540172):
+// Unidades creadas en AdMob (ca-app-pub-6926294559691397):
 //   Banner      → 8657131164
 //   Interstitial → 2084951559
 //   Rewarded    → 8161108035
@@ -48,17 +48,17 @@ if (Platform.OS !== 'web') {
 export const AD_UNIT_IDS = {
   // ── Banners ────────────────────────────────────────────────────────────────
   // Un único ID de banner reutilizable en todas las pantallas (política AdMob permite esto)
-  BANNER_HOME:  'ca-app-pub-9019813013540172/8657131164',
+  BANNER_HOME:  'ca-app-pub-6926294559691397/1826698506',
 
   // ── Interstitials ──────────────────────────────────────────────────────────
-  INTERSTITIAL_LEVEL_COMPLETE: 'ca-app-pub-9019813013540172/2084951559',
-  INTERSTITIAL_PRACTICE_MODE:  'ca-app-pub-9019813013540172/2084951559',
+  INTERSTITIAL_LEVEL_COMPLETE: 'ca-app-pub-6926294559691397/5438640450',
+  INTERSTITIAL_PRACTICE_MODE:  'ca-app-pub-6926294559691397/5438640450',
 
   // ── Rewarded ───────────────────────────────────────────────────────────────
-  REWARDED_CONTINUE:        'ca-app-pub-9019813013540172/8161108035',
-  REWARDED_DAILY_RETRY:     'ca-app-pub-9019813013540172/8161108035',
-  REWARDED_PRONUNCIATION:   'ca-app-pub-9019813013540172/8161108035',
-  REWARDED_HARD_MODE_HINT:  'ca-app-pub-9019813013540172/8161108035',
+  REWARDED_CONTINUE:        'ca-app-pub-6926294559691397/1126340448',
+  REWARDED_DAILY_RETRY:     'ca-app-pub-6926294559691397/1126340448',
+  REWARDED_PRONUNCIATION:   'ca-app-pub-6926294559691397/1126340448',
+  REWARDED_HARD_MODE_HINT:  'ca-app-pub-6926294559691397/1126340448',
 };
 
 // ─── Contador para mostrar interstitial cada N niveles ────────────────────────

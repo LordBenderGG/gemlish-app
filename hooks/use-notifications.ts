@@ -60,8 +60,8 @@ export interface NotificationSettings {
 
 export function useNotifications() {
   const [settings, setSettings] = useState<NotificationSettings>({
-    enabled: false,
-    hour: 8,   // 8:00 AM — valor por defecto consistente con la UI
+    enabled: true,
+    hour: 14,  // 2:00 PM
     minute: 0,
   });
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -121,10 +121,27 @@ export function useNotifications() {
         await kvSet(NOTIFICATION_ENABLED_KEY, 'false');
       }
 
+      // Fresh install: persist defaults para que rescheduleDaily funcione
+      if (enabled === null) {
+        await kvSet(NOTIFICATION_ENABLED_KEY, 'true');
+        await kvSet(NOTIFICATION_HOUR_KEY, '14');
+        await kvSet(NOTIFICATION_MINUTE_KEY, '0');
+      }
+
+      let parsedHour = hour ? parseInt(hour, 10) : 14;
+      let parsedMinute = minute ? parseInt(minute, 10) : 0;
+      // Migración: old default era 8:00 AM, nuevo default es 2:00 PM
+      if (parsedHour === 8 && parsedMinute === 0 && hour !== null) {
+        parsedHour = 14;
+        parsedMinute = 0;
+        await kvSet(NOTIFICATION_HOUR_KEY, '14');
+        await kvSet(NOTIFICATION_MINUTE_KEY, '0');
+      }
+
       setSettings({
         enabled: effectiveEnabled,
-        hour: hour ? parseInt(hour, 10) : 8,
-        minute: minute ? parseInt(minute, 10) : 0,
+        hour: parsedHour,
+        minute: parsedMinute,
       });
     } catch (err) {
       console.warn('[useNotifications] Error loading settings:', err);
@@ -316,14 +333,15 @@ export function useNotifications() {
   const rescheduleDaily = useCallback(async (): Promise<void> => {
     try {
       const enabled = await kvGet(NOTIFICATION_ENABLED_KEY);
-      if (enabled !== 'true') return;
+      // null = fresh install (default true), 'true' = activado
+      if (enabled !== null && enabled !== 'true') return;
       await scheduleDaily();
     } catch (err) {
       console.warn('[useNotifications] rescheduleDaily error:', err);
     }
   }, [scheduleDaily]);
 
-  // updateTime eliminado: la hora es fija (8:00 AM) y no configurable por el usuario
+  // updateTime eliminado: la hora es fija (2:00 PM) y no configurable por el usuario
 
   /**
    * Programa una notificación de resumen semanal los lunes a las 9:00 AM.

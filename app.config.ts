@@ -95,10 +95,10 @@ const config: ExpoConfig = {
     "expo-system-ui",
     [
       "react-native-google-mobile-ads",
-      {
-        // App ID real de AdMob para Android — usa EXPO_PUBLIC_ADMOB_APP_ID_ANDROID de .env.local
-        androidAppId: process.env.EXPO_PUBLIC_ADMOB_APP_ID_ANDROID ?? 'ca-app-pub-3940256099942544~3347511713',
-      },
+       {
+         // App ID real de AdMob para Android — usa EXPO_PUBLIC_ADMOB_APP_ID_ANDROID de .env.local
+         androidAppId: process.env.EXPO_PUBLIC_ADMOB_APP_ID_ANDROID || 'ca-app-pub-6926294559691397~7792810820',
+       },
     ],
     [
       "expo-splash-screen",
